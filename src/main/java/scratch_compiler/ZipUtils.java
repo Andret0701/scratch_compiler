@@ -83,6 +83,7 @@ public class ZipUtils {
             }
 
             zip.closeEntry();
+            zip.close();
             return zipFile;
         } catch (Exception e) {
             e.printStackTrace();
