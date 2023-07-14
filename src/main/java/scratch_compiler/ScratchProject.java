@@ -46,7 +46,7 @@ public class ScratchProject {
                 "            \"videoState\": \"on\",\n" +
                 "            \"textToSpeechLanguage\": null\n" +
                 "        },\n" +
-                new Figure("Figur1").toJSON() +
+                new Figure("Katt Figur").toJSON() +
                 "    ]";
         return json;
     }

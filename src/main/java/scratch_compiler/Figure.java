@@ -2,6 +2,17 @@ package scratch_compiler;
 
 import java.util.ArrayList;
 
+import scratch_compiler.Blocks.MoveBlock;
+import scratch_compiler.ValueFields.AdditionField;
+import scratch_compiler.ValueFields.DivisionField;
+import scratch_compiler.ValueFields.ModulusField;
+import scratch_compiler.ValueFields.MultiplicationField;
+import scratch_compiler.ValueFields.NumberField;
+import scratch_compiler.ValueFields.NumberVariableField;
+import scratch_compiler.ValueFields.SubtractionField;
+import scratch_compiler.Variables.NumberVariable;
+import scratch_compiler.Variables.Variable;
+
 public class Figure {
     private String name;
     ArrayList<Block> blocks = new ArrayList<Block>();
@@ -11,20 +22,32 @@ public class Figure {
 
     public Figure(String name) {
         this.name = name;
-        x = 48;
-        y = 50;
+        x = 200;
+        y = 91;
 
-        variables.add(new Variable("test variabel", "0"));
+        NumberVariable test = new NumberVariable("test variabel", 0);
+        variables.add(test);
         Block motion = new Block("motion_ifonedgebounce");
         Block motion2 = new Block("motion_ifonedgebounce");
         Block flag = new Block("event_whenflagclicked");
 
-        motion.setParent(flag);
-        motion2.setParent(flag);
+        Block move = new MoveBlock(new SubtractionField(
+                new AdditionField(
+                        new MultiplicationField(
+                                new DivisionField(new ModulusField(new NumberVariableField(test), new NumberField(1)),
+                                        new NumberField(1)),
+                                new NumberField(1)),
+                        new NumberField(1)),
+                new NumberField(10)));
+        motion.connectTo(flag);
+        motion2.connectTo(flag);
+
+        move.connectTo(motion2);
 
         blocks.add(flag);
         blocks.add(motion2);
         blocks.add(motion);
+        blocks.add(move);
     }
 
     private String variablesToJSON() {

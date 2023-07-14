@@ -15,7 +15,7 @@ public class Utils {
         return id;
     }
 
-    private static String id_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789()*;#+{}[]!@%$^&/:?|";
+    private static String id_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     private static char randomChar() {
         return id_chars.charAt((int) (Math.random() * id_chars.length()));

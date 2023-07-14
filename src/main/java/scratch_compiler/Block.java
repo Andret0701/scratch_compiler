@@ -1,14 +1,14 @@
 package scratch_compiler;
 
 public class Block {
-    private String id;
-    private String opcode;
-    private Block next;
-    private Block parent;
+    protected String id;
+    protected String opcode;
+    protected Block next;
+    protected Block parent;
 
-    private int x, y;
+    protected int x, y;
 
-    static private int count = 0;
+    static protected int count = 0;
 
     public Block(String opcode) {
         this.id = Utils.generateID();
@@ -16,7 +16,7 @@ public class Block {
         this.next = null;
         this.parent = null;
 
-        this.x = count * 100;
+        this.x = count * 200;
         this.y = 0;
 
         count++;
@@ -25,29 +25,33 @@ public class Block {
     public void setParent(Block block) {
         if (block == this || parent == block)
             return;
-
-        Block oldParent = this.parent;
-        this.parent = block;
-
-        if (oldParent != null)
-            oldParent.setNext(null);
-
-        if (block != null)
-            block.setNext(this);
+        parent = block;
     }
 
     public void setNext(Block block) {
         if (block == this || next == block)
             return;
+        next = block;
+    }
 
-        Block oldNext = this.next;
-        this.next = block;
+    public void connectTo(Block parent) {
+        if (parent == this || this.parent == parent)
+            return;
 
-        if (oldNext != null)
-            oldNext.setParent(null);
+        if (next == parent && parent.parent == this)
+            parent.connectTo(null);
 
-        if (block != null)
-            block.setParent(this);
+        Block oldParent = this.parent;
+        this.parent = parent;
+
+        if (oldParent != null)
+            oldParent.setNext(null);
+
+        if (parent != null) {
+            if (parent.next != null)
+                parent.next.setParent(null);
+            parent.setNext(this);
+        }
     }
 
     public String nextToJSON() {
@@ -60,12 +64,16 @@ public class Block {
         return "\"parent\": " + value;
     }
 
+    public String inputsToJSON() {
+        return "\"inputs\": {}";
+    }
+
     public String toJSON() {
         String json = "\"" + id + "\": {";
         json += "\"opcode\": \"" + opcode + "\",";
         json += nextToJSON() + ",";
         json += parentToJSON() + ",";
-        json += "\"inputs\": {},";
+        json += inputsToJSON() + ",";
         json += "\"fields\": {},";
         json += "\"shadow\": " + false + ",";
         json += "\"topLevel\": " + (parent == null);
