@@ -28,4 +28,20 @@ public class Utils {
         }
         return str;
     }
+
+    public static String readFile(String path) {
+        try {
+            java.io.File file = new java.io.File(path);
+            java.util.Scanner input = new java.util.Scanner(file);
+            String text = "";
+            while (input.hasNext()) {
+                text += input.nextLine() + "\n";
+            }
+            input.close();
+            return text;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 }

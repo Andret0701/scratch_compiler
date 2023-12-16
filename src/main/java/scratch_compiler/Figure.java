@@ -2,7 +2,10 @@ package scratch_compiler;
 
 import java.util.ArrayList;
 
+import scratch_compiler.Blocks.LoopBlock;
+import scratch_compiler.Blocks.LoopForeverBlock;
 import scratch_compiler.Blocks.MoveBlock;
+import scratch_compiler.Blocks.SetNumberVariableBlock;
 import scratch_compiler.ValueFields.AdditionField;
 import scratch_compiler.ValueFields.DivisionField;
 import scratch_compiler.ValueFields.ModulusField;
@@ -48,6 +51,34 @@ public class Figure {
         blocks.add(motion2);
         blocks.add(motion);
         blocks.add(move);
+
+        Block flag2 = new Block("event_whenflagclicked");
+        ContainerBlock loop = new LoopForeverBlock();
+
+        loop.connectTo(flag2);
+
+        Block move2 = new MoveBlock(new NumberField(10));
+        move2.connectInside(loop);
+
+        blocks.add(flag2);
+        blocks.add(loop);
+        blocks.add(move2);
+
+        Block flag3 = new Block("event_whenflagclicked");
+        ContainerBlock loop2 = new LoopBlock(new NumberField(10));
+        Block move3 = new MoveBlock(new NumberField(10));
+
+        loop2.connectTo(flag3);
+        move3.connectInside(loop2);
+
+        blocks.add(flag3);
+        blocks.add(loop2);
+        blocks.add(move3);
+
+        Block setVariable = new SetNumberVariableBlock(test, new NumberField(10));
+        setVariable.connectTo(loop2);
+
+        blocks.add(setVariable);
     }
 
     private String variablesToJSON() {

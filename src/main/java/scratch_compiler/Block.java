@@ -54,6 +54,26 @@ public class Block {
         }
     }
 
+    public void connectInside(ContainerBlock block) {
+        if (block == this || this.parent == block)
+            return;
+
+        if (next == block && block.parent == this)
+            block.connectInside(null);
+
+        Block oldParent = this.parent;
+        this.parent = block;
+
+        if (oldParent != null)
+            oldParent.setNext(null);
+
+        if (block != null) {
+            if (block.child != null)
+                block.child.setParent(null);
+            block.setChild(this);
+        }
+    }
+
     public String nextToJSON() {
         String value = this.next == null ? "null" : "\"" + this.next.getId() + "\"";
         return "\"next\": " + value;
@@ -68,13 +88,17 @@ public class Block {
         return "\"inputs\": {}";
     }
 
+    public String fieldsToJSON() {
+        return "\"fields\": {}";
+    }
+
     public String toJSON() {
         String json = "\"" + id + "\": {";
         json += "\"opcode\": \"" + opcode + "\",";
         json += nextToJSON() + ",";
         json += parentToJSON() + ",";
         json += inputsToJSON() + ",";
-        json += "\"fields\": {},";
+        json += fieldsToJSON() + ",";
         json += "\"shadow\": " + false + ",";
         json += "\"topLevel\": " + (parent == null);
 
