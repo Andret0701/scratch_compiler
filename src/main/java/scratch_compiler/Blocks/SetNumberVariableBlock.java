@@ -1,6 +1,6 @@
 package scratch_compiler.Blocks;
 
-import scratch_compiler.Block;
+import scratch_compiler.Blocks.BlockTypes.Block;
 import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.Variables.NumberVariable;
 

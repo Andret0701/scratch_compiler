@@ -1,6 +1,6 @@
 package scratch_compiler.Blocks;
 
-import scratch_compiler.ContainerBlock;
+import scratch_compiler.Blocks.BlockTypes.ContainerBlock;
 import scratch_compiler.ValueFields.NumberField;
 
 public class LoopBlock extends ContainerBlock {

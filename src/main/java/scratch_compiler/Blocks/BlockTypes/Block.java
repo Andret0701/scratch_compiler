@@ -1,4 +1,6 @@
-package scratch_compiler;
+package scratch_compiler.Blocks.BlockTypes;
+
+import scratch_compiler.Utils;
 
 public class Block {
     protected String id;
@@ -101,13 +103,13 @@ public class Block {
         json += fieldsToJSON() + ",";
         json += "\"shadow\": " + false + ",";
         json += "\"topLevel\": " + (parent == null);
-
+        
         if (parent == null) {
             json += ",";
             json += "\"x\": " + x + ",";
             json += "\"y\": " + y;
         }
-
+        
         json += "}";
         return json;
 
@@ -115,6 +117,18 @@ public class Block {
 
     public String getId() {
         return id;
+    }
+
+    @Override
+    public Block clone() {
+        Block block = new Block(opcode);
+        if (next!=null&& block.next==next)
+            block.next = next.clone();
+        if (parent!=null&& block.parent==parent)
+            block.parent = parent.clone();
+        block.x = x;
+        block.y = y;
+        return block;
     }
 
     /*

@@ -1,31 +1,31 @@
 package scratch_compiler.Variables;
 
 import scratch_compiler.Utils;
+import scratch_compiler.JSON.ArrayJSON;
 
-public abstract class Variable {
-    private String id;
-    private String name;
+public abstract class Variable extends ArrayJSON {
+    private VariableType type;
+    private boolean isGlobal;
 
-    public Variable(String name) {
-        this.id = Utils.generateID();
-        this.name = name;
+    public Variable(String name,VariableType type,boolean isGlobal) {
+        this.type = type;
+        this.isGlobal=isGlobal;
+        
+        add(name);
+        add("0");
     }
 
-    public String getId() {
-        return id;
-    }
 
     public String getName() {
-        return name;
+        return (String)get(0);
     }
 
-    protected abstract String valueToJSON();
-
-    public String toJSON() {
-        String json = "\"" + id + "\": [";
-        json += "\"" + name + "\",";
-        json += "\"" + valueToJSON() + "\"";
-        json += "]";
-        return json;
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Variable))
+            return false;
+        
+        Variable other = (Variable) obj;
+        return this.getName().equals(other.getName());
     }
 }

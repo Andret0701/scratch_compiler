@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import scratch_compiler.Block;
 import scratch_compiler.Blocks.LoopForeverBlock;
 import scratch_compiler.Blocks.StartBlock;
+import scratch_compiler.Blocks.BlockTypes.Block;
 import scratch_compiler.Compiler.Commands.Command;
 import scratch_compiler.Compiler.Tokens.NewStatementToken;
 

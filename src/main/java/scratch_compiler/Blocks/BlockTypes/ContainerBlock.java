@@ -1,4 +1,4 @@
-package scratch_compiler;
+package scratch_compiler.Blocks.BlockTypes;
 
 public class ContainerBlock extends Block {
     protected Block child = null;

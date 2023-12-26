@@ -2,29 +2,32 @@ package scratch_compiler;
 
 import java.util.ArrayList;
 
+import scratch_compiler.Blocks.MoveBlock;
 import scratch_compiler.Compiler.Compiler;
 import scratch_compiler.Compiler.SyntaxToken;
+import scratch_compiler.ValueFields.NumberField;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        // Block block = new Block("motion_ifonedgebounce", null, null);
-        // System.out.println(block.toJSON());
+        MoveBlock moveBlock = new MoveBlock(new NumberField(10));
+        System.out.println(moveBlock.toJSON());
 
-        // load code.txt
-        String code = Utils.readFile("src\\code.txt");
-        ArrayList<SyntaxToken> tokens = Compiler.parseCode(code);
 
-        for (SyntaxToken token : tokens) {
-            System.out.println(token);
-        }
 
-        // ScratchProject project = new ScratchProject();
-        // String file = ZipUtils.readZipFile("Mitt Scratch-prosjekt2 (8).sb3",
-        // "project.json");
-        // System.out.println(file);
+        ScratchProject project = new ScratchProject();
+        Figure figure =new Figure("Cat");
 
-        // ZipUtils.writeZipFile("Mitt Scratch-prosjekt2 (8).sb3", "project.json",
-        // project.toJSON());
+        System.out.println(project.addFigure(figure, 10, 10));
+        System.out.println(project.addFigure(figure, 20, 20));
+        System.out.println(project.addFigure(figure, 30, 30));
+        
+
+
+        String file = ZipUtils.readZipFile("twocats.sb3", "project.json");
+        System.out.println(file);
+
+        ZipUtils.writeZipFile("twocats.sb3", "project.json", project.toJSON());
+        //add move block to cat
 
     }
 }

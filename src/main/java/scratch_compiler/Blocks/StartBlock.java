@@ -1,7 +1,7 @@
 package scratch_compiler.Blocks;
 
-import scratch_compiler.Block;
-import scratch_compiler.ContainerBlock;
+import scratch_compiler.Blocks.BlockTypes.Block;
+import scratch_compiler.Blocks.BlockTypes.ContainerBlock;
 
 public class StartBlock extends Block {
     public StartBlock() {
