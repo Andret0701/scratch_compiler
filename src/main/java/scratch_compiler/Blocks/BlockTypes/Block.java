@@ -24,6 +24,18 @@ public class Block {
         count++;
     }
 
+    public String getOpcode() {
+        return opcode;
+    }
+
+    public Block getNext() {
+        return next;
+    }
+
+    public Block getParent() {
+        return parent;
+    }
+
     public void setParent(Block block) {
         if (block == this || parent == block)
             return;

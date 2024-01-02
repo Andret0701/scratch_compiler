@@ -1,8 +1,8 @@
 package scratch_compiler.JSON;
 
-public class StringJSON implements ToJSON{
+public class RemoveLaterJSON  implements ToJSON{
     private String value;
-    public StringJSON(String value)
+    public RemoveLaterJSON(String value)
     {
         this.value=value;
     }
@@ -20,7 +20,7 @@ public class StringJSON implements ToJSON{
     @Override
     public boolean equals(Object other)
     {
-        if (other instanceof StringJSON)
+        if (other instanceof RemoveLaterJSON)
             return ((StringJSON)other).getValue().equals(this.value);
         return false;
     }
@@ -28,6 +28,6 @@ public class StringJSON implements ToJSON{
     @Override
     public String toJSON()
     {
-        return "\""+value+"\"";
+        return value;
     }
 }

@@ -1,31 +1,53 @@
 package scratch_compiler.Variables;
 
-import scratch_compiler.Utils;
-import scratch_compiler.JSON.ArrayJSON;
 
-public abstract class Variable extends ArrayJSON {
-    private VariableType type;
+public class Variable {
+    private String name;
     private boolean isGlobal;
+    private VariableType type;
+    private boolean isList;
 
-    public Variable(String name,VariableType type,boolean isGlobal) {
-        this.type = type;
+    public Variable(String name,boolean isGlobal,VariableType type) {
+        this.name = name;
         this.isGlobal=isGlobal;
-        
-        add(name);
-        add("0");
+        this.type=type;
+        this.isList=false;
+    }
+
+    public Variable(String name,boolean isGlobal,VariableType type,boolean isList) {
+        this.name = name;
+        this.isGlobal=isGlobal;
+        this.type=type;
+        this.isList=isList;
     }
 
 
     public String getName() {
-        return (String)get(0);
+        return name;
+    }
+
+    public boolean isGlobal() {
+        return isGlobal;
+    }
+
+    public VariableType getType() {
+        return type;
+    }
+
+    public boolean isList() {
+        return isList;
+    }
+
+    public Variable clone() {
+        return new Variable(name,isGlobal,type,isList);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Variable))
+    public boolean equals(Object other) {
+        if (!(other instanceof Variable))
             return false;
         
-        Variable other = (Variable) obj;
-        return this.getName().equals(other.getName());
+        Variable otherVariable = (Variable)other;
+        return otherVariable.name.equals(this.name) && otherVariable.isGlobal==this.isGlobal && otherVariable.type==this.type && otherVariable.isList==this.isList;            
     }
 }

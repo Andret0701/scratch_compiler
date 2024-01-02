@@ -1,19 +1,8 @@
 package scratch_compiler;
 
-import java.util.ArrayList;
-
-import scratch_compiler.JSON.ToJSON;
-
 public class Utils {
-    private static ArrayList<String> ids = new ArrayList<>();
-
     public static String generateID() {
         String id = randomString(20);
-
-        if (ids.contains(id))
-            return generateID();
-
-        ids.add(id);
         return id;
     }
 
@@ -45,12 +34,5 @@ public class Utils {
             e.printStackTrace();
             return "";
         }
-    }
-
-    public static String toJSON(Object object) {
-        if (object instanceof ToJSON)
-            return ((ToJSON) object).toJSON();
-
-        return object.toString();
     }
 }

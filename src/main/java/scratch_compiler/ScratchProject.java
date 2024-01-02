@@ -1,34 +1,41 @@
 package scratch_compiler;
 
-import scratch_compiler.JSON.ArrayJSON;
-import scratch_compiler.JSON.NestedJSON;
+import java.util.ArrayList;
 
-public class ScratchProject extends NestedJSON {
+import scratch_compiler.ScratchObjects.Background;
+import scratch_compiler.ScratchObjects.Figure;
+import scratch_compiler.Variables.Variable;
 
+public class ScratchProject {
+    private Background background;
+    private ArrayList<Figure> figures;
     public ScratchProject() {
-        super();
-        setArray("targets", new ArrayJSON());
-        getArray("targets").add(new Background());
-        setArray("monitors", new ArrayJSON());
-        setArray("extensions", new ArrayJSON());   
-        setNested("meta", getMetadata());
+        background = new Background();
+        figures = new ArrayList<>();
     }
 
     public boolean containsFigure(String name)
     {        
-        if (containsName(name)&&getBoolean("isStage")==false)
-            return true;
+        for (Figure figure : figures)
+        {
+            if(figure.getName().equals(name))
+                return true;
+        }
+
         return false;
     }
 
     private boolean containsName(String name)
     {
-        for (Object element : getArray("targets"))
+        if (name.equals(background.getName()))
+            return true;
+
+        for (Figure figure : figures)
         {
-            NestedJSON nested = (NestedJSON) element;
-            if(nested.getString("name").equals(name))
+            if(figure.getName().equals(name))
                 return true;
         }
+
         return false;
     }
 
@@ -47,7 +54,7 @@ public class ScratchProject extends NestedJSON {
         String name = getValidName(figure.getName());
         Figure clone = figure.clone();
         clone.setName(name);
-        getArray("targets").add(clone);
+        figures.add(clone);
         return name;
     }
 
@@ -56,7 +63,7 @@ public class ScratchProject extends NestedJSON {
         Figure clone = figure.clone();
         clone.setName(name);
         clone.setPosition(x, y);
-        getArray("targets").add(clone);
+        figures.add(clone);
         return name;
     }
 
@@ -64,12 +71,11 @@ public class ScratchProject extends NestedJSON {
         if (!containsFigure(name))
             return;
 
-        for (int i = 0; i < getArray("targets").size(); i++)
+        for (int i = 0; i < figures.size(); i++)
         {
-            NestedJSON nested = (NestedJSON) getArray("targets").get(i);
-            if(nested.getString("name").equals(name))
+            if(figures.get(i).getName().equals(name))
             {
-                getArray("targets").remove(i);
+                figures.remove(i);
                 return;
             }
         }
@@ -79,21 +85,34 @@ public class ScratchProject extends NestedJSON {
         if (!containsFigure(name))
             return null;
 
-        for (Object element : getArray("targets"))
+        for (Figure figure : figures)
         {
-            NestedJSON nested = (NestedJSON) element;
-            if(nested.getString("name").equals(name))
-                return (Figure) nested;
+            if(figure.getName().equals(name))
+                return figure;
         }
         return null;
     }
 
-    private NestedJSON getMetadata() {
-        NestedJSON metadata = new NestedJSON();
-        metadata.setString("semver", "3.0.0");
-        metadata.setString("vm", "0.2.0-prerelease.20220222132735");
-        metadata.setString("agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Scratch/3.29.1 Chrome/94.0.4606.81 Electron/15.3.1 Safari/537.36");
-        return metadata;
+    public ArrayList<Variable> getGlobalVariables() {
+        ArrayList<Variable> globalVariables = new ArrayList<>();
+        globalVariables.addAll(background.getGlobalVariables());
+        for (Figure figure : figures)
+        {
+            for (Variable variable : figure.getGlobalVariables())
+            {
+                if (!globalVariables.contains(variable))
+                    globalVariables.add(variable);
+            }
+        }
+        return globalVariables;
+    }
+    
+    public ArrayList<Figure> getFigures() {
+        return new ArrayList<>(figures);
+    }
+
+    public Background getBackground() {
+        return background;
     }
 
 }

@@ -8,6 +8,12 @@ public class Vector2Int {
         this.y=y;
     }
 
+    public Vector2Int(double x,double y)
+    {
+        this.x=(int)x;
+        this.y=(int)y;
+    }
+
     @Override
     public boolean equals(Object other)
     {
@@ -17,4 +23,9 @@ public class Vector2Int {
         return vector.x==x&&vector.y==y;
     }
     
+
+    public Vector2Int copy()
+    {
+        return new Vector2Int(x,y);
+    }
 }
