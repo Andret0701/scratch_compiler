@@ -88,17 +88,24 @@ public class ObjectJSON implements ToJSON {
     public String toJSON() {
         String json = "{";
         ArrayList<String> keys = new ArrayList<>(values.keySet());
+        if (keys.size() > 1)
+            json += "\n";
+
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
-            json += "\"" + key + "\":";
+            if (keys.size() > 1)
+                json += "\t";
+            json += "\"" + key + "\": ";
             ToJSON value = getValue(key);
             if (value==null)
                 json+="null";
             else
-                json += getValue(key).toJSON();
+                json += getValue(key).toJSON().replace("\n", "\n\t");
             if (i < keys.size() - 1)
-                json += ",";
+                json += ",\n";
         }
+        if(keys.size()>1)
+            json+="\n";
         json += "}";
         return json;
     }

@@ -123,7 +123,7 @@ public class ScratchObjectToJSON {
         for (Variable variable : variables) 
         {
             if(!variable.isList())
-                variablesJSON.setValue(VariableToJSON.getVariableName(variable), VariableToJSON.variableToJSON(variable));
+                variablesJSON.setValue(VariableToJSON.getVariableId(variable), VariableToJSON.variableToJSON(variable));
         }
         return variablesJSON;
     }
@@ -133,7 +133,7 @@ public class ScratchObjectToJSON {
         for (Variable variable : variables) 
         {
             if(variable.isList())
-                variablesJSON.setValue(VariableToJSON.getVariableName(variable), VariableToJSON.variableToJSON(variable));
+                variablesJSON.setValue(VariableToJSON.getVariableId(variable), VariableToJSON.variableToJSON(variable));
         }
         return variablesJSON;
     }

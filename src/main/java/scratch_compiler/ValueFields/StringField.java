@@ -4,18 +4,18 @@ import java.util.ArrayList;
 
 import scratch_compiler.Blocks.BlockTypes.Block;
 
-public class NumberField extends ValueField {
-    private double value;
-
-    public NumberField(double value) {
+public class StringField extends ValueField {
+    private String value;
+    public StringField(String value) {
+        super();
         this.value = value;
-    }
+    }   
 
-    public double getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(double newValue) {
+    public void setValue(String newValue) {
         value = newValue;
     }
 

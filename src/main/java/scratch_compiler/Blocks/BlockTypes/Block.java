@@ -1,27 +1,18 @@
 package scratch_compiler.Blocks.BlockTypes;
 
-import scratch_compiler.Utils;
+import java.util.ArrayList;
+
+import scratch_compiler.Input;
+import scratch_compiler.ValueFields.ValueField;
+import scratch_compiler.Variables.Variable;
 
 public class Block {
-    protected String id;
     protected String opcode;
-    protected Block next;
-    protected Block parent;
-
-    protected int x, y;
-
-    static protected int count = 0;
-
+    protected Block next=null;
+    protected Block parent=null;
+    protected ArrayList<Input> inputs = new ArrayList<>();
     public Block(String opcode) {
-        this.id = Utils.generateID();
         this.opcode = opcode;
-        this.next = null;
-        this.parent = null;
-
-        this.x = count * 200;
-        this.y = 0;
-
-        count++;
     }
 
     public String getOpcode() {
@@ -36,124 +27,127 @@ public class Block {
         return parent;
     }
 
+    
+    public void setNext(Block block) {
+        if (block == this || next == block)
+        return;
+        next = block;
+    }
+    
     public void setParent(Block block) {
         if (block == this || parent == block)
             return;
         parent = block;
     }
 
-    public void setNext(Block block) {
-        if (block == this || next == block)
-            return;
-        next = block;
+    private boolean containsInput(String name) {
+        for (Input input : inputs) {
+            if (input.getName().equals(name))
+                return true;
+        }
+        return false;
     }
 
-    public void connectTo(Block parent) {
-        if (parent == this || this.parent == parent)
+    protected void setInput(String name, ValueField field) {
+        if (!containsInput(name)){
+            inputs.add(new Input(name, field));
             return;
-
-        if (next == parent && parent.parent == this)
-            parent.connectTo(null);
-
-        Block oldParent = this.parent;
-        this.parent = parent;
-
-        if (oldParent != null)
-            oldParent.setNext(null);
-
-        if (parent != null) {
-            if (parent.next != null)
-                parent.next.setParent(null);
-            parent.setNext(this);
+        }
+  
+        for (int i = 0; i < inputs.size(); i++) {
+            String inputName = inputs.get(i).getName();
+            if (inputName.equals(name)) {
+                inputs.set(i, new Input(inputName, field));
+                return;
+            }
         }
     }
 
-    public void connectInside(ContainerBlock block) {
-        if (block == this || this.parent == block)
-            return;
+    public ArrayList<Input> getInputs() {
+        return new ArrayList<>(inputs);
+    }
 
-        if (next == block && block.parent == this)
-            block.connectInside(null);
+    // public void connectTo(Block parent) {
+    //     if (parent == this || this.parent == parent)
+    //         return;
 
-        Block oldParent = this.parent;
-        this.parent = block;
+    //     if (next == parent && parent.parent == this)
+    //         parent.connectTo(null);
 
-        if (oldParent != null)
-            oldParent.setNext(null);
+    //     Block oldParent = this.parent;
+    //     this.parent = parent;
 
-        if (block != null) {
-            if (block.child != null)
-                block.child.setParent(null);
-            block.setChild(this);
+    //     if (oldParent != null)
+    //         oldParent.setNext(null);
+
+    //     if (parent != null) {
+    //         if (parent.next != null)
+    //             parent.next.setParent(null);
+    //         parent.setNext(this);
+    //     }
+    // }
+
+    // public void connectInside(ContainerBlock block) {
+    //     if (block == this || this.parent == block)
+    //         return;
+
+    //     if (next == block && block.parent == this)
+    //         block.connectInside(null);
+
+    //     Block oldParent = this.parent;
+    //     this.parent = block;
+
+    //     if (oldParent != null)
+    //         oldParent.setNext(null);
+
+    //     if (block != null) {
+    //         if (block.child != null)
+    //             block.child.setParent(null);
+    //         block.setChild(this);
+    //     }
+    // }
+
+    protected ArrayList<Block> getInputsBlocks() {
+        ArrayList<Block> blocks = new ArrayList<>();
+        for (Input input : inputs) {
+            ArrayList<Block> inputBlocks = input.getValueField().getBlocks();
+            blocks.addAll(inputBlocks);
         }
+        return blocks;
     }
 
-    public String nextToJSON() {
-        String value = this.next == null ? "null" : "\"" + this.next.getId() + "\"";
-        return "\"next\": " + value;
-    }
-
-    public String parentToJSON() {
-        String value = this.parent == null ? "null" : "\"" + this.parent.getId() + "\"";
-        return "\"parent\": " + value;
-    }
-
-    public String inputsToJSON() {
-        return "\"inputs\": {}";
-    }
-
-    public String fieldsToJSON() {
-        return "\"fields\": {}";
-    }
-
-    public String toJSON() {
-        String json = "\"" + id + "\": {";
-        json += "\"opcode\": \"" + opcode + "\",";
-        json += nextToJSON() + ",";
-        json += parentToJSON() + ",";
-        json += inputsToJSON() + ",";
-        json += fieldsToJSON() + ",";
-        json += "\"shadow\": " + false + ",";
-        json += "\"topLevel\": " + (parent == null);
-        
-        if (parent == null) {
-            json += ",";
-            json += "\"x\": " + x + ",";
-            json += "\"y\": " + y;
+    protected ArrayList<Variable> getInputsVariables() {
+        ArrayList<Variable> variables = new ArrayList<>();
+        for (Input input : inputs) {
+            ArrayList<Variable> inputVariables = input.getValueField().getVariables();
+            variables.addAll(inputVariables);
         }
-        
-        json += "}";
-        return json;
+        return variables;
+    }
+     
+    public ArrayList<Block> getBlocks() {
+        ArrayList<Block> blocks = new ArrayList<Block>();
+        blocks.add(this);
+        if (next != null)
+            blocks.addAll(next.getBlocks());
 
+        blocks.addAll(getInputsBlocks());
+    
+
+        return blocks;
     }
 
-    public String getId() {
-        return id;
+    public ArrayList<Variable> getVariables() {
+        return new ArrayList<Variable>(getInputsVariables());
     }
 
     @Override
     public Block clone() {
         Block block = new Block(opcode);
+        block.inputs = new ArrayList<>(inputs);
+
         if (next!=null&& block.next==next)
             block.next = next.clone();
-        if (parent!=null&& block.parent==parent)
-            block.parent = parent.clone();
-        block.x = x;
-        block.y = y;
         return block;
     }
-
-    /*
-     * "JlP`/`W[4SWi,4qtN}1f": {
-     * "opcode": "motion_ifonedgebounce",
-     * "next": "P(?=;LX!Q}_T|wTDOG_z",
-     * "parent": "Al/er`jzm5nRD:kQ6MWO",
-     * "inputs": {},
-     * "fields": {},
-     * "shadow": false,
-     * "topLevel": false
-     * "x": 695,
-     * "y": 582
-     * }
-     */
 }

@@ -1,0 +1,12 @@
+1 dukker opp hvis en value field kun har deafult value i seg (gpt sier dette er tall)
+2 id - referer til en value field blokk
+3 dukker opp hvis en value field har en ikke deafult value og deafult value i seg
+4 tall (gpt sier dette er expression)
+
+
+
+
+
+10 tekst
+
+12 variabel

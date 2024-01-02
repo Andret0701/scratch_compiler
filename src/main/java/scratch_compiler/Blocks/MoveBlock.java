@@ -1,33 +1,23 @@
 package scratch_compiler.Blocks;
 
+import java.util.ArrayList;
+
 import scratch_compiler.Blocks.BlockTypes.Block;
 import scratch_compiler.ValueFields.NumberField;
+import scratch_compiler.ValueFields.ValueField;
 
 public class MoveBlock extends Block {
-    private NumberField steps;
+    public MoveBlock(double steps) {
+        this(new NumberField(steps));
+    }
 
-    public MoveBlock(NumberField steps) {
+    public MoveBlock(ValueField steps) {
         super("motion_movesteps");
-        this.steps = steps;
+        setSteps(steps);
     }
 
-    @Override
-    public String inputsToJSON() {
-        String json = "\"inputs\": {";
-        json += "\"STEPS\":" + steps.toJSON();
-        json += "}";
-        return json;
-    }
-
-    @Override
-    public String toJSON() {
-        String json = super.toJSON();
-
-        String fieldBlockJson = steps.blockDataToJSON(id);
-        if (fieldBlockJson != "")
-            json += "," + fieldBlockJson;
-
-        return json;
+    public void setSteps(ValueField steps) {
+        setInput("STEPS", steps);
     }
 
 }

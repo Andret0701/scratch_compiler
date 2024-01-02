@@ -8,7 +8,6 @@ import scratch_compiler.Variables.Variable;
 public abstract class ScratchObject {
     protected String name;
     private ArrayList<Block> blocks = new ArrayList<Block>();
-    private ArrayList<Variable> variables = new ArrayList<Variable>();
 
     public ScratchObject(String name) {
         this.name = name;
@@ -22,29 +21,24 @@ public abstract class ScratchObject {
         this.name = name;
     }
 
-
-
-    public void addVariable(Variable variable) {
-        if (containsVariable(variable.getName()))
-            throw new IllegalArgumentException("Variable with name " + variable.getName() + " already exists");
-        variables.add(variable);
-    }
-
-    public boolean containsVariable(String name) {
-        for (Variable variable : variables) {
-            if (variable.getName().equals(name))
-                return true;
-        }
-        return false;
+    public boolean containsVariable(Variable variable) {
+        return getVariables().contains(variable);
     }
 
     public ArrayList<Variable> getVariables() {
-        return new ArrayList<>(variables);
+        ArrayList<Variable> variables = new ArrayList<>();
+        for (Block block : getBlocks()) {
+            for (Variable variable : block.getVariables()) {
+                if (!variables.contains(variable))
+                    variables.add(variable);
+            }
+        }
+        return variables;
     }
 
     public ArrayList<Variable> getGlobalVariables() {
         ArrayList<Variable> globalVariables = new ArrayList<>();
-        for (Variable variable : variables) {
+        for (Variable variable : getVariables()) {
             if (variable.isGlobal())
                 globalVariables.add(variable);
         }
@@ -53,7 +47,7 @@ public abstract class ScratchObject {
 
     public ArrayList<Variable> getLocalVariables() {
         ArrayList<Variable> localVariables = new ArrayList<>();
-        for (Variable variable : variables) {
+        for (Variable variable : getVariables()) {
             if (!variable.isGlobal())
                 localVariables.add(variable);
         }
