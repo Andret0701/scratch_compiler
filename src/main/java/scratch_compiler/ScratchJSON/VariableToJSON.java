@@ -1,7 +1,7 @@
 package scratch_compiler.ScratchJSON;
 
+import scratch_compiler.Variable;
 import scratch_compiler.JSON.ArrayJSON;
-import scratch_compiler.Variables.Variable;
 
 public class VariableToJSON {
     

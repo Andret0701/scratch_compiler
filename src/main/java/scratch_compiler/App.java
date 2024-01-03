@@ -7,9 +7,18 @@ import scratch_compiler.Blocks.MoveBlock;
 import scratch_compiler.Blocks.LoopBlock;
 import scratch_compiler.Blocks.SayBlock;
 import scratch_compiler.Blocks.SetVariableBlock;
+import scratch_compiler.Blocks.SetXBlock;
 import scratch_compiler.Blocks.ChangeVariableBlock;
+import scratch_compiler.Blocks.IfBlock;
+import scratch_compiler.Blocks.IfElseBlock;
 import scratch_compiler.ValueFields.VariableField;
+import scratch_compiler.ValueFields.LogicFields.EqualsField;
+import scratch_compiler.ValueFields.ScratchValues.DirectionField;
+import scratch_compiler.ValueFields.ScratchValues.TimerField;
+import scratch_compiler.ValueFields.ScratchValues.XPositionField;
+import scratch_compiler.ValueFields.ScratchValues.YPositionField;
 import scratch_compiler.Blocks.StartBlock;
+import scratch_compiler.Blocks.UnaryOperatorBlock;
 import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.JSON.ParserJSON;
 import scratch_compiler.ScratchJSON.ScratchProjectToJSON;
@@ -19,6 +28,7 @@ import scratch_compiler.ValueFields.DivisionField;
 import scratch_compiler.ValueFields.ModulusField;
 import scratch_compiler.ValueFields.MultiplicationField;
 import scratch_compiler.ValueFields.NumberField;
+import scratch_compiler.ValueFields.RoundField;
 import scratch_compiler.ValueFields.SubtractionField;
 public class App {
     public static void main(String[] args) throws Exception {
@@ -33,23 +43,11 @@ public class App {
         
         StartBlock startBlock = new StartBlock();
 
-        LoopForeverBlock loopForeverBlock = new LoopForeverBlock();
-        startBlock.connectUnder(loopForeverBlock);
-
-        MoveBlock moveBlock = new MoveBlock(new AdditionField(new SubtractionField(new MultiplicationField(new DivisionField(new ModulusField(new NumberField(10), new NumberField(2)), new NumberField(2)), new NumberField(2)), new NumberField(2)), new NumberField(2)));
-        AdditionField additionField = new AdditionField(new NumberField(10), new NumberField(10));
-        for (int i = 0; i < 20; i++) {
-            AdditionField temp= new AdditionField(null, new NumberField(i));
-            temp.setLeft(additionField);
-            additionField = temp;
-        }
-        moveBlock.setSteps(additionField);
+        figure.addBlock(new MoveBlock(new AdditionField(new TimerField(), new XPositionField())));
+        figure.addBlock(new MoveBlock(new DivisionField(new DirectionField(), new YPositionField())));
+        figure.addBlock(new MoveBlock(new RoundField(new TimerField())));
+        figure.addBlock(new SetXBlock(new ModulusField(new TimerField(), new NumberField(10))));
         
-        loopForeverBlock.connectInside(moveBlock);
-        moveBlock.addToStack(new BounceOnEdgeBlock());
-
-
-        figure.addBlock(startBlock);
         System.out.println(project.addFigure(figure, 10, 10));
 
 
@@ -62,3 +60,4 @@ public class App {
         ZipUtils.writeZipFile("twocats.sb3", "project.json", projectJSON.toJSON());
     }
 }
+

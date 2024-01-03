@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import scratch_compiler.Input;
-import scratch_compiler.Blocks.Block;
 import scratch_compiler.JSON.ArrayJSON;
 import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.JSON.StringJSON;
 import scratch_compiler.JSON.ToJSON;
+import scratch_compiler.Blocks.Block;
 import scratch_compiler.Types.Vector2Int;
 import scratch_compiler.ValueFields.StringField;
 import scratch_compiler.ValueFields.VariableField;
-import scratch_compiler.Variables.Variable;
-
 public class BlockToJSON {
     public static ObjectJSON blocksToJSON(ArrayList<Block> blocks) {
         ObjectJSON json = new ObjectJSON();

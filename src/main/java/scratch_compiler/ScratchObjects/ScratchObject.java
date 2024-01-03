@@ -2,8 +2,8 @@ package scratch_compiler.ScratchObjects;
 
 import java.util.ArrayList;
 
+import scratch_compiler.Variable;
 import scratch_compiler.Blocks.Block;
-import scratch_compiler.Variables.Variable;
 
 public abstract class ScratchObject {
     protected String name;

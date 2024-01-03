@@ -1,7 +1,8 @@
 package scratch_compiler.ValueFields;
 
 import java.util.ArrayList;
-import scratch_compiler.Variables.Variable;
+
+import scratch_compiler.Variable;
 
 public class VariableField extends ValueField{
     protected String name;

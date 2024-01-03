@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import scratch_compiler.ScratchObjects.Background;
 import scratch_compiler.ScratchObjects.Figure;
-import scratch_compiler.Variables.Variable;
 
 public class ScratchProject {
     private Background background;

@@ -6,7 +6,7 @@ import scratch_compiler.Input;
 import scratch_compiler.ValueFields.StringField;
 import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.VariableField;
-import scratch_compiler.Variables.Variable;
+import scratch_compiler.Variable;
 
 public class Block {
     protected String opcode;

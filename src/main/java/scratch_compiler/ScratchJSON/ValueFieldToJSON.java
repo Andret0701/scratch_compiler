@@ -2,8 +2,8 @@ package scratch_compiler.ScratchJSON;
 
 import java.util.HashMap;
 
-import scratch_compiler.Blocks.Block;
 import scratch_compiler.JSON.ArrayJSON;
+import scratch_compiler.Blocks.Block;
 import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.StringField;
 import scratch_compiler.ValueFields.ValueField;

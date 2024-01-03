@@ -3,13 +3,13 @@ package scratch_compiler.Blocks;
 import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.VariableField;
 
-public class SetVariableBlock extends Block{
+public class SetVariableBlock extends UnaryOperatorBlock{
     private String name;
     private boolean isGlobal;
-    public SetVariableBlock(String name, boolean isGlobal, ValueField value) {
-        super("data_setvariableto");
+    public SetVariableBlock(String name, boolean isGlobal, ValueField input) {
+        super("data_setvariableto", "VALUE");
         setVariable(name, isGlobal);
-        setValue(value);
+        setInput(input);
     }
 
     public void setVariable(String name, boolean isGlobal) {
@@ -22,7 +22,4 @@ public class SetVariableBlock extends Block{
         new VariableField(name, isGlobal);
     }
 
-    public void setValue(ValueField value) {
-        setInput("VALUE", value);
-    }
 }

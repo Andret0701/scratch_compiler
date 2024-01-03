@@ -2,11 +2,11 @@ package scratch_compiler.ScratchJSON;
 
 import java.util.ArrayList;
 
+import scratch_compiler.Variable;
 import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.JSON.RemoveLaterJSON;
 import scratch_compiler.ScratchObjects.Background;
 import scratch_compiler.ScratchObjects.Figure;
-import scratch_compiler.Variables.Variable;
 
 public class ScratchObjectToJSON {
     public static ObjectJSON figureToJSON(Figure figure) {

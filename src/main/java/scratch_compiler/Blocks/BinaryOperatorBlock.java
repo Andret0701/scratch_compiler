@@ -2,7 +2,7 @@ package scratch_compiler.Blocks;
 
 import scratch_compiler.ValueFields.ValueField;
 
-public class BinaryOperatorBlock extends Block {
+public class BinaryOperatorBlock extends ValueFieldBlock {
     private String leftInputName;
     private String rightInputName;
     public BinaryOperatorBlock(String opcode, String leftInputName, String rightInputName)
@@ -18,10 +18,6 @@ public class BinaryOperatorBlock extends Block {
 
     public void setLeft(ValueField left) {
         setInput(leftInputName, left);
-    }
-
-    public void setParent(Block parent) {
-        this.parent = parent;
     }
 
 }
