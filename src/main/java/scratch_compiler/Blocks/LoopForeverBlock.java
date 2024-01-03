@@ -1,11 +1,18 @@
 package scratch_compiler.Blocks;
 
-import scratch_compiler.Blocks.BlockTypes.ContainerBlock;
-
-public class LoopForeverBlock extends ContainerBlock {
+public class LoopForeverBlock extends Block {
 
     public LoopForeverBlock() {
         super("control_forever");
+    }
+
+    public void connectInside(Block child) {
+        connectChild(child, 1);
+    }
+
+    @Override
+    public void connectUnder(Block child) {
+        return;
     }
 
 }

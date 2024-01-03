@@ -2,7 +2,6 @@ package scratch_compiler.Blocks;
 
 import java.util.ArrayList;
 
-import scratch_compiler.Blocks.BlockTypes.Block;
 import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.ValueField;
 

@@ -2,7 +2,7 @@ package scratch_compiler.ScratchObjects;
 
 import java.util.ArrayList;
 
-import scratch_compiler.Blocks.BlockTypes.Block;
+import scratch_compiler.Blocks.Block;
 import scratch_compiler.Variables.Variable;
 
 public abstract class ScratchObject {

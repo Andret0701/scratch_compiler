@@ -2,7 +2,7 @@ package scratch_compiler.ValueFields;
 
 import java.util.ArrayList;
 
-import scratch_compiler.Blocks.BlockTypes.Block;
+import scratch_compiler.Blocks.Block;
 import scratch_compiler.Variables.Variable;
 
 public abstract class ValueField {
@@ -13,11 +13,9 @@ public abstract class ValueField {
     public Block getBlock() {
         return null;
     }
-    
-    public ArrayList<Block> getBlocks() {
-        ArrayList<Block> blocks = new ArrayList<Block>();
-        blocks.add(getBlock());
-        return blocks;
+
+    public ArrayList<Block> getBlocks(Block parent) {
+        return new ArrayList<Block>();
     }
 
     public ArrayList<Variable> getVariables() {

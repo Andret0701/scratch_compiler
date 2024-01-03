@@ -1,37 +1,23 @@
 package scratch_compiler.Blocks;
 
-import scratch_compiler.Blocks.BlockTypes.ContainerBlock;
 import scratch_compiler.ValueFields.NumberField;
 
-public class LoopBlock extends ContainerBlock {
-    private NumberField num;
-
-    public LoopBlock(NumberField num) {
+public class LoopBlock extends Block {
+    public LoopBlock(NumberField count) {
         super("control_repeat");
-        this.num = num;
+        setLoopCount(count);
     }
 
-    @Override
-    public String inputsToJSON() {
-        String json = "\"inputs\": {";
-        json += "\"TIMES\":" + num.toJSON();
-
-        if (child != null)
-            json += ",\"SUBSTACK\": [2, \"" + child.getId() + "\"]";
-
-        json += "}";
-        return json;
+    public LoopBlock(int count) {
+        this(new NumberField(count));
     }
 
-    @Override
-    public String toJSON() {
-        String json = super.toJSON();
+    public void connectInside(Block child) {
+        connectChild(child,1);
+    }
 
-        String fieldBlockJson = num.blockDataToJSON(id);
-        if (fieldBlockJson != "")
-            json += "," + fieldBlockJson;
-
-        return json;
+    public void setLoopCount(NumberField count) {
+        setInput("TIMES", count);
     }
 
 }

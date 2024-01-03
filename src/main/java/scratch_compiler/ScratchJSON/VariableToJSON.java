@@ -15,7 +15,6 @@ public class VariableToJSON {
          else 
             variableJSON.addString("0");
 
-        
         return variableJSON;
     }
 

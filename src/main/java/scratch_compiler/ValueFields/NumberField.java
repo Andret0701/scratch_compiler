@@ -2,7 +2,7 @@ package scratch_compiler.ValueFields;
 
 import java.util.ArrayList;
 
-import scratch_compiler.Blocks.BlockTypes.Block;
+import scratch_compiler.Blocks.Block;
 
 public class NumberField extends ValueField {
     private double value;
@@ -25,7 +25,7 @@ public class NumberField extends ValueField {
     }
 
     @Override
-    public ArrayList<Block> getBlocks() {
+    public ArrayList<Block> getBlocks(Block parent) {
         return new ArrayList<>();
     }
 }

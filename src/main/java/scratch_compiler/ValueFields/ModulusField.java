@@ -1,12 +1,8 @@
 package scratch_compiler.ValueFields;
 
-import scratch_compiler.Utils;
-
-public class ModulusField extends NumberOperatorField {
-    public ModulusField(NumberField num1, NumberField num2) {
-        super("operator_mod", num1, num2);
-        id = Utils.generateID();
-        this.num1 = num1;
-        this.num2 = num2;
+public class ModulusField extends BinaryOperationField {
+    public ModulusField(ValueField left, ValueField right) {
+        super("operator_mod", "NUM1", "NUM2", left, right);
     }
+
 }
