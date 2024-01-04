@@ -1,9 +1,11 @@
 package scratch_compiler.ScratchJSON;
 
+import scratch_compiler.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import scratch_compiler.Input;
+import scratch_compiler.Variable;
 import scratch_compiler.JSON.ArrayJSON;
 import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.JSON.StringJSON;
@@ -11,6 +13,7 @@ import scratch_compiler.JSON.ToJSON;
 import scratch_compiler.Blocks.Block;
 import scratch_compiler.Types.Vector2Int;
 import scratch_compiler.ValueFields.StringField;
+import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.VariableField;
 public class BlockToJSON {
     public static ObjectJSON blocksToJSON(ArrayList<Block> blocks) {
@@ -81,22 +84,25 @@ public class BlockToJSON {
 
     private static ObjectJSON fieldsToJSON(Block block) {
         ObjectJSON fields = new ObjectJSON();
-        for (Input field : block.getFields())
+        for (Field field : block.getFields())
         {
             ArrayJSON fieldJSON = new ArrayJSON();
-            if (field.getValueField() instanceof VariableField)
+            if (field.getVariable() !=null)
             {   
-                VariableField variableField = (VariableField) field.getValueField();
-                fieldJSON.addString(VariableToJSON.getVariableName(variableField.getVariable()));
-                fieldJSON.addString(VariableToJSON.getVariableId(variableField.getVariable()));
+                Variable variable = field.getVariable();
+                fieldJSON.addString(VariableToJSON.getVariableName(variable));
+                fieldJSON.addString(VariableToJSON.getVariableId(variable));
                 fields.setArray(field.getName(), fieldJSON);
             }
-            else if (field.getValueField() instanceof StringField)
+            else if (field.getType() !=null)
             {
-                StringField stringField = (StringField) field.getValueField();
-                fieldJSON.addString(stringField.getValue());
+                fieldJSON.addString(field.getType());
                 fieldJSON.addValue(null);
                 fields.setArray(field.getName(), fieldJSON);
+            }
+            else if (field.getValueField() instanceof ValueField)
+            {
+                throw new RuntimeException("Field not implemented: "+field.getValueField().getClass().getName());
             }
             else
                 throw new RuntimeException("Field not supported: "+field.getValueField().getClass().getName());

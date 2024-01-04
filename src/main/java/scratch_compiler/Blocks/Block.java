@@ -2,6 +2,7 @@ package scratch_compiler.Blocks;
 
 import java.util.ArrayList;
 
+import scratch_compiler.Field;
 import scratch_compiler.Input;
 import scratch_compiler.ValueFields.StringField;
 import scratch_compiler.ValueFields.ValueField;
@@ -13,7 +14,7 @@ public class Block {
     protected ArrayList<Block> children = new ArrayList<>();
     protected Block parent=null;
     protected ArrayList<Input> inputs = new ArrayList<>();
-    protected ArrayList<Input> fields = new ArrayList<>();
+    protected ArrayList<Field> fields = new ArrayList<>();
     public Block(String opcode) {
         this.opcode = opcode;
         children = new ArrayList<>();
@@ -70,44 +71,30 @@ public class Block {
     }
 
     private boolean containsField(String name) {
-        for (Input field : fields) {
+        for (Field field : fields) {
             if (field.getName().equals(name))
                 return true;
         }
         return false;
     }
 
-    protected void setField(String name, String value) {
+    protected void setField(Field field) {
+        String name = field.getName();
         if (!containsField(name)){
-            fields.add(new Input(name, new StringField(value)));
+            fields.add(field);
             return;
         }
   
         for (int i = 0; i < fields.size(); i++) {
             String fieldName = fields.get(i).getName();
             if (fieldName.equals(name)) {
-                fields.set(i, new Input(fieldName, new StringField(value)));
+                fields.set(i, field);
                 return;
             }
         }
     }
 
-    protected void setField(String name, VariableField value) {
-        if (!containsField(name)){
-            fields.add(new Input(name, value));
-            return;
-        }
-  
-        for (int i = 0; i < fields.size(); i++) {
-            String fieldName = fields.get(i).getName();
-            if (fieldName.equals(name)) {
-                fields.set(i, new Input(fieldName, value));
-                return;
-            }
-        }
-    }
-
-    public ArrayList<Input> getFields() {
+    public ArrayList<Field> getFields() {
         return new ArrayList<>(fields);
     }
 
@@ -180,8 +167,8 @@ public class Block {
 
     protected ArrayList<Block> getFieldsBlocks() {
         ArrayList<Block> blocks = new ArrayList<>();
-        for (Input field : fields) {
-            ArrayList<Block> fieldBlocks = field.getValueField().getBlocks(this);
+        for (Field field : fields) {
+            ArrayList<Block> fieldBlocks = field.getBlocks(this);
             blocks.addAll(fieldBlocks);
         }
         return blocks;
@@ -189,8 +176,8 @@ public class Block {
     
     protected ArrayList<Variable> getFieldsVariables() {
         ArrayList<Variable> variables = new ArrayList<>();
-        for (Input field : fields) {
-            ArrayList<Variable> fieldVariables = field.getValueField().getVariables();
+        for (Field field : fields) {
+            ArrayList<Variable> fieldVariables = field.getVariables();
             variables.addAll(fieldVariables);
         }
         return variables;

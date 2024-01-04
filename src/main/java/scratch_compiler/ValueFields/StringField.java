@@ -1,9 +1,4 @@
 package scratch_compiler.ValueFields;
-
-import java.util.ArrayList;
-
-import scratch_compiler.Blocks.Block;
-
 public class StringField extends ValueField {
     private String value;
     public StringField(String value) {
@@ -17,15 +12,5 @@ public class StringField extends ValueField {
 
     public void setValue(String newValue) {
         value = newValue;
-    }
-
-    @Override
-    public Block getBlock() {
-        return null;
-    }
-
-    @Override
-    public ArrayList<Block> getBlocks(Block parent) {
-        return new ArrayList<>();
     }
 }

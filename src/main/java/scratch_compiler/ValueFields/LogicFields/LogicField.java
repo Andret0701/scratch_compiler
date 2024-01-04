@@ -6,4 +6,8 @@ public class LogicField extends ValueField {
     public LogicField() {
         super();
     }
+
+    public LogicField(String opcode) {
+        super(opcode);
+    }
 }

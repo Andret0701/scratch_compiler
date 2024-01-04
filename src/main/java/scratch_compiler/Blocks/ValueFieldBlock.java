@@ -9,7 +9,5 @@ public class ValueFieldBlock extends Block{
         this.parent = parent;
     }
 
-    public void connectUnder(Block child) {
-        return;
-    }
+
 }
