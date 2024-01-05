@@ -1,14 +1,29 @@
-int a=1;
-int b=2;
-b*=a;
 
-float c=3.5*a+b;
+while(x>-50)
+    x-=4;
+while(y>-50)
+    y-=4;
 
+
+while(true)
 {
-    float d=1;
-}
+    while(x<50)
+    {
+        x+=4;
+    }
 
+    while(y<50)
+    {
+        y+=4;
+    }
 
-{
-    float d=2;
+    while(x>-50)
+    {
+        x-=4;
+    }
+
+    while(y>-50)
+    {
+        y-=4;
+    }
 }

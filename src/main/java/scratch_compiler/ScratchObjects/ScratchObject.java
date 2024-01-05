@@ -2,12 +2,15 @@ package scratch_compiler.ScratchObjects;
 
 import java.util.ArrayList;
 
+import scratch_compiler.Asset;
+import scratch_compiler.Costume;
 import scratch_compiler.Variable;
 import scratch_compiler.Blocks.Block;
 
 public abstract class ScratchObject {
     protected String name;
     private ArrayList<Block> blocks = new ArrayList<Block>();
+    private ArrayList<Costume> costumes = new ArrayList<Costume>();
 
     public ScratchObject(String name) {
         this.name = name;
@@ -61,5 +64,20 @@ public abstract class ScratchObject {
 
     public ArrayList<Block> getBlocks() {
         return new ArrayList<>(blocks);
+    }
+
+    public void addCostume(Costume costume) {
+        Costume clone = costume.clone();
+        costumes.add(clone);
+    }
+
+    public ArrayList<Costume> getCostumes() {
+        return new ArrayList<>(costumes);
+    }
+
+    public ArrayList<Asset> getAssets() {
+        ArrayList<Asset> assets = new ArrayList<>();
+        assets.addAll(getCostumes());
+        return assets;
     }
 }

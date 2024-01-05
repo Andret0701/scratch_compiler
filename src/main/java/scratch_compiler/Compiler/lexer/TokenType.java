@@ -4,45 +4,69 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum TokenType {
-    AND("&&", 3),
-    OR("\\|\\|", 1),
-    EQUALS("==", 8),
-    NOT_EQUALS("!=", 8),
-    ADD_ASSIGN("\\+="),
-    SUB_ASSIGN("-="),
-    MUL_ASSIGN("\\*="),
-    DIV_ASSIGN("/="),
-    ASSIGN("="),
-    MINUS("-", 13),
-    PLUS("\\+", 13),
-    MUL("\\*", 14),
-    DIV("/", 14),
+    STRING("\"[^\"]*\"", TokenSubtype.VALUE),
+    FLOAT("[0-9]+\\\\.[0-9]+", TokenSubtype.VALUE),
+    INT("[0-9]+", TokenSubtype.VALUE),
+    BOOLEAN("(true|false)", TokenSubtype.VALUE),
+
+    GREATER_EQUALS(">=", TokenSubtype.BINARY_OPERATOR),
+    LESS_EQUALS("<=", TokenSubtype.BINARY_OPERATOR),
+    LESS_THAN("<", TokenSubtype.BINARY_OPERATOR),
+    GREATER_THAN(">", TokenSubtype.BINARY_OPERATOR),
+    AND("&&", TokenSubtype.BINARY_OPERATOR),
+    OR("\\|\\|", TokenSubtype.BINARY_OPERATOR),
+    EQUALS("==", TokenSubtype.BINARY_OPERATOR),
+    NOT_EQUALS("!=", TokenSubtype.BINARY_OPERATOR),
+    
+    ADD_ASSIGN("\\+=", TokenSubtype.ASSIGNMENT),
+    SUB_ASSIGN("-=", TokenSubtype.ASSIGNMENT),
+    MUL_ASSIGN("\\*=", TokenSubtype.ASSIGNMENT),
+    DIV_ASSIGN("/=", TokenSubtype.ASSIGNMENT),
+    MOD_ASSIGN("%=", TokenSubtype.ASSIGNMENT),
+    ASSIGN("=", TokenSubtype.ASSIGNMENT),
+    
+    SUB("-", TokenSubtype.BINARY_OPERATOR),
+    ADD("\\+", TokenSubtype.BINARY_OPERATOR),
+    MUL("\\*", TokenSubtype.BINARY_OPERATOR),
+    DIV("/", TokenSubtype.BINARY_OPERATOR),
+    MOD("%", TokenSubtype.BINARY_OPERATOR),
+    
     OPEN("\\("),
     CLOSE("\\)"),
     COMMA(","),
+    
+    
+    SQUARE_BRACKET_OPEN("\\["),
+    SQUARE_BRACKET_CLOSE("\\]"),
+
     BOOLEAN_DECLARATION("bool"),
-    BOOLEAN("(true|false)"),
     FLOAT_DECLARATION("float"),
-    FLOAT("[0-9]+\\.[0-9]+"),
     INT_DECLARATION("int"),
-    INT("[0-9]+"),
+    STRING_DECLARATION("string"),
+    VOID_DECLARATION("void"),
+    STRUCT_DECLARATION("struct"),
+
     IF("if"),
     ELSE("else"),
+    WHILE("while"),
+    FOR("for"),
+    
     OPEN_BRACE("\\{"),
     CLOSE_BRACE("\\}"),
     SEMICOLON(";"),
+
     IDENTIFIER("[a-zA-Z_][a-zA-Z0-9_]*");
 
     private final Pattern pattern;
-    private final int precedence;
+    private final TokenSubtype subtype;
 
-    TokenType(String regex, int precedence) {
+    TokenType(String regex, TokenSubtype subtype) {
         this.pattern = Pattern.compile("^" + regex);
-        this.precedence = precedence;
+        this.subtype = subtype;
     }
 
     TokenType(String regex) {
-        this(regex, -1);
+        this(regex, TokenSubtype.KEYWORD);
     }
 
     int endOfMatch(String s) {
@@ -54,7 +78,7 @@ public enum TokenType {
         return -1;
     }
 
-    int getPrecedence() {
-        return precedence;
+    public TokenSubtype getSubtype() {
+        return subtype;
     }
 }

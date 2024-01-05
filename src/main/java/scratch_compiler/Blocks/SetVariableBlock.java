@@ -11,7 +11,7 @@ public class SetVariableBlock extends UnaryOperatorBlock{
     public SetVariableBlock(String name, boolean isGlobal, ValueField input) {
         super("data_setvariableto", "VALUE");
         setVariable(name, isGlobal);
-        setInput(input);
+        setOperand(input);
     }
 
     public void setVariable(String name, boolean isGlobal) {

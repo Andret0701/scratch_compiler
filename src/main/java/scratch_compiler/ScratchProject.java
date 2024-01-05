@@ -114,4 +114,13 @@ public class ScratchProject {
         return background;
     }
 
+
+    public ArrayList<Asset> getAssets() {
+        ArrayList<Asset> assets = new ArrayList<>();
+        assets.addAll(background.getAssets());
+        for (Figure figure : figures)
+            assets.addAll(figure.getAssets());
+        return assets;
+    }
+
 }

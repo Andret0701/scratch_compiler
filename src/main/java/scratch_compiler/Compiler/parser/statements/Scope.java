@@ -1,8 +1,7 @@
 package scratch_compiler.Compiler.parser.statements;
 
 import scratch_compiler.Compiler.IdentifierTypes;
-import scratch_compiler.Compiler.lexer.TokenType;
-import scratch_compiler.Compiler.parser.nodes.Expression;
+import scratch_compiler.Compiler.parser.VariableType;
 
 import java.util.ArrayList;
 
@@ -13,16 +12,15 @@ public class Scope extends Statement {
     private ArrayList<Statement> statements;
 
     public Scope(IdentifierTypes identifierTypes) {
-        super(TokenType.OPEN_BRACE, null);
         statements = new ArrayList<>();
-        this.identifierTypes = identifierTypes;
+        this.identifierTypes = identifierTypes.copy();
     }
 
     public void addStatement(Statement statement) {
         statements.add(statement);
     }
 
-    public void addIdentifierType(String name, TokenType type) {
+    public void addIdentifierType(String name, VariableType type) {
         identifierTypes.add(name, type);
     }
 

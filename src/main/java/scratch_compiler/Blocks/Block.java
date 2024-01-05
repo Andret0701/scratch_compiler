@@ -92,6 +92,7 @@ public class Block {
                 return;
             }
         }
+        
     }
 
     public ArrayList<Field> getFields() {

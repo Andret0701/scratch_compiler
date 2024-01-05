@@ -1,23 +1,22 @@
 package scratch_compiler.Compiler;
 
 import java.util.HashMap;
-
-import scratch_compiler.Compiler.lexer.TokenType;
+import scratch_compiler.Compiler.parser.VariableType;
 
 public class IdentifierTypes {
-    private HashMap<String, TokenType> types;
+    private HashMap<String, VariableType> types;
 
     public IdentifierTypes() {
         types = new HashMap<>();
     }
 
-    public void add(String name, TokenType type) {
+    public void add(String name, VariableType type) {
         types.put(name, type);
     }
 
-    public TokenType get(String name) {
+    public VariableType get(String name) {
         if (!contains(name))
-            return null;
+            throw new IllegalArgumentException("Variable " + name + " is not declared");
         return types.get(name);
     }
 
@@ -25,9 +24,19 @@ public class IdentifierTypes {
         return types.containsKey(name);
     }
 
+    public void validateDeclaration(String name, int line) {
+        if (contains(name))
+            throw new IllegalArgumentException("Redeclaration of variable " + name + " at line " + line);
+    }
+
+    public void validateUsage(String name, int line) {
+        if (!contains(name))
+            throw new IllegalArgumentException("Variable " + name + " is not declared at line " + line);
+    }
+
     public IdentifierTypes copy() {
         IdentifierTypes copy = new IdentifierTypes();
-        copy.types = (HashMap<String, TokenType>) types.clone();
+        copy.types = new HashMap<>(types);
         return copy;
     }
 }

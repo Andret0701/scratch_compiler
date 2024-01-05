@@ -20,10 +20,14 @@ public class StatementParser {
                 return DeclarationParser.parse(tokens, identifierTypes);
             case BOOLEAN_DECLARATION:
                 return DeclarationParser.parse(tokens, identifierTypes);
+            case STRING_DECLARATION:
+                return DeclarationParser.parse(tokens, identifierTypes);
             case IDENTIFIER:
                 return AssignmentParser.parse(tokens, identifierTypes);
             case IF:
                 return IfParser.parse(tokens, identifierTypes);
+            case WHILE:
+                return WhileParser.parse(tokens, identifierTypes);
             default:
                 CompilerUtils.throwExpected("statement", tokens.peek().getLine(), tokens.peek());
         }
@@ -45,9 +49,7 @@ public class StatementParser {
             scope.addStatement(statement);
         }
 
-        tokens.expect(TokenType.CLOSE_BRACE);
-
-        tokens.next();
+        tokens.expectNext(TokenType.CLOSE_BRACE);
         return scope;
     }
 }

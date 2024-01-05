@@ -1,69 +1,86 @@
 package scratch_compiler.Compiler.parser;
 
-import javax.swing.plaf.nimbus.State;
-
 import scratch_compiler.Compiler.IdentifierTypes;
 import scratch_compiler.Compiler.CompilerUtils;
+import scratch_compiler.Compiler.lexer.Token;
 import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
-import scratch_compiler.Compiler.parser.nodes.Expression;
-import scratch_compiler.Compiler.parser.statements.Declaration;
+import scratch_compiler.Compiler.parser.expressions.Expression;
+import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class DeclarationParser {
     public static Statement parse(TokenReader tokens, IdentifierTypes identifierTypes) {
-        if (!tokens.isNext(TokenType.INT_DECLARATION) && !tokens.isNext(TokenType.FLOAT_DECLARATION)
-                && !tokens.isNext(TokenType.BOOLEAN_DECLARATION))
-            return null;
-
         switch (tokens.peek().getType()) {
             case INT_DECLARATION:
-                return parseVariableDeclaration(tokens, identifierTypes, TokenType.INT);
+                return parseVariableDeclaration(tokens, identifierTypes, TokenType.INT_DECLARATION,VariableType.INT);
             case FLOAT_DECLARATION:
-                return parseVariableDeclaration(tokens, identifierTypes, TokenType.FLOAT);
+                return parseVariableDeclaration(tokens, identifierTypes, TokenType.FLOAT_DECLARATION,VariableType.FLOAT);
             case BOOLEAN_DECLARATION:
-                return parseVariableDeclaration(tokens, identifierTypes, TokenType.BOOLEAN);
+                return parseVariableDeclaration(tokens, identifierTypes, TokenType.BOOLEAN_DECLARATION,VariableType.BOOLEAN);
+            case STRING_DECLARATION:
+                return parseVariableDeclaration(tokens, identifierTypes, TokenType.STRING_DECLARATION,VariableType.STRING);
             default:
                 CompilerUtils.throwExpected("declaration", tokens.peek().getLine(), tokens.peek());
         }
         throw new RuntimeException("Unreachable");
     }
 
-    private static Statement parseVariableDeclaration(TokenReader tokens, IdentifierTypes identifierTypes,
-            TokenType type) {
-        tokens.next();
-        if (tokens.peek().getType() != TokenType.IDENTIFIER)
-            CompilerUtils.throwExpected("identifier", tokens.peek().getLine(), tokens.peek());
+    private static Statement parseVariableDeclaration(TokenReader tokens, IdentifierTypes identifierTypes, TokenType declarationType,VariableType type) {
+        tokens.expectNext(declarationType);
 
-        String name = tokens.peek().getValue();
-        if (identifierTypes.contains(name))
-            throw new RuntimeException("Identifier '" + name + "' already declared at line "
-                    + tokens.peek().getLine());
-        tokens.next();
+        if (tokens.isNext(TokenType.SQUARE_BRACKET_OPEN)) 
+            return parseArrayDeclaration(tokens, identifierTypes, declarationType,type);
 
-        if (tokens.peek().getType() != TokenType.ASSIGN)
-            CompilerUtils.throwExpected("=", tokens.peek().getLine(), tokens.peek());
-        tokens.next();
+        Token identifier=tokens.expectNext(TokenType.IDENTIFIER);
 
-        Expression expression = ExpressionParser.parse(tokens);
-        if (!validAssignmentType(type, expression.getType(identifierTypes)))
-            throw new RuntimeException("Type mismatch at line " + tokens.peek().getLine() + " expected " + type
-                    + " got " + expression.getType(identifierTypes));
+        String name = identifier.getValue();
+        identifierTypes.validateDeclaration(name, identifier.getLine());
 
-        if (tokens.peek().getType() != TokenType.SEMICOLON)
-            CompilerUtils.throwExpected(";", tokens.peek().getLine(), tokens.peek());
-        tokens.next();
+        if (tokens.peek().getType()==TokenType.SEMICOLON) 
+        {
+            tokens.expectNext(TokenType.SEMICOLON);
+            identifierTypes.add(name, type);
+            return new VariableDeclaration(name,type, ExpressionParser.getDefaultValue(type));
+        }
+
+        tokens.expectNext(TokenType.ASSIGN);
+
+        Expression expression = ExpressionParser.parse(tokens, identifierTypes);
+        if (!expression.getType().canBeConvertedTo(type))
+            throw new RuntimeException("Cannot convert " + expression.getType() + " to " + type);
+
+
+        tokens.expectNext(TokenType.SEMICOLON);
 
         identifierTypes.add(name, type);
-        return new Declaration(name,type, expression);
+        return new VariableDeclaration(name,type, expression);
     }
 
-    private static boolean validAssignmentType(TokenType target, TokenType source) {
-        if (target==source)
-            return true;
-        if (target == TokenType.FLOAT && source == TokenType.INT)
-            return true;
-        return false;
+    private static Statement parseArrayDeclaration(TokenReader tokens, IdentifierTypes identifierTypes, TokenType declarationType,VariableType type) {
+        
+        tokens.expectNext(TokenType.SQUARE_BRACKET_OPEN);
+        tokens.expectNext(TokenType.SQUARE_BRACKET_CLOSE);
+        
+        Token identifier=tokens.expectNext(TokenType.IDENTIFIER);
+        String name = identifier.getValue();
+        identifierTypes.validateDeclaration(name, identifier.getLine());
+
+        tokens.expectNext(TokenType.ASSIGN);
+        tokens.expectNext(declarationType);
+        tokens.expectNext(TokenType.SQUARE_BRACKET_OPEN);
+
+        Expression expression = ExpressionParser.parse(tokens, identifierTypes);
+        Expression.validateType(expression, VariableType.INT, tokens.peek().getLine());
+        
+
+        tokens.expectNext(TokenType.SQUARE_BRACKET_CLOSE);
+        tokens.expectNext(TokenType.SEMICOLON);
+
+        identifierTypes.add(name, type);
+        return new VariableDeclaration(name,type, expression);
     }
+
+
 
 }

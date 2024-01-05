@@ -90,4 +90,42 @@ public class ZipUtils {
             return null;
         }
     }
+
+
+    public static void zipFolder(String path) throws Exception {
+        //if theres already a zip file, delete it
+        //convert folder to zip file
+        //delete folder
+
+        File folder = new File(path);
+        File zipFile = new File(path + ".zip");
+
+        if (zipFile.exists())
+            zipFile.delete();
+        
+        zipFile.createNewFile();
+
+        FileOutputStream fos = new FileOutputStream(zipFile);
+        ZipOutputStream zos = new ZipOutputStream(fos);
+
+        for (File file : folder.listFiles()) {
+            if (file.isDirectory())
+                continue;
+
+            ZipEntry zipEntry = new ZipEntry(file.getName());
+            zos.putNextEntry(zipEntry);
+
+            FileInputStream fis = new FileInputStream(file);
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = fis.read(buffer)) > 0)
+                zos.write(buffer, 0, len);
+
+            fis.close();
+            zos.closeEntry();
+        }
+
+        zos.close();        
+        folder.delete();
+    }
 }

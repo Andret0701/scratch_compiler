@@ -3,16 +3,16 @@ package scratch_compiler.Blocks;
 import scratch_compiler.ValueFields.ValueField;
 
 public class UnaryOperatorBlock extends ValueFieldBlock {
-    private String inputName;
-    public UnaryOperatorBlock(String opcode, String inputName)
+    private String operandName;
+    public UnaryOperatorBlock(String opcode, String operandName)
     {
         super(opcode);
-        this.inputName = inputName;
+        this.operandName = operandName;
     }
 
 
-    public void setInput(ValueField input) {
-        setInput(inputName, input);
+    public void setOperand(ValueField input) {
+        setInput(operandName, input);
     }
 
 }

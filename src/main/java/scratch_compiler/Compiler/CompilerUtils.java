@@ -51,24 +51,5 @@ public class CompilerUtils {
             throwMustBeOfType(type, token.getType());
     }
 
-    public static Scope compile(String code) {
-          try {
-           
-            ArrayList<Token> tokens = Lexer.lex(code);
 
-            TokenReader reader = new TokenReader(tokens);
-
-            Scope scope = new Scope(new IdentifierTypes());
-            Statement statement;
-            while ((statement = StatementParser.parse(reader, scope.getIdentifierTypes())) != null) 
-                scope.addStatement(statement);
-
-            return scope;
-            
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-    }
 }

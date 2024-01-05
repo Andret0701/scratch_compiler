@@ -2,6 +2,8 @@ package scratch_compiler.Compiler.lexer;
 
 import java.util.ArrayList;
 
+import scratch_compiler.Compiler.CompilerUtils;
+
 public class TokenReader {
     private ArrayList<Token> tokens;
     private int position;
@@ -44,9 +46,22 @@ public class TokenReader {
         return tokens.size();
     }
 
-    public void expect(TokenType type) {
-        if (!isNext(type))
-            throw new RuntimeException("Expected " + type + " at line " + peek().getLine());
+    public Token expectNext(TokenType... types) {
+        for (TokenType type : types)
+            if (isNext(type))
+                return pop();
+
+        String expected = "";
+        for (int i = 0; i < types.length; i++)
+        {
+            expected += types[i];
+            if (i != types.length - 2)
+                expected += " or ";
+            else if (i == types.length - 2)
+                expected += ", ";
+        }
+        CompilerUtils.throwExpected(expected, peek().getLine(), peek());
+        return null;
     }
 
     public  boolean isNext(TokenType type) {

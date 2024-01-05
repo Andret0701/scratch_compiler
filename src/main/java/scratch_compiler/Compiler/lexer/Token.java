@@ -23,12 +23,14 @@ public class Token {
         return line;
     }
 
-    public int getPrecedence() {
-        return type.getPrecedence();
+    public TokenSubtype getSubtype()
+    {
+        return type.getSubtype();
     }
 
-    public boolean isOperator() {
-        return getPrecedence() >= 0;
+    public boolean isSubtype(TokenSubtype subtype)
+    {
+        return getSubtype() == subtype;
     }
 
     @Override
