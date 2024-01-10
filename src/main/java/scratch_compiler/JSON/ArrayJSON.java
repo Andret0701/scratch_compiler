@@ -105,6 +105,11 @@ public class ArrayJSON implements ToJSON, Iterable<ToJSON> {
         return array.size();
     }
 
+    public void extend(ArrayJSON arrayJSON) {
+        for (int i = 0; i < arrayJSON.size(); i++)
+            addValue(arrayJSON.getValue(i));
+    }
+
     @Override
     public String toJSON() {
         String json = "[";

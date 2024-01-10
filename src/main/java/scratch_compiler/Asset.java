@@ -2,6 +2,8 @@ package scratch_compiler;
 
 import java.io.File;
 
+import scratch_compiler.ScratchJSON.MD5;
+
 public class Asset {
     public String path;
     private String md5ext;

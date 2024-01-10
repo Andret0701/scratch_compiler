@@ -1,4 +1,4 @@
-package scratch_compiler;
+package scratch_compiler.ScratchJSON;
 
 import java.io.File;
 import java.io.FileInputStream;

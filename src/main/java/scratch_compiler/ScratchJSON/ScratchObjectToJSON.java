@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import scratch_compiler.Variable;
 import scratch_compiler.JSON.ArrayJSON;
 import scratch_compiler.JSON.ObjectJSON;
-import scratch_compiler.JSON.RemoveLaterJSON;
 import scratch_compiler.ScratchObjects.Background;
 import scratch_compiler.ScratchObjects.Figure;
 

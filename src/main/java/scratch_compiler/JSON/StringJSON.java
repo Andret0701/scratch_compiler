@@ -4,7 +4,7 @@ public class StringJSON implements ToJSON{
     private String value;
     public StringJSON(String value)
     {
-        this.value=value;
+        setValue(value);
     }
 
     public String getValue()
@@ -14,7 +14,7 @@ public class StringJSON implements ToJSON{
 
     public void setValue(String value)
     {
-        this.value=value;
+        this.value = value;
     }
 
     @Override
@@ -28,6 +28,28 @@ public class StringJSON implements ToJSON{
     @Override
     public String toJSON()
     {
-        return "\""+value+"\"";
+        String json = "\"";
+        for (int i = 0; i < value.length(); i++)
+        {
+            char c = value.charAt(i);
+            if (c == '"')
+                json += "\\\"";
+            else if (c == '\\')
+                json += "\\\\";
+            else if (c == '\b')
+                json += "\\b";
+            else if (c == '\f')
+                json += "\\f";
+            else if (c == '\n')
+                json += "\\n";
+            else if (c == '\r')
+                json += "\\r";
+            else if (c == '\t')
+                json += "\\t";
+            else
+                json += c;
+        }
+        json += "\"";
+        return json;
     }
 }

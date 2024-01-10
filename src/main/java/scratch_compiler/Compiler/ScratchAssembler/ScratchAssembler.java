@@ -173,7 +173,7 @@ public class ScratchAssembler {
 
 
         
-        if (expression.getType()==VariableType.BOOLEAN) 
+        if (expression.getType()==VariableType.BOOLEAN)
             out= new AdditionField(out, new NumberField(0));
     
 

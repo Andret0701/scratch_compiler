@@ -1,10 +1,5 @@
-
-while(x>-50)
-    x-=4;
-while(y>-50)
-    y-=4;
-
-
+x=0;
+y=0;
 while(true)
 {
     while(x<50)

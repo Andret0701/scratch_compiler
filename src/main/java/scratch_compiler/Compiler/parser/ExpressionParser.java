@@ -57,12 +57,23 @@ public class ExpressionParser {
     }
 
     private static int getPrecedence(Expression node) {
+        if (node instanceof BinaryOperationExpression)
+        {
+            BinaryOperationExpression binaryOperation = (BinaryOperationExpression) node;
+            if (binaryOperation.getLeft()!=null  || binaryOperation.getRight()!=null) 
+                return -1;
+            return ((BinaryOperationExpression) node).getPrecedence();
+        }
+    
         if (node instanceof OperationExpression)
+        {
             return ((OperationExpression) node).getPrecedence();
+        }
         return -1;
     }
 
     private static Expression connectExpressionList(List<Expression> expressions) {
+        System.out.println(expressions);
         if(expressions.size()==0)
             return null;
         if (expressions.size() == 1)

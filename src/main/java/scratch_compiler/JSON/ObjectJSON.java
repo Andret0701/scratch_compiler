@@ -84,6 +84,16 @@ public class ObjectJSON implements ToJSON {
         return (ArrayJSON) value;
     }
 
+    public void add(ObjectJSON object) {
+        ArrayList<String> keys = new ArrayList<>(object.values.keySet());
+        for (String key : keys)
+        {
+            if (contains(key))
+                throw new RuntimeException("The key " + key + " already exists");
+            setValue(key, object.getValue(key));
+        }
+    }
+
     @Override
     public String toJSON() {
         String json = "{";

@@ -56,24 +56,24 @@ public class ParserJSON {
     {
         if (!reader.startsWith("\""))
             throw new IllegalArgumentException("Expected '\"' at start of string");
-        reader.strip("\"");
+        reader.read();
         String result="";
         while (!reader.startsWith("\""))
         {
             if (reader.startsWith("\\"))
             {
-                reader.strip("\\");
+                reader.read();
                 if (reader.startsWith("\"")){
                     result+="\"";
-                    reader.strip("\"");
+                    reader.read();
                 }
                 else if (reader.startsWith("\\")){
                     result+="\\";
-                    reader.strip("\\");
+                    reader.read();
                 }
                 else if (reader.startsWith("/")){
                     result+="/";
-                    reader.strip("/");
+                    reader.read();
                 }
                 else if (reader.startsWith("b")){
                     result+="\b";
@@ -105,10 +105,7 @@ public class ParserJSON {
                 }
             }
             else
-            {
                 result+=reader.read();
-                reader.removeWhitespace();
-            }
         }
         reader.strip("\"");
         return new StringJSON(result);
