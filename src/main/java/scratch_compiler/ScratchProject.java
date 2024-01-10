@@ -123,4 +123,8 @@ public class ScratchProject {
         return assets;
     }
 
+    public void setBackgroud(Background background) {
+        this.background = background;
+    }
+
 }

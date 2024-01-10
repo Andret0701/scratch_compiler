@@ -5,8 +5,11 @@ import scratch_compiler.Compiler.CompilerUtils;
 import scratch_compiler.Compiler.ScratchAssembler.ScratchAssembler;
 import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.JSON.ParserJSON;
+import scratch_compiler.JSON.ToJSON;
 import scratch_compiler.ScratchJSON.ScratchProjectToJSON;
+import scratch_compiler.ScratchObjects.Background;
 import scratch_compiler.ScratchObjects.Figure;
+import scratch_compiler.Types.Vector2;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -20,19 +23,23 @@ public class App {
         Figure figure =new Figure("Cat");
         
         String code = CompilerUtils.readFile("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\code.txt");
-        figure.addBlock(ScratchAssembler.assemble(code));
+        //figure.addBlock(ScratchAssembler.assemble(code));
+        figure.addCostume(new Costume("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\Assets\\cat2.svg", new Vector2(180, 240)));
         project.addFigure(figure, 10, 10);
+        Background background =new Background();
+        background.addCostume(new Costume("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\Assets\\cat2.svg", new Vector2(180, 240)));
+        project.setBackgroud(background);
 
+        try {
+            ToJSON json =ParserJSON.parse(ZipUtils.readZipFile("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\myScratchProject.sb3", "project.json"));
+            System.out.println("Project:" + json.toJSON());
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        ScratchProjectCreater.createProject("myScratchProject", "C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler", project);
 
         
-        ObjectJSON projectJSON=ScratchProjectToJSON.projectToJSON(project);
-        String file = ZipUtils.readZipFile("Mitt Scratch-prosjekt2 (8).sb3", "project.json");
-        System.out.println(ParserJSON.parse(file).toJSON());
-
-        ZipUtils.writeZipFile("Mitt Scratch-prosjekt2 (8).sb3", "project.json", projectJSON.toJSON());
-
-        
-
 
     }
 }

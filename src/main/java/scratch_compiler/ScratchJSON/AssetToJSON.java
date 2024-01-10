@@ -16,6 +16,6 @@ public class AssetToJSON {
 
     public static String getAssetId(Asset asset)
     {
-        return asset.getName() + "_" + asset.getDataFormat();
+        return asset.getMd5ext().split("\\.")[0];
     }
 }

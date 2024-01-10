@@ -24,6 +24,8 @@ public class NumberJSON implements ToJSON {
     
     @Override
     public String toJSON() {
+        if (value == (int) value)
+            return Integer.toString((int) value);
         return Double.toString(value);
     }
 }

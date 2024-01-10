@@ -3,6 +3,7 @@ package scratch_compiler.ScratchJSON;
 import java.util.ArrayList;
 
 import scratch_compiler.Variable;
+import scratch_compiler.JSON.ArrayJSON;
 import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.JSON.RemoveLaterJSON;
 import scratch_compiler.ScratchObjects.Background;
@@ -18,48 +19,29 @@ public class ScratchObjectToJSON {
         figureJSON.setObject("broadcasts", new ObjectJSON());
         figureJSON.setObject("blocks", BlockToJSON.blocksToJSON(figure.getBlocks()));
         figureJSON.setObject("comments", new ObjectJSON());
-        figureJSON.setValue("currentCostume", new RemoveLaterJSON("0,\n" +
-                "            \"costumes\": [\n" +
-                "                {\n" +
-                "                    \"assetId\": \"bcf454acf82e4504149f7ffe07081dbc\",\n" +
-                "                    \"name\": \"drakt1\",\n" +
-                "                    \"bitmapResolution\": 1,\n" +
-                "                    \"md5ext\": \"bcf454acf82e4504149f7ffe07081dbc.svg\",\n" +
-                "                    \"dataFormat\": \"svg\",\n" +
-                "                    \"rotationCenterX\": 48,\n" +
-                "                    \"rotationCenterY\": 50\n" +
-                "                },\n" +
-                "                {\n" +
-                "                    \"assetId\": \"0fb9be3e8397c983338cb71dc84d0b25\",\n" +
-                "                    \"name\": \"drakt2\",\n" +
-                "                    \"bitmapResolution\": 1,\n" +
-                "                    \"md5ext\": \"0fb9be3e8397c983338cb71dc84d0b25.svg\",\n" +
-                "                    \"dataFormat\": \"svg\",\n" +
-                "                    \"rotationCenterX\": 46,\n" +
-                "                    \"rotationCenterY\": 53\n" +
-                "                }\n" +
-                "            ],\n" +
-                "            \"sounds\": [\n" +
-                "                {\n" +
-                "                    \"assetId\": \"83c36d806dc92327b9e7049a565c6bff\",\n" +
-                "                    \"name\": \"Mjau\",\n" +
-                "                    \"dataFormat\": \"wav\",\n" +
-                "                    \"format\": \"\",\n" +
-                "                    \"rate\": 48000,\n" +
-                "                    \"sampleCount\": 40681,\n" +
-                "                    \"md5ext\": \"83c36d806dc92327b9e7049a565c6bff.wav\"\n" +
-                "                }\n" +
-                "            ],\n" +
-                "            \"volume\": 100,\n" +
-                "            \"layerOrder\": 1"));
-        figureJSON.setBoolean("isVisible", figure.isVisible());
+        figureJSON.setNumber("currentCostume", 0);
+        figureJSON.setArray("costumes",CostumeToJSON.costumesToJSON(figure.getCostumes(),false)); 
+        figureJSON.setArray("sounds",new ArrayJSON());
+        // figureJSON.setValue("sounds", new RemoveLaterJSON("[\n" +
+        //         "                {\n" +
+        //         "                    \"assetId\": \"83c36d806dc92327b9e7049a565c6bff\",\n" +
+        //         "                    \"name\": \"Mjau\",\n" +
+        //         "                    \"dataFormat\": \"wav\",\n" +
+        //         "                    \"format\": \"\",\n" +
+        //         "                    \"rate\": 48000,\n" +
+        //         "                    \"sampleCount\": 40681,\n" +
+        //         "                    \"md5ext\": \"83c36d806dc92327b9e7049a565c6bff.wav\"\n" +
+        //         "                }\n" +
+        //         "            ]"));
+        figureJSON.setNumber("volume", 100);
+        figureJSON.setNumber("layerOrder", 1);
+        figureJSON.setBoolean("visible", figure.isVisible());
         figureJSON.setNumber("x", figure.getPosition().x);
         figureJSON.setNumber("y", figure.getPosition().y);
         figureJSON.setNumber("size", figure.getSize());
         figureJSON.setNumber("direction", figure.getDirection());
         figureJSON.setBoolean("draggable", false);
         figureJSON.setString("rotationStyle", "all around");
-
         return figureJSON;
     }
 
@@ -75,44 +57,49 @@ public class ScratchObjectToJSON {
         backgroundJSON.setObject("broadcasts", new ObjectJSON());
         backgroundJSON.setObject("blocks", BlockToJSON.blocksToJSON(background.getBlocks()));
         backgroundJSON.setObject("comments", new ObjectJSON());
-        backgroundJSON.setValue("currentCostume", new RemoveLaterJSON("0,\n" +
-                "            \"costumes\": [\n" +
-                "                {\n" +
-                "                    \"assetId\": \"bcf454acf82e4504149f7ffe07081dbc\",\n" +
-                "                    \"name\": \"drakt1\",\n" +
-                "                    \"bitmapResolution\": 1,\n" +
-                "                    \"md5ext\": \"bcf454acf82e4504149f7ffe07081dbc.svg\",\n" +
-                "                    \"dataFormat\": \"svg\",\n" +
-                "                    \"rotationCenterX\": 48,\n" +
-                "                    \"rotationCenterY\": 50\n" +
-                "                },\n" +
-                "                {\n" +
-                "                    \"assetId\": \"0fb9be3e8397c983338cb71dc84d0b25\",\n" +
-                "                    \"name\": \"drakt2\",\n" +
-                "                    \"bitmapResolution\": 1,\n" +
-                "                    \"md5ext\": \"0fb9be3e8397c983338cb71dc84d0b25.svg\",\n" +
-                "                    \"dataFormat\": \"svg\",\n" +
-                "                    \"rotationCenterX\": 46,\n" +
-                "                    \"rotationCenterY\": 53\n" +
-                "                }\n" +
-                "            ],\n" +
-                "            \"sounds\": [\n" +
-                "                {\n" +
-                "                    \"assetId\": \"83c36d806dc92327b9e7049a565c6bff\",\n" +
-                "                    \"name\": \"Mjau\",\n" +
-                "                    \"dataFormat\": \"wav\",\n" +
-                "                    \"format\": \"\",\n" +
-                "                    \"rate\": 48000,\n" +
-                "                    \"sampleCount\": 40681,\n" +
-                "                    \"md5ext\": \"83c36d806dc92327b9e7049a565c6bff.wav\"\n" +
-                "                }\n" +
-                "            ],\n" +
-                "            \"volume\": 100,\n" +
-                "            \"layerOrder\": 0"));
+        backgroundJSON.setNumber("currentCostume", 0);
+        backgroundJSON.setArray("costumes",CostumeToJSON.costumesToJSON(background.getCostumes(),true));
+        backgroundJSON.setArray("sounds",new ArrayJSON());
+        // backgroundJSON.setValue("currentCostume", new RemoveLaterJSON("0,\n" +
+        //         "            \"costumes\": [\n" +
+        //         "                {\n" +
+        //         "                    \"assetId\": \"bcf454acf82e4504149f7ffe07081dbc\",\n" +
+        //         "                    \"name\": \"drakt1\",\n" +
+        //         "                    \"bitmapResolution\": 1,\n" +
+        //         "                    \"md5ext\": \"bcf454acf82e4504149f7ffe07081dbc.svg\",\n" +
+        //         "                    \"dataFormat\": \"svg\",\n" +
+        //         "                    \"rotationCenterX\": 48,\n" +
+        //         "                    \"rotationCenterY\": 50\n" +
+        //         "                },\n" +
+        //         "                {\n" +
+        //         "                    \"assetId\": \"0fb9be3e8397c983338cb71dc84d0b25\",\n" +
+        //         "                    \"name\": \"drakt2\",\n" +
+        //         "                    \"bitmapResolution\": 1,\n" +
+        //         "                    \"md5ext\": \"0fb9be3e8397c983338cb71dc84d0b25.svg\",\n" +
+        //         "                    \"dataFormat\": \"svg\",\n" +
+        //         "                    \"rotationCenterX\": 46,\n" +
+        //         "                    \"rotationCenterY\": 53\n" +
+        //         "                }\n" +
+        //         "            ],\n" +
+        //         "            \"sounds\": [\n" +
+        //         "                {\n" +
+        //         "                    \"assetId\": \"83c36d806dc92327b9e7049a565c6bff\",\n" +
+        //         "                    \"name\": \"Mjau\",\n" +
+        //         "                    \"dataFormat\": \"wav\",\n" +
+        //         "                    \"format\": \"\",\n" +
+        //         "                    \"rate\": 48000,\n" +
+        //         "                    \"sampleCount\": 40681,\n" +
+        //         "                    \"md5ext\": \"83c36d806dc92327b9e7049a565c6bff.wav\"\n" +
+        //         "                }\n" +
+        //         "            ],\n" +
+        //         "            \"volume\": 100,\n" +
+        //         "            \"layerOrder\": 0"));
+        backgroundJSON.setNumber("volume", 100);
+        backgroundJSON.setNumber("layerOrder", 0);
         backgroundJSON.setNumber("tempo", 60);
         backgroundJSON.setNumber("videoTransparency", 50);
         backgroundJSON.setString("videoState", "on");
-        backgroundJSON.setString("textToSpeechLanguage", null);
+        backgroundJSON.setValue("textToSpeechLanguage", null);
 
         return backgroundJSON;
     }
