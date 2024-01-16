@@ -3,6 +3,7 @@ package scratch_compiler.Blocks;
 import java.util.ArrayList;
 
 import scratch_compiler.Field;
+import scratch_compiler.Function;
 import scratch_compiler.Input;
 import scratch_compiler.ValueFields.StringField;
 import scratch_compiler.ValueFields.ValueField;
@@ -15,11 +16,21 @@ public class Block {
     protected Block parent=null;
     protected ArrayList<Input> inputs = new ArrayList<>();
     protected ArrayList<Field> fields = new ArrayList<>();
+    private Function function;
     public Block(String opcode) {
         this.opcode = opcode;
+        this.function = null;
         children = new ArrayList<>();
         children.add(null);
     }
+
+    public Block(String opcode, Function function) {
+        this.opcode = opcode;
+        this.function = function;
+        children = new ArrayList<>();
+        children.add(null);
+    }
+
 
 
     public String getOpcode() {
@@ -222,6 +233,11 @@ public class Block {
 
         return block;
     }
+
+    public Function getFunction() {
+        return function;
+    }
+
 
     @Override
     public String toString() {

@@ -10,7 +10,7 @@ import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class DeclarationParser {
-    public static Statement parse(TokenReader tokens, IdentifierTypes identifierTypes) {
+    public static VariableDeclaration parse(TokenReader tokens, IdentifierTypes identifierTypes) {
         switch (tokens.peek().getType()) {
             case INT_DECLARATION:
                 return parseVariableDeclaration(tokens, identifierTypes, TokenType.INT_DECLARATION,VariableType.INT);
@@ -26,7 +26,7 @@ public class DeclarationParser {
         throw new RuntimeException("Unreachable");
     }
 
-    private static Statement parseVariableDeclaration(TokenReader tokens, IdentifierTypes identifierTypes, TokenType declarationType,VariableType type) {
+    private static VariableDeclaration parseVariableDeclaration(TokenReader tokens, IdentifierTypes identifierTypes, TokenType declarationType,VariableType type) {
         tokens.expectNext(declarationType);
 
         if (tokens.isNext(TokenType.SQUARE_BRACKET_OPEN)) 
@@ -51,13 +51,11 @@ public class DeclarationParser {
             throw new RuntimeException("Cannot convert " + expression.getType() + " to " + type);
 
 
-        tokens.expectNext(TokenType.SEMICOLON);
-
         identifierTypes.add(name, type);
         return new VariableDeclaration(name,type, expression);
     }
 
-    private static Statement parseArrayDeclaration(TokenReader tokens, IdentifierTypes identifierTypes, TokenType declarationType,VariableType type) {
+    private static VariableDeclaration parseArrayDeclaration(TokenReader tokens, IdentifierTypes identifierTypes, TokenType declarationType,VariableType type) {
         
         tokens.expectNext(TokenType.SQUARE_BRACKET_OPEN);
         tokens.expectNext(TokenType.SQUARE_BRACKET_CLOSE);

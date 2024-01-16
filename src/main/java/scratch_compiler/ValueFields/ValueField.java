@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import scratch_compiler.Field;
+import scratch_compiler.Function;
 import scratch_compiler.Variable;
 import scratch_compiler.Blocks.Block;
 import scratch_compiler.Blocks.FieldBlock;
@@ -14,6 +15,10 @@ public abstract class ValueField {
     private HashMap<String, Field> childFields = new HashMap<>();
     public ValueField(String opcode) {
         block = new FieldBlock(opcode);
+    }
+
+    public ValueField(String opcode, Function function) {
+        block = new FieldBlock(opcode, function);
     }
 
     public ValueField() {

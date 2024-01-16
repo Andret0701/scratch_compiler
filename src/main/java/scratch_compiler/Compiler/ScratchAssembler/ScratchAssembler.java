@@ -31,6 +31,7 @@ import scratch_compiler.Compiler.parser.expressions.StringValue;
 import scratch_compiler.Compiler.parser.expressions.SubtractionExpression;
 import scratch_compiler.Compiler.parser.expressions.VariableValue;
 import scratch_compiler.Compiler.parser.statements.Assignment;
+import scratch_compiler.Compiler.parser.statements.ForStatement;
 import scratch_compiler.Compiler.parser.statements.IfStatement;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 import scratch_compiler.Compiler.parser.statements.WhileStatement;
@@ -52,7 +53,7 @@ import scratch_compiler.ValueFields.LogicFields.GreaterThanField;
 import scratch_compiler.ValueFields.LogicFields.LessThanField;
 public class ScratchAssembler {
     public static Block assemble(String code) {
-        Scope scope = new CompiledCode(code,ScratchVariablesAssembler.getIdentiferTypes()).getScope();
+        Scope scope = CompiledCode.compile(code, ScratchVariablesAssembler.getIdentiferTypes()).getScope();
 
         StartBlock startBlock = new StartBlock();
         startBlock.addToStack(new ClearListBlock("Stack", false));
@@ -91,6 +92,8 @@ public class ScratchAssembler {
             return IfAssembler.assemble((IfStatement) statement,stack);
         if (statement instanceof WhileStatement)
             return WhileAssembler.assemble((WhileStatement) statement,stack);
+        if (statement instanceof ForStatement)
+            return ForAssembler.assemble((ForStatement) statement,stack);
         
 
         return defaultBlock();
@@ -114,7 +117,7 @@ public class ScratchAssembler {
         return new Variable(variable.getName(), false);
     }
 
-    private static Block assembleAssignment(Assignment assignment,StackReference stack) {
+    public static Block assembleAssignment(Assignment assignment,StackReference stack) {
         String name = assignment.getName();
         if (ScratchVariablesAssembler.isVariable(name))
             return ScratchVariablesAssembler.assembleAssignment(name, assembleExpression(assignment.getExpression(),stack));
@@ -130,7 +133,7 @@ public class ScratchAssembler {
         if (expression instanceof BooleanValue)
             return new NumberField(((BooleanValue) expression).getValue() ? 1 : 0);
         if  (expression instanceof StringValue)
-            return new StringField(((StringValue) expression).getValue());
+            return new StringField(((StringValue) expression).getString());
         if (expression instanceof VariableValue)
         {
             String name = ((VariableValue) expression).getName();
@@ -188,7 +191,7 @@ public class ScratchAssembler {
         return new StringField("Compile Error"); 
     }
 
-    private static Block getListRemoveLastBlock(String name, boolean isGlobal) {
+    public static Block getListRemoveLastBlock(String name, boolean isGlobal) {
         return new RemoveListBlock(name, isGlobal, new ListLengthField(name, isGlobal));
     }
     

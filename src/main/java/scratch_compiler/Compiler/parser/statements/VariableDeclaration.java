@@ -17,6 +17,10 @@ public class VariableDeclaration extends Statement{
         return name;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     public Expression getExpression() {
         return expression;
     }

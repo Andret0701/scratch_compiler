@@ -25,4 +25,8 @@ public class Assignment extends Statement {
         return name + " = " + getExpression();
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
 }

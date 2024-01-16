@@ -12,6 +12,7 @@ public class IntValue extends Expression {
     public int getValue() {
         return value;
     }
+    
 
     @Override
     public VariableType getType() {

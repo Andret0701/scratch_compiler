@@ -9,7 +9,7 @@ public class StringValue extends Expression {
         this.value = value;
     }
 
-    public String getValue() {
+    public String getString() {
         return value;
     }
 
@@ -20,7 +20,7 @@ public class StringValue extends Expression {
 
     @Override
     public String toString() {
-        return getValue();
+        return getString();
     }
 }
 

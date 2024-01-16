@@ -11,27 +11,41 @@ public class StatementParser {
     public static Statement parse(TokenReader tokens, IdentifierTypes identifierTypes) {
         if (tokens.isAtEnd())
             return null;
-        switch (tokens.peek().getType()) {
-            case OPEN_BRACE:
-                return parseScope(tokens, identifierTypes);
+
+        TokenType type = tokens.peek().getType();
+        if (type==TokenType.OPEN_BRACE)
+            return parseScope(tokens, identifierTypes);
+        if (type==TokenType.IF)
+            return IfParser.parse(tokens, identifierTypes);
+        if (type==TokenType.WHILE)
+            return WhileParser.parse(tokens, identifierTypes);
+        if (type==TokenType.FOR)
+           return ForParser.parse(tokens, identifierTypes);
+
+
+        Statement statement=null;
+        switch (type) {
             case INT_DECLARATION:
-                return DeclarationParser.parse(tokens, identifierTypes);
+                statement= DeclarationParser.parse(tokens, identifierTypes);
+                break;
             case FLOAT_DECLARATION:
-                return DeclarationParser.parse(tokens, identifierTypes);
+                statement= DeclarationParser.parse(tokens, identifierTypes);
+                break;
             case BOOLEAN_DECLARATION:
-                return DeclarationParser.parse(tokens, identifierTypes);
+                statement= DeclarationParser.parse(tokens, identifierTypes);
+                break;
             case STRING_DECLARATION:
-                return DeclarationParser.parse(tokens, identifierTypes);
+                statement= DeclarationParser.parse(tokens, identifierTypes);
+                break;
             case IDENTIFIER:
-                return AssignmentParser.parse(tokens, identifierTypes);
-            case IF:
-                return IfParser.parse(tokens, identifierTypes);
-            case WHILE:
-                return WhileParser.parse(tokens, identifierTypes);
+                statement= AssignmentParser.parse(tokens, identifierTypes);
+                break;
             default:
                 CompilerUtils.throwExpected("statement", tokens.peek().getLine(), tokens.peek());
         }
-        throw new RuntimeException("Unreachable");
+        
+        tokens.expectNext(TokenType.SEMICOLON);
+        return statement;
     }
 
     public static Statement parseScope(TokenReader tokens, IdentifierTypes identifierTypes) {

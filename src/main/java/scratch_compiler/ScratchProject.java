@@ -106,6 +106,9 @@ public class ScratchProject {
         return globalVariables;
     }
     
+
+
+
     public ArrayList<Figure> getFigures() {
         return new ArrayList<>(figures);
     }

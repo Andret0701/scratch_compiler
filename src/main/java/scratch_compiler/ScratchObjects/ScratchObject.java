@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import scratch_compiler.Asset;
 import scratch_compiler.Costume;
+import scratch_compiler.Function;
 import scratch_compiler.Variable;
 import scratch_compiler.Blocks.Block;
 
@@ -80,4 +81,5 @@ public abstract class ScratchObject {
         assets.addAll(getCostumes());
         return assets;
     }
+
 }

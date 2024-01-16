@@ -3,7 +3,6 @@ package scratch_compiler;
 
 import java.util.ArrayList;
 
-import scratch_compiler.Blocks.Function;
 import scratch_compiler.Compiler.CompilerUtils;
 import scratch_compiler.Compiler.ScratchAssembler.ScratchAssembler;
 import scratch_compiler.JSON.ObjectJSON;
@@ -48,6 +47,7 @@ public class App {
             System.out.println(e);
         }
         ScratchProjectCreater.createProject("myScratchProject2", "C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler", project);
+
     }
 }
 

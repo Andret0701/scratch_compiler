@@ -1,6 +1,7 @@
 package scratch_compiler.ScratchJSON;
 
 import scratch_compiler.Field;
+import scratch_compiler.Function;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,6 @@ import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.JSON.StringJSON;
 import scratch_compiler.JSON.ToJSON;
 import scratch_compiler.Blocks.Block;
-import scratch_compiler.Blocks.Function;
 import scratch_compiler.Types.Vector2Int;
 import scratch_compiler.ValueFields.ValueField;
 public class BlockToJSON {
@@ -23,9 +23,12 @@ public class BlockToJSON {
         blocks = getAllBlocks(blocks);
         HashMap<Block,String> blockToID = blockToID(blocks);
         for (Block block : blocks) {
-            json.setObject(blockToID.get(block), blockToJSON(block, blockToID, blockToPosition));
-            if(block instanceof Function)
-                json.add(FunctionToJSON.functionDataToJSON((Function) block));
+            String blockID = blockToID.get(block);
+            if(block.getOpcode()=="procedures_definition")
+                json.setObject(FunctionToJSON.getFunctionID(block.getFunction()), FunctionToJSON.functionPrototypeToJSON(block.getFunction()));
+            
+            ObjectJSON blockJSON = blockToJSON(block, blockToID, blockToPosition);
+            json.setObject(blockID, blockJSON);
         }
     
         return json;
@@ -61,8 +64,8 @@ public class BlockToJSON {
     }
 
     private static ObjectJSON inputsToJSON(Block block, HashMap<Block, String> blockToID) {
-        if (block instanceof Function)
-            return FunctionToJSON.getFunctionInput((Function) block);
+        //if (block instanceof Function)
+        //    return FunctionToJSON.getFunctionInput((Function) block);
 
         ObjectJSON inputs = new ObjectJSON();
 
@@ -133,9 +136,6 @@ public class BlockToJSON {
     }
 
     private static String getBlockID(Block block, ArrayList<String> ids) {
-        if (block instanceof Function)
-            return FunctionToJSON.getFunctionID((Function) block);
-
         String id = "id_block_"+block.getOpcode();
         if (!ids.contains(id))
             return id;

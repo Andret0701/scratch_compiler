@@ -18,6 +18,8 @@ public enum TokenType {
     EQUALS("==", TokenSubtype.BINARY_OPERATOR),
     NOT_EQUALS("!=", TokenSubtype.BINARY_OPERATOR),
     
+    INCREMENT("\\+\\+", TokenSubtype.ASSIGNMENT),
+    DECREMENT("--", TokenSubtype.ASSIGNMENT),
     ADD_ASSIGN("\\+=", TokenSubtype.ASSIGNMENT),
     SUB_ASSIGN("-=", TokenSubtype.ASSIGNMENT),
     MUL_ASSIGN("\\*=", TokenSubtype.ASSIGNMENT),
