@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 import scratch_compiler.Asset;
 import scratch_compiler.Costume;
-import scratch_compiler.Function;
 import scratch_compiler.Variable;
-import scratch_compiler.Blocks.Block;
+import scratch_compiler.Blocks.Types.Block;
+import scratch_compiler.Blocks.Types.HatBlock;
 
 public abstract class ScratchObject {
     protected String name;
-    private ArrayList<Block> blocks = new ArrayList<Block>();
+    private ArrayList<HatBlock> blocks = new ArrayList<HatBlock>();
     private ArrayList<Costume> costumes = new ArrayList<Costume>();
 
     public ScratchObject(String name) {
@@ -58,12 +58,14 @@ public abstract class ScratchObject {
         return localVariables;
     }
 
-    public void addBlock(Block block) {
-        Block clone = block.clone();
-        blocks.add(clone);
+    public void addBlock(HatBlock block) {
+        if (blocks.contains(block))
+            throw new RuntimeException("ScratchObject already contains block");
+
+        blocks.add(block);
     }
 
-    public ArrayList<Block> getBlocks() {
+    public ArrayList<HatBlock> getBlocks() {
         return new ArrayList<>(blocks);
     }
 

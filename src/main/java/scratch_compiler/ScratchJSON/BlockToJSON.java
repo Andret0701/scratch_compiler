@@ -1,93 +1,169 @@
 package scratch_compiler.ScratchJSON;
 
 import scratch_compiler.Field;
-import scratch_compiler.Function;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import scratch_compiler.Input;
 import scratch_compiler.Variable;
+import scratch_compiler.Blocks.Types.Block;
+import scratch_compiler.Blocks.Types.BlockStack;
+import scratch_compiler.Blocks.Types.HatBlock;
+import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.JSON.ArrayJSON;
 import scratch_compiler.JSON.ObjectJSON;
-import scratch_compiler.JSON.StringJSON;
-import scratch_compiler.JSON.ToJSON;
-import scratch_compiler.Blocks.Block;
-import scratch_compiler.Types.Vector2Int;
-import scratch_compiler.ValueFields.ValueField;
+import scratch_compiler.Types.Vector2;
 public class BlockToJSON {
-    public static ObjectJSON blocksToJSON(ArrayList<Block> blocks) {
-        ObjectJSON json = new ObjectJSON();
-        HashMap<Block,Vector2Int> blockToPosition = blockToPosition(blocks);
-        
-        blocks = getAllBlocks(blocks);
-        HashMap<Block,String> blockToID = blockToID(blocks);
-        for (Block block : blocks) {
-            String blockID = blockToID.get(block);
-            if(block.getOpcode()=="procedures_definition")
-                json.setObject(FunctionToJSON.getFunctionID(block.getFunction()), FunctionToJSON.functionPrototypeToJSON(block.getFunction()));
+    public static ObjectJSON blocksToJSON(ArrayList<HatBlock> blocks) {
+        System.out.println("Blocks: " + blocks);
+        ObjectJSON blocksJSON = new ObjectJSON();
+        for (int i = 0; i < blocks.size(); i++) {
+            Vector2 position = getBlockPosition(i);
+            BlockJSON hatBlockJSON = hatblockToJSON(blocks.get(i), position);
+            blocksJSON.add(hatBlockJSON.getBlocksJSON());
+        }    
+        return blocksJSON;
+    }
+
+    private static BlockJSON hatblockToJSON(HatBlock hatBlock, Vector2 position) {
+        BlockJSON hatBlockJSON = blockToJSON(hatBlock);
+        hatBlockJSON.getBlock().setNumber("x", position.x);
+        hatBlockJSON.getBlock().setNumber("y", position.y);
+
+        BlockJSON stackJSON = blockStackToJSON(hatBlock.getStack());
+
+        hatBlockJSON = connectBlocks(hatBlockJSON, stackJSON);        
+        return hatBlockJSON;
+    }
+
+    private static BlockJSON blockStackToJSON(BlockStack blockStack) {
+        if (blockStack.size() == 0)
+            return new BlockJSON();
+
+        //convert stack to JSON
+        ArrayList<BlockJSON> stackJSON = new ArrayList<BlockJSON>();        
+        for (StackBlock stackBlock : blockStack) {
+            BlockJSON blockJSON = blockToJSON(stackBlock);
+            stackJSON.add(blockJSON);
+        }
+
+        //connect blocks
+        while (stackJSON.size() > 1) {
+            BlockJSON parentJSON = stackJSON.get(stackJSON.size()-2);
+            BlockJSON nextJSON = stackJSON.get(stackJSON.size()-1);
+            stackJSON.remove(stackJSON.size()-1);
+            stackJSON.remove(stackJSON.size()-1);
             
-            ObjectJSON blockJSON = blockToJSON(block, blockToID, blockToPosition);
-            json.setObject(blockID, blockJSON);
-        }
-    
-        return json;
-    }
-
-    private static ArrayList<Block> getAllBlocks(ArrayList<Block> blocks) {
-        ArrayList<Block> allBlocks = new ArrayList<>();
-        for (Block block : blocks) {
-            allBlocks.addAll(block.getBlocks());
-        }
-        return allBlocks;
-    }
-
-
-    private static ObjectJSON blockToJSON(Block block, HashMap<Block, String> blockToID, HashMap<Block, Vector2Int> blockToPosition) {
-        ObjectJSON json = new ObjectJSON();
-        json.setString("opcode", block.getOpcode());
-        json.setObject("inputs", inputsToJSON(block, blockToID));
-        json.setObject("fields", fieldsToJSON(block));
-        json.setValue("next", connectedToJSON(block.getNext(), blockToID));
-        json.setValue("parent", connectedToJSON(block.getParent(), blockToID));
-        json.setBoolean("shadow", false);
-
-        boolean hasParent = block.getParent() != null;
-        json.setBoolean("topLevel", !hasParent);
-        if (!hasParent) {
-            Vector2Int position = blockToPosition.get(block);
-            json.setNumber("x", position.x);
-            json.setNumber("y", position.y);
+            stackJSON.add(connectBlocks(parentJSON, nextJSON));
         }
 
-        return json;
+        return stackJSON.get(0);
     }
 
-    private static ObjectJSON inputsToJSON(Block block, HashMap<Block, String> blockToID) {
-        //if (block instanceof Function)
-        //    return FunctionToJSON.getFunctionInput((Function) block);
+    private static BlockJSON connectBlocks(BlockJSON parentJSON, BlockJSON nextJSON) {
+        if (parentJSON == null || nextJSON == null)
+            throw new IllegalArgumentException("parentJSON or nextJSON is null");
 
-        ObjectJSON inputs = new ObjectJSON();
+        String parentID = parentJSON.getBlockID();
+        String nextID = nextJSON.getBlockID();
 
-        ArrayList<Block> insideChildren = block.getInsideChildren();
-        for (int i = 0; i < insideChildren.size(); i++) {
-            if (insideChildren.get(i) == null)
+        if (parentJSON.getBlock().getValue("next") != null)
+            throw new IllegalArgumentException("parentJSON already has a next block");
+        
+        if (nextJSON.getBlock().getValue("parent") != null)
+            throw new IllegalArgumentException("nextJSON already has a parent block");
+
+        //connect blocks
+        parentJSON.getBlock().setString("next", nextID);
+        nextJSON.getBlock().setString("parent", parentID);
+        nextJSON.getBlock().setBoolean("topLevel", false);
+        
+        //add nextJSON to parentJSON
+        ObjectJSON subBlocks = nextJSON.getSubBlocks();
+        subBlocks.setObject(nextID, nextJSON.getBlock());
+        parentJSON.addSubBlocks(subBlocks);
+
+        return parentJSON;
+    }
+
+
+    private static BlockJSON blockToJSON(Block block) {
+        if (block.getOpcode()==null)
+            return null;
+
+        ObjectJSON blockJSON = new ObjectJSON();
+        blockJSON.setString("opcode", block.getOpcode());
+        blockJSON.setObject("inputs", inputsToJSON(block));
+        blockJSON.setObject("fields", fieldsToJSON(block));
+        blockJSON.setValue("next", null);
+        blockJSON.setValue("parent", null);
+        blockJSON.setBoolean("shadow", false);
+        blockJSON.setBoolean("topLevel", true);
+
+        return new BlockJSON(blockJSON, getBlockID(block), subBlocksToJSON(block));
+    }
+
+    private static ObjectJSON subBlocksToJSON(Block block) {
+        ObjectJSON subBlocksJSON = new ObjectJSON();
+
+        //adding inputblocks
+        for (Input input : block.getInputs()) {
+            Block valueBlock = input.getValueField();
+            BlockJSON blockJSON = blockToJSON(valueBlock);
+            if (blockJSON == null)
                 continue;
+            
+            blockJSON.getBlock().setString("parent", getBlockID(block));
+            blockJSON.getBlock().setBoolean("topLevel", false);
 
-            String name = "SUBSTACK";
-            if (i > 0)
-                name += i+1;
+            subBlocksJSON.add(blockJSON.getBlocksJSON());
+        }
 
-            ArrayJSON substack = new ArrayJSON();
-            substack.addNumber(2);
-            substack.addString(blockToID.get(insideChildren.get(i)));
-            inputs.setArray(name, substack);
+
+        //adding substacks
+        if (block instanceof StackBlock) {
+            for (BlockStack substack : ((StackBlock)block).getSubstacks()) {
+                if (substack==null|| substack.size() == 0)
+                    continue;
+
+                BlockJSON stackJSON = blockStackToJSON(substack);
+
+                stackJSON.getBlock().setString("parent", getBlockID(block));
+                stackJSON.getBlock().setBoolean("topLevel", false);
+
+                subBlocksJSON.add(stackJSON.getBlocksJSON());
+            }
+        }
+
+        return subBlocksJSON;
+    }
+
+    private static ObjectJSON inputsToJSON(Block block) {
+        ObjectJSON inputsJSON = new ObjectJSON();
+
+        if (block instanceof StackBlock) {
+            int stackNumber = 1;
+            for (BlockStack substack : ((StackBlock)block).getSubstacks()) {
+                if (substack==null|| substack.size() == 0)
+                    continue;
+
+                String name = "SUBSTACK";
+                if (stackNumber > 1)
+                    name += stackNumber;
+
+                ArrayJSON substackJSON = new ArrayJSON();
+                substackJSON.addNumber(2);
+                substackJSON.addString(getBlockID(substack.get(0)));
+                inputsJSON.setArray(name, substackJSON);
+
+                stackNumber++;
+            }
         }
 
         for(Input input : block.getInputs())
-            inputs.setArray(input.getName(), ValueFieldToJSON.valueFieldToJSON(input.getValueField(), blockToID));
+            inputsJSON.setArray(input.getName(), ValueFieldToJSON.valueFieldToJSON(input.getValueField()));
         
-        return inputs;
+        return inputsJSON;
     }
 
     private static ObjectJSON fieldsToJSON(Block block) {
@@ -108,51 +184,17 @@ public class BlockToJSON {
                 fieldJSON.addValue(null);
                 fields.setArray(field.getName(), fieldJSON);
             }
-            else if (field.getValueField() instanceof ValueField)
-            {
-                throw new RuntimeException("Field not implemented: "+field.getValueField().getClass().getName());
-            }
-            else
-                throw new RuntimeException("Field not supported: "+field.getValueField().getClass().getName());
         }
+
+
         return fields;
     }
 
-    private static ToJSON connectedToJSON(Block block, HashMap<Block, String> blockToID) {
-        if (block == null)
-            return null;
-        return new StringJSON(blockToID.get(block));
+    static String getBlockID(Block block) {
+       return "id_block_"+block.getOpcode()+"_"+block.hashCode();
     }
 
-    private static HashMap<Block,String> blockToID(ArrayList<Block> blocks) {
-        HashMap<Block,String> blockToID = new HashMap<>();
-        ArrayList<String> ids = new ArrayList<>();
-        for (Block block : blocks) {
-            String id = getBlockID(block, ids);
-            ids.add(id);
-            blockToID.put(block, id);
-        }
-        return blockToID;
-    }
-
-    private static String getBlockID(Block block, ArrayList<String> ids) {
-        String id = "id_block_"+block.getOpcode();
-        if (!ids.contains(id))
-            return id;
-
-        int i = 2;
-        while (ids.contains(id + i))
-            i++;
-        return id + i;
-    }
-
-    private static HashMap<Block,Vector2Int> blockToPosition(ArrayList<Block> blocks) {
-        HashMap<Block,Vector2Int> blockToPosition = new HashMap<>();
-        Vector2Int position = new Vector2Int(0, 0);
-        for (Block block : blocks) {
-            blockToPosition.put(block, position);
-            position = new Vector2Int(position.x+250, position.y); //135 is the width of a start block
-        }
-        return blockToPosition;
+    private static Vector2 getBlockPosition(int stackNumber) {
+        return new Vector2(250*stackNumber, 0);
     }
 }

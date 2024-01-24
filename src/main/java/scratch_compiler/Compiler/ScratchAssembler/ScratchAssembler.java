@@ -4,16 +4,13 @@ import java.util.ArrayList;
 
 import scratch_compiler.Variable;
 import scratch_compiler.Blocks.AddListBlock;
-import scratch_compiler.Blocks.Block;
 import scratch_compiler.Blocks.ChangeListBlock;
 import scratch_compiler.Blocks.ClearListBlock;
-import scratch_compiler.Blocks.MoveBlock;
 import scratch_compiler.Blocks.RemoveListBlock;
 import scratch_compiler.Blocks.SayBlock;
-import scratch_compiler.Blocks.SetVariableBlock;
-import scratch_compiler.Blocks.StartBlock;
+import scratch_compiler.Blocks.Types.BlockStack;
+import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.Compiler.CompiledCode;
-import scratch_compiler.Compiler.IdentifierTypes;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.AdditionExpression;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperationExpression;
@@ -52,55 +49,56 @@ import scratch_compiler.ValueFields.LogicFields.EqualsField;
 import scratch_compiler.ValueFields.LogicFields.GreaterThanField;
 import scratch_compiler.ValueFields.LogicFields.LessThanField;
 public class ScratchAssembler {
-    public static Block assemble(String code) {
+    public static BlockStack assemble(String code) {
         Scope scope = CompiledCode.compile(code, ScratchVariablesAssembler.getIdentiferTypes()).getScope();
 
-        StartBlock startBlock = new StartBlock();
-        startBlock.addToStack(new ClearListBlock("Stack", false));
-        Block stack = compileScope(scope, new StackReference());
-        startBlock.addToStack(stack);
-        return startBlock;
+        BlockStack blockStack = new BlockStack();
+        blockStack.push(new ClearListBlock("Stack", false));
+        blockStack.push(compileScope(scope, new StackReference()));
+
+        return blockStack;
     }
 
-    private static Block compileScope(Scope scope,StackReference stack) {
+    private static BlockStack compileScope(Scope scope,StackReference stack) {
         stack.addScope(); 
         ArrayList<Statement> statements = scope.getStatements();
         if (statements.size() == 0)
-            return defaultBlock();
+            return new BlockStack();
 
-        Block outBlock = assembleStatement(statements.get(0),stack);
+        BlockStack blockStack = assembleStatement(statements.get(0),stack);
 
-        for (int i = 1; i < statements.size(); i++) {
-            Block block = assembleStatement(statements.get(i),stack);
-            outBlock.addToStack(block);
-        }
+        for (int i = 1; i < statements.size(); i++)
+            blockStack.push(assembleStatement(statements.get(i),stack));
 
         int numRemoved=stack.removeScope();
         for (int i = 0; i < numRemoved; i++)
-            outBlock.addToStack(getListRemoveLastBlock("Stack", false));
-        return outBlock;
+            blockStack.push(getListRemoveLastBlock("Stack", false));
+    
+        return blockStack;
     }
 
-    static Block assembleStatement(Statement statement,StackReference stack) {
-        if (statement instanceof VariableDeclaration) 
-            return assembleDeclaration((VariableDeclaration) statement,stack);
-        if (statement instanceof Assignment)
-            return assembleAssignment((Assignment) statement,stack);
+    static BlockStack assembleStatement(Statement statement,StackReference stack) {
         if (statement instanceof Scope)
             return compileScope((Scope) statement,stack);
-        if (statement instanceof IfStatement)
-            return IfAssembler.assemble((IfStatement) statement,stack);
-        if (statement instanceof WhileStatement)
-            return WhileAssembler.assemble((WhileStatement) statement,stack);
+
         if (statement instanceof ForStatement)
             return ForAssembler.assemble((ForStatement) statement,stack);
         
-
-        return defaultBlock();
+        StackBlock block = defaultBlock();
+        if (statement instanceof VariableDeclaration) 
+            block= assembleDeclaration((VariableDeclaration) statement,stack);
+        if (statement instanceof Assignment)
+            block= assembleAssignment((Assignment) statement,stack);
+        if (statement instanceof IfStatement)
+            block= IfAssembler.assemble((IfStatement) statement,stack);
+        if (statement instanceof WhileStatement)
+            block= WhileAssembler.assemble((WhileStatement) statement,stack);
+        
+        return new BlockStack(block);
     }
 
-    static Block assembleDeclaration(VariableDeclaration declaration,StackReference stack) {
-        AddListBlock addListBlock = new AddListBlock("Stack", false, assembleExpression(declaration.getExpression(),stack));
+    static StackBlock assembleDeclaration(VariableDeclaration declaration,StackReference stack) {
+        StackBlock addListBlock=new AddListBlock("Stack", false, assembleExpression(declaration.getExpression(),stack));
         stack.addVariable(getVariable(declaration));
         return addListBlock;
     }
@@ -117,11 +115,11 @@ public class ScratchAssembler {
         return new Variable(variable.getName(), false);
     }
 
-    public static Block assembleAssignment(Assignment assignment,StackReference stack) {
+    public static StackBlock assembleAssignment(Assignment assignment,StackReference stack) {
         String name = assignment.getName();
         if (ScratchVariablesAssembler.isVariable(name))
             return ScratchVariablesAssembler.assembleAssignment(name, assembleExpression(assignment.getExpression(),stack));
-
+        
         return new ChangeListBlock("Stack", false, new NumberField(stack.getVariableIndex(getVariable(assignment))), assembleExpression(assignment.getExpression(),stack));
     }
 
@@ -183,7 +181,7 @@ public class ScratchAssembler {
         return out;
     }
 
-    static Block defaultBlock() {
+    static StackBlock defaultBlock() {
         return new SayBlock(defaultField());
     }
 
@@ -191,7 +189,7 @@ public class ScratchAssembler {
         return new StringField("Compile Error"); 
     }
 
-    public static Block getListRemoveLastBlock(String name, boolean isGlobal) {
+    public static StackBlock getListRemoveLastBlock(String name, boolean isGlobal) {
         return new RemoveListBlock(name, isGlobal, new ListLengthField(name, isGlobal));
     }
     

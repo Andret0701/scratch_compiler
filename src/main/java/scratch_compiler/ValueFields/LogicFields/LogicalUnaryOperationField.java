@@ -9,7 +9,7 @@ public abstract class LogicalUnaryOperationField extends LogicField {
     }
 
     public void setOperand(LogicField operand) {
-        setChildInput(operandName, operand);
+        setInput(operandName, operand);
     }
 
 }

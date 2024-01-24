@@ -1,6 +1,8 @@
 package scratch_compiler.ValueFields.ScratchValues;
 
-public class DirectionField extends ScratchValueField {
+import scratch_compiler.ValueFields.ValueField;
+
+public class DirectionField extends ValueField {
     public DirectionField() {
         super("motion_direction");
     }

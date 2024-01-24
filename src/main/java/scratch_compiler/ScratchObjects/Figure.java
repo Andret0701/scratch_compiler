@@ -1,7 +1,5 @@
 package scratch_compiler.ScratchObjects;
 
-import scratch_compiler.Costume;
-import scratch_compiler.Blocks.Block;
 import scratch_compiler.Types.Vector2Int;
 
 public class Figure extends ScratchObject {
@@ -58,21 +56,4 @@ public class Figure extends ScratchObject {
         return this.visible;
     }
 
-
-    //copy 
-    @Override
-    public Figure clone() {
-        Figure clone = new Figure(getName());
-        clone.setPosition(getPosition());
-        clone.setSize(getSize());
-        clone.setDirection(getDirection());
-        clone.setVisible(isVisible());
-
-        for(Costume costume : getCostumes())
-            clone.addCostume(costume.clone());
-
-        for (Block block : getBlocks())
-            clone.addBlock(block.clone());
-        return clone;
-    }
 }

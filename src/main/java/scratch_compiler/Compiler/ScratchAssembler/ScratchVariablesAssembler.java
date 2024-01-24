@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import scratch_compiler.Blocks.Block;
 import scratch_compiler.Blocks.SetXBlock;
 import scratch_compiler.Blocks.SetYBlock;
+import scratch_compiler.Blocks.Types.Block;
+import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.Compiler.IdentifierTypes;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.ValueFields.ValueField;
@@ -36,7 +37,7 @@ public class ScratchVariablesAssembler {
         return ScratchAssembler.defaultField();
     }
 
-    public static Block assembleAssignment(String name, ValueField value) {
+    public static StackBlock assembleAssignment(String name, ValueField value) {
         if (name.equals("x"))
             return new SetXBlock(value);
         if (name.equals("y"))

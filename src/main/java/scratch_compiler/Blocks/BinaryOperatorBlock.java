@@ -1,8 +1,9 @@
 package scratch_compiler.Blocks;
 
+import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.ValueFields.ValueField;
 
-public class BinaryOperatorBlock extends ValueFieldBlock {
+public class BinaryOperatorBlock extends StackBlock {
     private String leftInputName;
     private String rightInputName;
     public BinaryOperatorBlock(String opcode, String leftInputName, String rightInputName)

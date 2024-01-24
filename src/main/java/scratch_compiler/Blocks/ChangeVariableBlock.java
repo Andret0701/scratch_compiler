@@ -2,6 +2,7 @@ package scratch_compiler.Blocks;
 
 import scratch_compiler.Field;
 import scratch_compiler.Variable;
+import scratch_compiler.Blocks.Types.Block;
 import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.VariableField;
 

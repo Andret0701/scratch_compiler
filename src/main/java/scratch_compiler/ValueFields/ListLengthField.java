@@ -14,7 +14,7 @@ public class ListLengthField  extends ValueField {
     public void setVariable(String name, boolean isGlobal) {
         this.name = name;
         this.isGlobal = isGlobal;
-        setChildField(new Field("LIST", new Variable(name, isGlobal, true)));
+        setField(new Field("LIST", new Variable(name, isGlobal, true)));
     }
 
     public Variable getVariable() {

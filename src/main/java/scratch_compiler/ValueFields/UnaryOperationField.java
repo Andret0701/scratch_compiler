@@ -10,7 +10,7 @@ public abstract class UnaryOperationField extends ValueField {
     }
 
     public void setOperand(ValueField operand) {
-        setChildInput(operandName, operand);
+        setInput(operandName, operand);
     }
 
 }

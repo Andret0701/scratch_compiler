@@ -1,7 +1,5 @@
 package scratch_compiler.Blocks;
 
-import java.lang.invoke.VarHandle;
-
 import scratch_compiler.Field;
 import scratch_compiler.Variable;
 import scratch_compiler.ValueFields.ValueField;

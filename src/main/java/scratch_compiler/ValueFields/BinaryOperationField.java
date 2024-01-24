@@ -12,10 +12,10 @@ public abstract class BinaryOperationField extends ValueField {
     }
 
     public void setLeft(ValueField left) {
-        setChildInput(leftInputName, left);
+        setInput(leftInputName, left);
     }
 
     public void setRight(ValueField right) {
-        setChildInput(rightInputName, right);
+        setInput(rightInputName, right);
     }
 }

@@ -21,17 +21,6 @@ public class ScratchObjectToJSON {
         figureJSON.setNumber("currentCostume", 0);
         figureJSON.setArray("costumes",CostumeToJSON.costumesToJSON(figure.getCostumes(),false)); 
         figureJSON.setArray("sounds",new ArrayJSON());
-        // figureJSON.setValue("sounds", new RemoveLaterJSON("[\n" +
-        //         "                {\n" +
-        //         "                    \"assetId\": \"83c36d806dc92327b9e7049a565c6bff\",\n" +
-        //         "                    \"name\": \"Mjau\",\n" +
-        //         "                    \"dataFormat\": \"wav\",\n" +
-        //         "                    \"format\": \"\",\n" +
-        //         "                    \"rate\": 48000,\n" +
-        //         "                    \"sampleCount\": 40681,\n" +
-        //         "                    \"md5ext\": \"83c36d806dc92327b9e7049a565c6bff.wav\"\n" +
-        //         "                }\n" +
-        //         "            ]"));
         figureJSON.setNumber("volume", 100);
         figureJSON.setNumber("layerOrder", 1);
         figureJSON.setBoolean("visible", figure.isVisible());

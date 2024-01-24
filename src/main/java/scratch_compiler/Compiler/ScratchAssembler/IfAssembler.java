@@ -1,33 +1,37 @@
 package scratch_compiler.Compiler.ScratchAssembler;
 
-import scratch_compiler.Blocks.Block;
+import java.util.Stack;
+
 import scratch_compiler.Blocks.IfBlock;
 import scratch_compiler.Blocks.IfElseBlock;
+import scratch_compiler.Blocks.Types.Block;
+import scratch_compiler.Blocks.Types.BlockStack;
+import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.Compiler.parser.statements.IfStatement;
 import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.LogicFields.EqualsField;
 
 public class IfAssembler {
-    public static Block assemble(IfStatement ifStatement, StackReference stack) {
+    public static StackBlock assemble(IfStatement ifStatement, StackReference stack) {
         if (ifStatement.getElseStatement() == null)
             return IfAssembler.assembleIf(ifStatement, stack);
         else
             return IfAssembler.assembleIfElse(ifStatement, stack);
     }
 
-    private static Block assembleIf(IfStatement ifStatement, StackReference stack) {
+    private static StackBlock assembleIf(IfStatement ifStatement, StackReference stack) {
         IfBlock ifBlock = new IfBlock(new EqualsField(ScratchAssembler.assembleExpression(ifStatement.getExpression(), stack), new NumberField(1)));
-        Block ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack);
-        ifBlock.connectIf(ifBody);
+        BlockStack ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack);
+        ifBlock.pushIf(ifBody);
         return ifBlock;
     }
 
-    private static Block assembleIfElse(IfStatement ifStatement, StackReference stack) {
+    private static StackBlock assembleIfElse(IfStatement ifStatement, StackReference stack) {
         IfElseBlock ifBlock = new IfElseBlock(new EqualsField(ScratchAssembler.assembleExpression(ifStatement.getExpression(), stack), new NumberField(1)));
-        Block ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack);
-        Block elseBody = ScratchAssembler.assembleStatement(ifStatement.getElseStatement(), stack);
-        ifBlock.connectIf(ifBody);
-        ifBlock.connectElse(elseBody);
+        BlockStack ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack);
+        BlockStack elseBody = ScratchAssembler.assembleStatement(ifStatement.getElseStatement(), stack);
+        ifBlock.pushIf(ifBody);
+        ifBlock.pushElse(elseBody);
         return ifBlock;
         
     }

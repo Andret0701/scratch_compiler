@@ -1,6 +1,8 @@
 package scratch_compiler.ValueFields.ScratchValues;
 
-public class XPositionField extends ScratchValueField {
+import scratch_compiler.ValueFields.ValueField;
+
+public class XPositionField extends ValueField {
     public XPositionField() {
         super("motion_xposition");
     }

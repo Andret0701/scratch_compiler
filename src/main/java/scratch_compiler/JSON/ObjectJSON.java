@@ -36,6 +36,9 @@ public class ObjectJSON implements ToJSON {
     }
 
     public void setObject(String key, ObjectJSON value) {
+        if (value==this)
+            throw new RuntimeException("Cannot add an object to itself");
+
         setValue(key, value);
     }
 
