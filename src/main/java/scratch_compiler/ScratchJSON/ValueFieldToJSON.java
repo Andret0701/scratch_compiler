@@ -51,10 +51,11 @@ public class ValueFieldToJSON {
     }
 
     private static ArrayJSON numberFieldToJSON(NumberField numberField) {
-        ArrayJSON arrayJSON = new ArrayJSON();
-        arrayJSON.addNumber(4);
-        arrayJSON.addString(numberField.getValue()+"");
-        return arrayJSON;
+        // ArrayJSON arrayJSON = new ArrayJSON();
+        // arrayJSON.addNumber(4);
+        // arrayJSON.addString(numberField.getValue()+"");
+        // return arrayJSON;
+        return stringFieldToJSON(new StringField(numberField.getValue()));
     }
 
     private static ArrayJSON stringFieldToJSON(StringField stringField) {

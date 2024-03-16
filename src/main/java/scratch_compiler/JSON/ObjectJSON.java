@@ -97,6 +97,11 @@ public class ObjectJSON implements ToJSON {
         }
     }
 
+
+    public ArrayList<String> getKeys() {
+        return new ArrayList<>(values.keySet());
+    }
+
     @Override
     public String toJSON() {
         String json = "{";

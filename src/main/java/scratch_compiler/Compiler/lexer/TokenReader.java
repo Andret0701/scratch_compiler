@@ -64,34 +64,17 @@ public class TokenReader {
         return null;
     }
 
-    public Token expectNext(TokenSubtype... types) {
-        for (TokenSubtype type : types)
-            if (isNext(type))
-                return pop();
-
-        String expected = "";
-        for (int i = 0; i < types.length; i++)
-        {
-            expected += types[i];
-            if (i != types.length - 2)
-                expected += " or ";
-            else if (i == types.length - 2)
-                expected += ", ";
-        }
-        CompilerUtils.throwExpected(expected, peek().getLine(), peek());
-        return null;
-    }
-
     public  boolean isNext(TokenType type) {
         if (peek()==null||peek().getType() != type)
             return false;
         return true;
     }
 
-    public  boolean isNext(TokenSubtype type) {
-        if (peek()==null||peek().getSubtype() != type)
+    public boolean isAt(int offset, TokenType type) {
+        Token token = peek(offset);
+        if (token == null)
             return false;
-        return true;
+        return token.getType() == type;
     }
 
     @Override

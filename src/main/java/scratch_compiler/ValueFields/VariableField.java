@@ -2,7 +2,7 @@ package scratch_compiler.ValueFields;
 
 import java.util.ArrayList;
 
-import scratch_compiler.Variable;
+import scratch_compiler.ScratchVariable;
 
 public class VariableField extends ValueField{
     protected String name;
@@ -13,13 +13,13 @@ public class VariableField extends ValueField{
         this.isGlobal = isGlobal;
     }
 
-    public Variable getVariable() {
-        return new Variable(name,isGlobal);
+    public ScratchVariable getVariable() {
+        return new ScratchVariable(name,isGlobal);
     }
 
     @Override
-    public ArrayList<Variable> getVariables() {
-        ArrayList<Variable> variables = new ArrayList<Variable>();
+    public ArrayList<ScratchVariable> getVariables() {
+        ArrayList<ScratchVariable> variables = new ArrayList<ScratchVariable>();
         variables.add(getVariable());
         return variables;
     }

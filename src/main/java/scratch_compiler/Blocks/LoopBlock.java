@@ -3,9 +3,10 @@ package scratch_compiler.Blocks;
 import scratch_compiler.Blocks.Types.BlockStack;
 import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.ValueFields.NumberField;
+import scratch_compiler.ValueFields.ValueField;
 
 public class LoopBlock extends StackBlock {
-    public LoopBlock(NumberField count) {
+    public LoopBlock(ValueField count) {
         super("control_repeat");
         setLoopCount(count);
     }
@@ -22,7 +23,7 @@ public class LoopBlock extends StackBlock {
         push(0, stack);
     }
 
-    public void setLoopCount(NumberField count) {
+    public void setLoopCount(ValueField count) {
         setInput("TIMES", count);
     }
 

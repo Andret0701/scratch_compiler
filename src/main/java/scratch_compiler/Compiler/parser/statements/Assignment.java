@@ -1,19 +1,21 @@
 package scratch_compiler.Compiler.parser.statements;
 
-import scratch_compiler.Compiler.parser.expressions.Expression;
+import java.util.ArrayList;
 
+import scratch_compiler.Compiler.parser.expressions.Expression;
+import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 
 public class Assignment extends Statement {
-    private String name;
+    private VariableValue variable;
     private Expression expression;
 
-    public Assignment(String name, Expression expression) {
-        this.name = name;
+    public Assignment(VariableValue variable, Expression expression) {
+        this.variable = variable;
         this.expression = expression;
     }
 
-    public String getName() {
-        return name;
+    public VariableValue getVariable() {
+        return variable;
     }
 
     public Expression getExpression() {
@@ -22,11 +24,15 @@ public class Assignment extends Statement {
 
     @Override
     public String toString() {
-        return name + " = " + getExpression();
+        return variable + " = " + getExpression();
     }
 
     public void setExpression(Expression expression) {
         this.expression = expression;
+    }
+
+    public ArrayList<Statement> getChildren() {
+        return new ArrayList<Statement>();
     }
 
 }

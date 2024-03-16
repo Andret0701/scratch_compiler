@@ -10,7 +10,7 @@ public class ScratchProjectToJSON {
         ObjectJSON projectJSON = new ObjectJSON();
         projectJSON.setValue("targets", getTargets(project));
         projectJSON.setValue("monitors", new ArrayJSON());
-        projectJSON.setValue("extensions", new ArrayJSON());
+        projectJSON.setValue("extensions", getExtensions());
         projectJSON.setValue("meta", getMetadata());
 
         return projectJSON;
@@ -24,11 +24,18 @@ public class ScratchProjectToJSON {
         return targets;
     }
 
+    private static ArrayJSON getExtensions() {
+        ArrayJSON extensions = new ArrayJSON();
+        extensions.addString("pen");
+        return extensions;
+    }
+
     private static ObjectJSON getMetadata() {
         ObjectJSON metadata = new ObjectJSON();
         metadata.setString("semver", "3.0.0");
         metadata.setString("vm", "0.2.0-prerelease.20220222132735");
-        metadata.setString("agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Scratch/3.29.1 Chrome/94.0.4606.81 Electron/15.3.1 Safari/537.36");
+        metadata.setString("agent",
+                "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Scratch/3.29.1 Chrome/94.0.4606.81 Electron/15.3.1 Safari/537.36");
         return metadata;
     }
 }

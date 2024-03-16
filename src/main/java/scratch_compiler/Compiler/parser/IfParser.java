@@ -1,6 +1,7 @@
 package scratch_compiler.Compiler.parser;
 
-import scratch_compiler.Compiler.IdentifierTypes;
+import scratch_compiler.Compiler.DeclarationTable;
+import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
@@ -8,12 +9,12 @@ import scratch_compiler.Compiler.parser.statements.IfStatement;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class IfParser {
-    public static Statement parse(TokenReader tokens, IdentifierTypes identifierTypes) {
+    public static Statement parse(TokenReader tokens, DeclarationTable identifierTypes) {
         tokens.expectNext(TokenType.IF);
         tokens.expectNext(TokenType.OPEN);
 
         Expression expression = ExpressionParser.parse(tokens, identifierTypes);
-        if (!expression.getType().canBeConvertedTo(VariableType.BOOLEAN))
+        if (!expression.getType().equals(new Type(VariableType.BOOLEAN)))
             throw new RuntimeException("Expected boolean expression at line " + tokens.peek().getLine());
 
         tokens.expectNext(TokenType.CLOSE);
@@ -21,7 +22,7 @@ public class IfParser {
         Statement statement = StatementParser.parse(tokens, identifierTypes.copy());
         if (statement == null)
             throw new RuntimeException("Expected statement at line " + tokens.peek().getLine());
-        
+
         if (tokens.isNext(TokenType.ELSE)) {
             tokens.next();
             Statement elseStatement = StatementParser.parse(tokens, identifierTypes.copy());
@@ -30,6 +31,6 @@ public class IfParser {
             return new IfStatement(expression, statement, elseStatement);
         }
 
-        return new IfStatement(expression, statement);      
-    }   
+        return new IfStatement(expression, statement);
+    }
 }

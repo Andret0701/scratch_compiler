@@ -6,7 +6,7 @@ import java.util.HashMap;
 import scratch_compiler.Field;
 import scratch_compiler.Input;
 import scratch_compiler.ValueFields.ValueField;
-import scratch_compiler.Variable;
+import scratch_compiler.ScratchVariable;
 
 public abstract class Block {
     protected String opcode;
@@ -42,14 +42,14 @@ public abstract class Block {
         return new ArrayList<Field>(fields.values());
     }
 
-    public ArrayList<Variable> getVariables() {
-        ArrayList<Variable> variables = new ArrayList<Variable>();
+    public ArrayList<ScratchVariable> getVariables() {
+        ArrayList<ScratchVariable> variables = new ArrayList<ScratchVariable>();
         for (Input input : getInputs()) {
-            ArrayList<Variable> inputVariables = input.getValueField().getVariables();
+            ArrayList<ScratchVariable> inputVariables = input.getValueField().getVariables();
             variables.addAll(inputVariables);
         }
         for (Field field : getFields()) {
-            Variable variable = field.getVariable();
+            ScratchVariable variable = field.getVariable();
             if (variable != null)
                 variables.add(variable);
         }

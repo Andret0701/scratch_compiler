@@ -5,7 +5,9 @@ import scratch_compiler.Field;
 import java.util.ArrayList;
 
 import scratch_compiler.Input;
-import scratch_compiler.Variable;
+import scratch_compiler.ScratchVariable;
+import scratch_compiler.Blocks.FunctionCallBlock;
+import scratch_compiler.Blocks.FunctionDefinitionBlock;
 import scratch_compiler.Blocks.Types.Block;
 import scratch_compiler.Blocks.Types.BlockStack;
 import scratch_compiler.Blocks.Types.HatBlock;
@@ -15,7 +17,6 @@ import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.Types.Vector2;
 public class BlockToJSON {
     public static ObjectJSON blocksToJSON(ArrayList<HatBlock> blocks) {
-        System.out.println("Blocks: " + blocks);
         ObjectJSON blocksJSON = new ObjectJSON();
         for (int i = 0; i < blocks.size(); i++) {
             Vector2 position = getBlockPosition(i);
@@ -26,13 +27,18 @@ public class BlockToJSON {
     }
 
     private static BlockJSON hatblockToJSON(HatBlock hatBlock, Vector2 position) {
-        BlockJSON hatBlockJSON = blockToJSON(hatBlock);
+        BlockJSON hatBlockJSON;
+        if(hatBlock instanceof FunctionDefinitionBlock)
+            hatBlockJSON = FunctionToJSON.functionDefinitionToJSON((FunctionDefinitionBlock) hatBlock);
+        else
+            hatBlockJSON = blockToJSON(hatBlock);
+
         hatBlockJSON.getBlock().setNumber("x", position.x);
         hatBlockJSON.getBlock().setNumber("y", position.y);
 
         BlockJSON stackJSON = blockStackToJSON(hatBlock.getStack());
-
-        hatBlockJSON = connectBlocks(hatBlockJSON, stackJSON);        
+        if (stackJSON != null && stackJSON.getBlock() != null)
+            hatBlockJSON = connectBlocks(hatBlockJSON, stackJSON);        
         return hatBlockJSON;
     }
 
@@ -87,7 +93,7 @@ public class BlockToJSON {
     }
 
 
-    private static BlockJSON blockToJSON(Block block) {
+    public static BlockJSON blockToJSON(Block block) {
         if (block.getOpcode()==null)
             return null;
 
@@ -99,6 +105,12 @@ public class BlockToJSON {
         blockJSON.setValue("parent", null);
         blockJSON.setBoolean("shadow", false);
         blockJSON.setBoolean("topLevel", true);
+
+        if (block instanceof FunctionCallBlock)
+        {
+            blockJSON.setObject("mutation", FunctionToJSON.functionCallMutationToJSON(((FunctionCallBlock) block).getFunction()));
+            blockJSON.setObject("inputs", FunctionToJSON.functionCallInputsToJSON(blockJSON.getObject("inputs"), ((FunctionCallBlock) block).getFunction()));
+        }
 
         return new BlockJSON(blockJSON, getBlockID(block), subBlocksToJSON(block));
     }
@@ -173,7 +185,7 @@ public class BlockToJSON {
             ArrayJSON fieldJSON = new ArrayJSON();
             if (field.getVariable() !=null)
             {   
-                Variable variable = field.getVariable();
+                ScratchVariable variable = field.getVariable();
                 fieldJSON.addString(VariableToJSON.getVariableName(variable));
                 fieldJSON.addString(VariableToJSON.getVariableId(variable));
                 fields.setArray(field.getName(), fieldJSON);

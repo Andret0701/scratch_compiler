@@ -12,24 +12,24 @@ import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.LogicFields.EqualsField;
 
 public class IfAssembler {
-    public static StackBlock assemble(IfStatement ifStatement, StackReference stack) {
+    public static StackBlock assemble(IfStatement ifStatement, VariableStackReference stack, boolean isFunction) {
         if (ifStatement.getElseStatement() == null)
-            return IfAssembler.assembleIf(ifStatement, stack);
+            return IfAssembler.assembleIf(ifStatement, stack, isFunction);
         else
-            return IfAssembler.assembleIfElse(ifStatement, stack);
+            return IfAssembler.assembleIfElse(ifStatement, stack, isFunction);
     }
 
-    private static StackBlock assembleIf(IfStatement ifStatement, StackReference stack) {
-        IfBlock ifBlock = new IfBlock(new EqualsField(ScratchAssembler.assembleExpression(ifStatement.getExpression(), stack), new NumberField(1)));
-        BlockStack ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack);
+    private static StackBlock assembleIf(IfStatement ifStatement, VariableStackReference stack, boolean isFunction) {
+        IfBlock ifBlock = new IfBlock(new EqualsField(ScratchAssembler.assembleExpression(ifStatement.getExpression(), stack,isFunction), new NumberField(1)));
+        BlockStack ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack,isFunction);
         ifBlock.pushIf(ifBody);
         return ifBlock;
     }
 
-    private static StackBlock assembleIfElse(IfStatement ifStatement, StackReference stack) {
-        IfElseBlock ifBlock = new IfElseBlock(new EqualsField(ScratchAssembler.assembleExpression(ifStatement.getExpression(), stack), new NumberField(1)));
-        BlockStack ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack);
-        BlockStack elseBody = ScratchAssembler.assembleStatement(ifStatement.getElseStatement(), stack);
+    private static StackBlock assembleIfElse(IfStatement ifStatement, VariableStackReference stack, boolean isFunction) {
+        IfElseBlock ifBlock = new IfElseBlock(new EqualsField(ScratchAssembler.assembleExpression(ifStatement.getExpression(), stack,isFunction), new NumberField(1)));
+        BlockStack ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack,isFunction);
+        BlockStack elseBody = ScratchAssembler.assembleStatement(ifStatement.getElseStatement(), stack,isFunction);
         ifBlock.pushIf(ifBody);
         ifBlock.pushElse(elseBody);
         return ifBlock;

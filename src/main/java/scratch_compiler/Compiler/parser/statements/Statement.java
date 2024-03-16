@@ -1,6 +1,10 @@
 package scratch_compiler.Compiler.parser.statements;
 
-public class Statement {
+import java.util.ArrayList;
+
+public abstract class Statement {
     public Statement() {
     }
+
+    public abstract ArrayList<Statement> getChildren();
 }

@@ -1,6 +1,38 @@
-x=0;
-y=0;
-while(true)
+struct Vector2{
+    float x;
+    float y;
+}
+
+struct Figure{
+    Vector2 position;
+    float rotation;
+    float size;
+    string name;
+}
+
+
+void say2(string s1, string s2)
 {
-    x+=1;
+    say(s1+ " " + s2);
+    return;
+}
+
+int update()
+{
+    Vector2 position={0.0,0.0};
+    Figure figure = {position,0.0,1.0, "Chris"};
+    figure={position,0.0,1.0, "Chris"};
+
+    say(figure.name);
+    say(figure.position.x);
+    say(figure.position.y);
+    say(figure.rotation);
+
+    say(true);
+    say(1);
+
+    if(true)
+        return 1;
+    else
+        return 0;
 }

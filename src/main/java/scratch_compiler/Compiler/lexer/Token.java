@@ -23,16 +23,6 @@ public class Token {
         return line;
     }
 
-    public TokenSubtype getSubtype()
-    {
-        return type.getSubtype();
-    }
-
-    public boolean isSubtype(TokenSubtype subtype)
-    {
-        return getSubtype() == subtype;
-    }
-
     @Override
     public String toString() {
         return "(" + type + ", '" + value + "')";

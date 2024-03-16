@@ -14,6 +14,7 @@ public class BlockJSON {
 
     public BlockJSON(ObjectJSON block, String blockID) {
         this.block = block;
+        this.blockID = blockID;
         this.subBlocks = new ObjectJSON();
     }
 

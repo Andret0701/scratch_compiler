@@ -1,0 +1,55 @@
+package scratch_compiler.Compiler;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import scratch_compiler.Compiler.parser.VariableType;
+
+public class Function {
+    private String name;
+    private Type returnType;
+    private ArrayList<Variable> arguments;
+
+    public Function(String name) {
+        this(name, new Type(VariableType.VOID));
+    }
+
+    public Function(String name, Type returnType) {
+        this(name, returnType, new ArrayList<Variable>());
+    }
+
+    public Function(String name, Type returnType, Variable... arguments) {
+        this(name, returnType, new ArrayList<>(Arrays.asList(arguments)));
+    }
+
+    public Function(String name, Type returnType, ArrayList<Variable> arguments) {
+        this.name = name;
+        this.returnType = returnType;
+        this.arguments = arguments;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Type getReturnType() {
+        return returnType;
+    }
+
+    public ArrayList<Variable> getArguments() {
+        return new ArrayList<Variable>(arguments);
+    }
+
+    @Override
+    public String toString() {
+        String args = "";
+        for (int i = 0; i < this.arguments.size(); i++) {
+            args += this.arguments.get(i).toString();
+            if (i < this.arguments.size() - 1)
+                args += ", ";
+        }
+
+        args = "(" + args + ")";
+        return returnType + " " + name + args;
+    }
+}

@@ -9,19 +9,19 @@ import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.LogicFields.EqualsField;
 
 public class ForAssembler {
-    public static BlockStack assemble(ForStatement forStatement, StackReference stack) {
+    public static BlockStack assemble(ForStatement forStatement, VariableStackReference stack, boolean isFunction) {
         stack.addScope();
 
         BlockStack forStack = new BlockStack();
 
-        StackBlock declaration= ScratchAssembler.assembleDeclaration(forStatement.getDeclaration(), stack);
+        BlockStack declaration= ScratchAssembler.assembleDeclaration(forStatement.getDeclaration(), stack, isFunction);
         forStack.push(declaration);
 
-        RepeatUntilBlock forBlock = new RepeatUntilBlock(new EqualsField(ScratchAssembler.assembleExpression(forStatement.getExpression(), stack), new NumberField(0)));
-        BlockStack forBody = ScratchAssembler.assembleStatement(forStatement.getStatement(), stack);
+        RepeatUntilBlock forBlock = new RepeatUntilBlock(new EqualsField(ScratchAssembler.assembleExpression(forStatement.getExpression(), stack,isFunction), new NumberField(0)));
+        BlockStack forBody = ScratchAssembler.assembleStatement(forStatement.getStatement(), stack, isFunction);
         forBlock.pushRepeat(forBody);
         
-        StackBlock increment = ScratchAssembler.assembleAssignment(forStatement.getIncrement(), stack);
+        BlockStack increment = ScratchAssembler.assembleAssignment(forStatement.getIncrement(), stack, isFunction);
         forBlock.pushRepeat(increment); 
 
         forStack.push(forBlock);
@@ -29,7 +29,7 @@ public class ForAssembler {
 
         int numRemoved=stack.removeScope();
         for (int i = 0; i < numRemoved; i++)
-            forStack.push(ScratchAssembler.getListRemoveLastBlock("Stack", false));
+            forStack.push(StackAssembler.removeLastValueFromStack());
         return forStack;
     }
 }

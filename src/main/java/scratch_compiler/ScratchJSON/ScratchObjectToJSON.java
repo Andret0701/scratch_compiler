@@ -2,7 +2,7 @@ package scratch_compiler.ScratchJSON;
 
 import java.util.ArrayList;
 
-import scratch_compiler.Variable;
+import scratch_compiler.ScratchVariable;
 import scratch_compiler.JSON.ArrayJSON;
 import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.ScratchObjects.Background;
@@ -34,11 +34,11 @@ public class ScratchObjectToJSON {
     }
 
 
-    public static ObjectJSON backgroundToJSON(Background background, ArrayList<Variable> globalVariables) {
+    public static ObjectJSON backgroundToJSON(Background background, ArrayList<ScratchVariable> globalVariables) {
         ObjectJSON backgroundJSON = new ObjectJSON();
         backgroundJSON.setString("name", background.getName());
         backgroundJSON.setBoolean("isStage", true);
-        ArrayList<Variable> variables = new ArrayList<>(globalVariables);
+        ArrayList<ScratchVariable> variables = new ArrayList<>(globalVariables);
         variables.addAll(background.getLocalVariables());
         backgroundJSON.setObject("variables", variablesToJSON(variables));
         backgroundJSON.setObject("lists", listsToJSON(variables));
@@ -93,9 +93,9 @@ public class ScratchObjectToJSON {
     }
 
 
-    private static ObjectJSON variablesToJSON(ArrayList<Variable> variables) {
+    private static ObjectJSON variablesToJSON(ArrayList<ScratchVariable> variables) {
         ObjectJSON variablesJSON = new ObjectJSON();
-        for (Variable variable : variables) 
+        for (ScratchVariable variable : variables) 
         {
             if(!variable.isList())
                 variablesJSON.setValue(VariableToJSON.getVariableId(variable), VariableToJSON.variableToJSON(variable));
@@ -103,9 +103,9 @@ public class ScratchObjectToJSON {
         return variablesJSON;
     }
 
-    private static ObjectJSON listsToJSON(ArrayList<Variable> variables) {
+    private static ObjectJSON listsToJSON(ArrayList<ScratchVariable> variables) {
         ObjectJSON variablesJSON = new ObjectJSON();
-        for (Variable variable : variables) 
+        for (ScratchVariable variable : variables) 
         {
             if(variable.isList())
                 variablesJSON.setValue(VariableToJSON.getVariableId(variable), VariableToJSON.variableToJSON(variable));

@@ -1,41 +1,47 @@
 package scratch_compiler.Compiler.ScratchAssembler;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
-import scratch_compiler.Variable;
+import scratch_compiler.Compiler.Function;
+import scratch_compiler.ScratchFunction;
+import scratch_compiler.ScratchProgram;
+import scratch_compiler.ScratchVariable;
+import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Blocks.AddListBlock;
 import scratch_compiler.Blocks.ChangeListBlock;
 import scratch_compiler.Blocks.ClearListBlock;
+import scratch_compiler.Blocks.FunctionDefinitionBlock;
 import scratch_compiler.Blocks.RemoveListBlock;
 import scratch_compiler.Blocks.SayBlock;
+import scratch_compiler.Blocks.Types.Block;
 import scratch_compiler.Blocks.Types.BlockStack;
+import scratch_compiler.Blocks.Types.HatBlock;
 import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.Compiler.CompiledCode;
 import scratch_compiler.Compiler.parser.VariableType;
-import scratch_compiler.Compiler.parser.expressions.AdditionExpression;
-import scratch_compiler.Compiler.parser.expressions.BinaryOperationExpression;
-import scratch_compiler.Compiler.parser.expressions.BooleanValue;
-import scratch_compiler.Compiler.parser.expressions.DivisionExpression;
-import scratch_compiler.Compiler.parser.expressions.EqualsExpression;
+import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
-import scratch_compiler.Compiler.parser.expressions.FloatValue;
-import scratch_compiler.Compiler.parser.expressions.GreaterThanExpression;
-import scratch_compiler.Compiler.parser.expressions.IntValue;
-import scratch_compiler.Compiler.parser.expressions.LessThanExpression;
-import scratch_compiler.Compiler.parser.expressions.ModulusExpression;
-import scratch_compiler.Compiler.parser.expressions.MultiplicationExpression;
-import scratch_compiler.Compiler.parser.expressions.StringValue;
-import scratch_compiler.Compiler.parser.expressions.SubtractionExpression;
-import scratch_compiler.Compiler.parser.expressions.VariableValue;
+import scratch_compiler.Compiler.parser.expressions.UnaryOperator;
+import scratch_compiler.Compiler.parser.expressions.types.OperatorType;
+import scratch_compiler.Compiler.parser.expressions.values.BooleanValue;
+import scratch_compiler.Compiler.parser.expressions.values.FloatValue;
+import scratch_compiler.Compiler.parser.expressions.values.IntValue;
+import scratch_compiler.Compiler.parser.expressions.values.StringValue;
+import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.parser.statements.Assignment;
 import scratch_compiler.Compiler.parser.statements.ForStatement;
+import scratch_compiler.Compiler.parser.statements.FunctionCall;
+import scratch_compiler.Compiler.parser.statements.FunctionDeclaration;
 import scratch_compiler.Compiler.parser.statements.IfStatement;
+import scratch_compiler.Compiler.parser.statements.ReturnStatement;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 import scratch_compiler.Compiler.parser.statements.WhileStatement;
 import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
 import scratch_compiler.ValueFields.AdditionField;
 import scratch_compiler.ValueFields.DivisionField;
+import scratch_compiler.ValueFields.FunctionArgumentField;
 import scratch_compiler.ValueFields.JoinField;
 import scratch_compiler.ValueFields.ListElementField;
 import scratch_compiler.ValueFields.ListLengthField;
@@ -48,137 +54,171 @@ import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.LogicFields.EqualsField;
 import scratch_compiler.ValueFields.LogicFields.GreaterThanField;
 import scratch_compiler.ValueFields.LogicFields.LessThanField;
+
 public class ScratchAssembler {
-    public static BlockStack assemble(String code) {
-        Scope scope = CompiledCode.compile(code, ScratchVariablesAssembler.getIdentiferTypes()).getScope();
+    public static ScratchProgram assemble(String code) {
+        CompiledCode compiledCode = CompiledCode.compile(code, ScratchCoreAssembler.getDeclarationTable());
+        System.out.println(compiledCode);
+
+        ArrayList<FunctionDeclaration> functionDeclarations = compiledCode.getFunctions();
 
         BlockStack blockStack = new BlockStack();
-        blockStack.push(new ClearListBlock("Stack", false));
-        blockStack.push(compileScope(scope, new StackReference()));
+        blockStack.push(StackAssembler.initializeStack());
 
-        return blockStack;
+        ArrayList<HatBlock> functionDefinitionBlocks = new ArrayList<>();
+        for (FunctionDeclaration functionDeclaration : functionDeclarations) {
+            FunctionDefinitionBlock functionDefinitionBlock = FunctionAssembler.assembleFunction(functionDeclaration);
+            functionDefinitionBlocks.add(functionDefinitionBlock);
+        }
+
+        return new ScratchProgram(blockStack, functionDefinitionBlocks);
     }
 
-    private static BlockStack compileScope(Scope scope,StackReference stack) {
-        stack.addScope(); 
+    public static BlockStack compileScope(Scope scope, VariableStackReference stack, boolean isFunction) {
+        stack.addScope();
         ArrayList<Statement> statements = scope.getStatements();
         if (statements.size() == 0)
             return new BlockStack();
 
-        BlockStack blockStack = assembleStatement(statements.get(0),stack);
+        BlockStack blockStack = assembleStatement(statements.get(0), stack, isFunction);
 
         for (int i = 1; i < statements.size(); i++)
-            blockStack.push(assembleStatement(statements.get(i),stack));
+            blockStack.push(assembleStatement(statements.get(i), stack, isFunction));
 
-        int numRemoved=stack.removeScope();
-        for (int i = 0; i < numRemoved; i++)
-            blockStack.push(getListRemoveLastBlock("Stack", false));
-    
+        int numRemoved = stack.removeScope();
+        if (numRemoved > 0)
+            blockStack.push(StackAssembler.offsetPointer(-numRemoved));
+
         return blockStack;
     }
 
-    static BlockStack assembleStatement(Statement statement,StackReference stack) {
+    static BlockStack assembleStatement(Statement statement, VariableStackReference stack, boolean isFunction) {
         if (statement instanceof Scope)
-            return compileScope((Scope) statement,stack);
+            return compileScope((Scope) statement, stack, isFunction);
 
         if (statement instanceof ForStatement)
-            return ForAssembler.assemble((ForStatement) statement,stack);
-        
-        StackBlock block = defaultBlock();
-        if (statement instanceof VariableDeclaration) 
-            block= assembleDeclaration((VariableDeclaration) statement,stack);
+            return ForAssembler.assemble((ForStatement) statement, stack, isFunction);
+        if (statement instanceof FunctionCall)
+            return FunctionCallAssembler.assemble((FunctionCall) statement, stack, isFunction);
         if (statement instanceof Assignment)
-            block= assembleAssignment((Assignment) statement,stack);
+            return assembleAssignment((Assignment) statement, stack, isFunction);
+        if (statement instanceof ReturnStatement)
+            return FunctionAssembler.assembleReturnStatement((ReturnStatement) statement, stack);
+        if (statement instanceof VariableDeclaration)
+            return assembleDeclaration((VariableDeclaration) statement, stack, isFunction);
+
+        StackBlock block = defaultBlock();
         if (statement instanceof IfStatement)
-            block= IfAssembler.assemble((IfStatement) statement,stack);
+            block = IfAssembler.assemble((IfStatement) statement, stack, isFunction);
         if (statement instanceof WhileStatement)
-            block= WhileAssembler.assemble((WhileStatement) statement,stack);
-        
+            block = WhileAssembler.assemble((WhileStatement) statement, stack, isFunction);
+
         return new BlockStack(block);
     }
 
-    static StackBlock assembleDeclaration(VariableDeclaration declaration,StackReference stack) {
-        StackBlock addListBlock=new AddListBlock("Stack", false, assembleExpression(declaration.getExpression(),stack));
+    static BlockStack assembleDeclaration(VariableDeclaration declaration, VariableStackReference stack,
+            boolean isFunction) {
         stack.addVariable(getVariable(declaration));
-        return addListBlock;
+        BlockStack blockStack = new BlockStack();
+        for (Expression argument : declaration.getArguments())
+            blockStack.push(StackAssembler.addValueToStack(assembleExpression(argument, stack, isFunction)));
+        return blockStack;
     }
 
-    private static Variable getVariable(VariableDeclaration declaration) {
-        return new Variable(declaration.getName(), false);
+    private static ScratchVariable getVariable(VariableDeclaration declaration) {
+        return new ScratchVariable(declaration.getName(), false);
     }
 
-    private static Variable getVariable(Assignment assignment) {
-        return new Variable(assignment.getName(), false);
+    private static ScratchVariable getVariable(Assignment assignment) {
+        return new ScratchVariable(assignment.getName(), false);
     }
 
-    private static Variable getVariable(VariableValue variable) {
-        return new Variable(variable.getName(), false);
+    private static ScratchVariable getVariable(VariableValue variable) {
+        return new ScratchVariable(variable.getName(), false);
     }
 
-    public static StackBlock assembleAssignment(Assignment assignment,StackReference stack) {
+    public static BlockStack assembleAssignment(Assignment assignment, VariableStackReference stack,
+            boolean isFunction) {
         String name = assignment.getName();
-        if (ScratchVariablesAssembler.isVariable(name))
-            return ScratchVariablesAssembler.assembleAssignment(name, assembleExpression(assignment.getExpression(),stack));
-        
-        return new ChangeListBlock("Stack", false, new NumberField(stack.getVariableIndex(getVariable(assignment))), assembleExpression(assignment.getExpression(),stack));
+        if (ScratchCoreAssembler.isVariable(name))
+            return ScratchCoreAssembler.assembleAssignment(name,
+                    assembleExpression(assignment.getExpression(), stack, isFunction));
+
+        return StackAssembler.assignValueToStack(assembleExpression(assignment.getExpression(), stack, isFunction),
+                new NumberField(stack.getVariableIndex(getVariable(assignment))));
     }
 
-    static ValueField assembleExpression(Expression expression,StackReference stack) {
+    static ValueField assembleExpression(Expression expression, VariableStackReference stack, boolean isFunction) {
         if (expression instanceof IntValue)
             return new NumberField(((IntValue) expression).getValue());
         if (expression instanceof FloatValue)
             return new NumberField(((FloatValue) expression).getValue());
         if (expression instanceof BooleanValue)
             return new NumberField(((BooleanValue) expression).getValue() ? 1 : 0);
-        if  (expression instanceof StringValue)
+        if (expression instanceof StringValue)
             return new StringField(((StringValue) expression).getString());
-        if (expression instanceof VariableValue)
-        {
+        if (expression instanceof VariableValue) {
             String name = ((VariableValue) expression).getName();
-            if (ScratchVariablesAssembler.isVariable(name))
-                return ScratchVariablesAssembler.assembleExpression(name);
-            return new ListElementField("Stack", false, new NumberField(stack.getVariableIndex(getVariable((VariableValue) expression))));
+            if (ScratchCoreAssembler.isVariable(name))
+                return ScratchCoreAssembler.assembleExpression(name);
+
+            int stackIndex = stack.getVariableIndex(getVariable((VariableValue) expression));
+            if (isFunction)
+                return StackAssembler.getElementOfStack(
+                        new AdditionField(FunctionAssembler.getStackOffset(), new NumberField(stackIndex)));
+            return StackAssembler.getElementOfStack(new NumberField(stackIndex));
         }
-        if (expression instanceof BinaryOperationExpression)
-            return assembleBinaryExpression((BinaryOperationExpression) expression,stack);
-        
+        if (expression instanceof BinaryOperator)
+            return assembleBinaryExpression((BinaryOperator) expression, stack, isFunction);
+        if (expression instanceof UnaryOperator)
+            return defaultField();
+
         return defaultField();
     }
 
-    private static ValueField assembleBinaryExpression(BinaryOperationExpression expression,StackReference stack) {
-        ValueField left = assembleExpression(expression.getLeft(),stack);
-        ValueField right = assembleExpression(expression.getRight(),stack);
+    private static ValueField assembleBinaryExpression(BinaryOperator expression,
+            VariableStackReference stack, boolean isFunction) {
+        ValueField left = assembleExpression(expression.getLeft(), stack, isFunction);
+        ValueField right = assembleExpression(expression.getRight(), stack, isFunction);
 
-        ValueField out=defaultField();
-        if (expression instanceof AdditionExpression)
-        {
-            if (expression.getType() ==VariableType.STRING)
-                out= new JoinField(left, right);
-            else
-                out= new AdditionField(left, right);
+        OperatorType operator = expression.getOperatorType();
+
+        // add the rest of the operators
+        switch (operator) {
+            case ADDITION:
+                return new AdditionField(left, right);
+            default:
+                return defaultField();
         }
-        else if (expression instanceof SubtractionExpression)
-                out= new SubtractionField(left, right);
-        else if  (expression instanceof MultiplicationExpression)
-                out= new MultiplicationField(left, right);
-        else if (expression instanceof DivisionExpression)
-                out= new DivisionField(left, right);
-        else if (expression instanceof ModulusExpression)
-                out= new ModulusField(left, right);
-        else if (expression instanceof EqualsExpression)
-                out= new EqualsField(left, right);
-        else if (expression instanceof GreaterThanExpression)
-                out= new GreaterThanField(left, right);
-        else if (expression instanceof LessThanExpression)
-                out= new LessThanField(left, right);
 
+        // switch (expression.getOperatorType()) {
+        // case ADD:
+        // out = new AdditionField(left, right);
+        // break;
+        // case SUB:
 
-        
-        if (expression.getType()==VariableType.BOOLEAN)
-            out= new AdditionField(out, new NumberField(0));
-    
+        // if (expression instanceof AdditionExpression) {
+        // if (expression.getType() == VariableType.STRING)
+        // out = new JoinField(left, right);
+        // else
+        // out = new AdditionField(left, right);
+        // } else if (expression instanceof SubtractionExpression)
+        // out = new SubtractionField(left, right);
+        // else if (expression instanceof MultiplicationExpression)
+        // out = new MultiplicationField(left, right);
+        // else if (expression instanceof DivisionExpression)
+        // out = new DivisionField(left, right);
+        // else if (expression instanceof ModulusExpression)
+        // out = new ModulusField(left, right);
+        // else if (expression instanceof EqualsExpression)
+        // out = new EqualsField(left, right);
+        // else if (expression instanceof GreaterThanExpression)
+        // out = new GreaterThanField(left, right);
+        // else if (expression instanceof LessThanExpression)
+        // out = new LessThanField(left, right);
 
-        return out;
+        // if (expression.getType() == VariableType.BOOLEAN)
+        // out = new AdditionField(out, new NumberField(0));
     }
 
     static StackBlock defaultBlock() {
@@ -186,12 +226,7 @@ public class ScratchAssembler {
     }
 
     static ValueField defaultField() {
-        return new StringField("Compile Error"); 
+        return new StringField("Compile Error");
     }
-
-    public static StackBlock getListRemoveLastBlock(String name, boolean isGlobal) {
-        return new RemoveListBlock(name, isGlobal, new ListLengthField(name, isGlobal));
-    }
-    
 
 }

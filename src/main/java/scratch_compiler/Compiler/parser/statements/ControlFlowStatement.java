@@ -1,6 +1,9 @@
 package scratch_compiler.Compiler.parser.statements;
 
+import java.util.ArrayList;
+
 import scratch_compiler.Compiler.parser.expressions.Expression;
+
 public abstract class ControlFlowStatement extends Statement {
     private Expression expression;
     private Statement statement;
@@ -24,5 +27,11 @@ public abstract class ControlFlowStatement extends Statement {
 
     public Expression getExpression() {
         return expression;
+    }
+
+    public ArrayList<Statement> getChildren() {
+        ArrayList<Statement> children = new ArrayList<Statement>();
+        children.add(statement);
+        return children;
     }
 }

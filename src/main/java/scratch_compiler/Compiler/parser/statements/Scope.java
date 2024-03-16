@@ -1,31 +1,19 @@
 package scratch_compiler.Compiler.parser.statements;
 
-import scratch_compiler.Compiler.IdentifierTypes;
-import scratch_compiler.Compiler.parser.VariableType;
-
+import scratch_compiler.Compiler.DeclarationTable;
 import java.util.ArrayList;
 
-
-
 public class Scope extends Statement {
-    private IdentifierTypes identifierTypes;
+    public final DeclarationTable declarationTable;
     private ArrayList<Statement> statements;
 
-    public Scope(IdentifierTypes identifierTypes) {
+    public Scope(DeclarationTable declarationTable) {
         statements = new ArrayList<>();
-        this.identifierTypes = identifierTypes.copy();
+        this.declarationTable = declarationTable.copy();
     }
 
     public void addStatement(Statement statement) {
         statements.add(statement);
-    }
-
-    public void addIdentifierType(String name, VariableType type) {
-        identifierTypes.add(name, type);
-    }
-
-    public IdentifierTypes getIdentifierTypes() {
-        return identifierTypes;
     }
 
     public ArrayList<Statement> getStatements() {
@@ -36,11 +24,14 @@ public class Scope extends Statement {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{").append("\n");
-        for (Statement statement : statements) 
+        for (Statement statement : statements)
             sb.append("   ").append(statement).append("\n");
-        
+
         sb.append("}");
         return sb.toString();
     }
 
+    public ArrayList<Statement> getChildren() {
+        return new ArrayList<>(statements);
+    }
 }

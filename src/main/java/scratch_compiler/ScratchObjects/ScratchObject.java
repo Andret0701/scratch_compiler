@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import scratch_compiler.Asset;
 import scratch_compiler.Costume;
-import scratch_compiler.Variable;
+import scratch_compiler.ScratchFunction;
+import scratch_compiler.ScratchVariable;
+import scratch_compiler.Blocks.FunctionDefinitionBlock;
 import scratch_compiler.Blocks.Types.Block;
 import scratch_compiler.Blocks.Types.HatBlock;
 
@@ -25,14 +27,25 @@ public abstract class ScratchObject {
         this.name = name;
     }
 
-    public boolean containsVariable(Variable variable) {
+    public boolean containsVariable(ScratchVariable variable) {
         return getVariables().contains(variable);
     }
 
-    public ArrayList<Variable> getVariables() {
-        ArrayList<Variable> variables = new ArrayList<>();
+    public boolean containsFunctionDefinition(String functionName) {
+        for (HatBlock block : getBlocks()) {
+            if (block instanceof FunctionDefinitionBlock) {
+                ScratchFunction function = ((FunctionDefinitionBlock) block).getFunction();
+                if (function.getName().equals(functionName))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public ArrayList<ScratchVariable> getVariables() {
+        ArrayList<ScratchVariable> variables = new ArrayList<>();
         for (Block block : getBlocks()) {
-            for (Variable variable : block.getVariables()) {
+            for (ScratchVariable variable : block.getVariables()) {
                 if (!variables.contains(variable))
                     variables.add(variable);
             }
@@ -40,18 +53,18 @@ public abstract class ScratchObject {
         return variables;
     }
 
-    public ArrayList<Variable> getGlobalVariables() {
-        ArrayList<Variable> globalVariables = new ArrayList<>();
-        for (Variable variable : getVariables()) {
+    public ArrayList<ScratchVariable> getGlobalVariables() {
+        ArrayList<ScratchVariable> globalVariables = new ArrayList<>();
+        for (ScratchVariable variable : getVariables()) {
             if (variable.isGlobal())
                 globalVariables.add(variable);
         }
         return globalVariables;
     }
 
-    public ArrayList<Variable> getLocalVariables() {
-        ArrayList<Variable> localVariables = new ArrayList<>();
-        for (Variable variable : getVariables()) {
+    public ArrayList<ScratchVariable> getLocalVariables() {
+        ArrayList<ScratchVariable> localVariables = new ArrayList<>();
+        for (ScratchVariable variable : getVariables()) {
             if (!variable.isGlobal())
                 localVariables.add(variable);
         }
@@ -61,6 +74,12 @@ public abstract class ScratchObject {
     public void addBlock(HatBlock block) {
         if (blocks.contains(block))
             throw new RuntimeException("ScratchObject already contains block");
+
+        if (block instanceof FunctionDefinitionBlock) {
+            ScratchFunction function = ((FunctionDefinitionBlock) block).getFunction();
+            if (containsFunctionDefinition(function.getName()))
+                throw new RuntimeException("ScratchObject already contains function definition");
+        }
 
         blocks.add(block);
     }

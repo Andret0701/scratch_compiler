@@ -24,12 +24,12 @@ public class ScratchProject {
         figures.put(figure.getName(), figure);
     }
 
-    public ArrayList<Variable> getGlobalVariables() {
-        ArrayList<Variable> globalVariables = new ArrayList<>();
+    public ArrayList<ScratchVariable> getGlobalVariables() {
+        ArrayList<ScratchVariable> globalVariables = new ArrayList<>();
         globalVariables.addAll(background.getGlobalVariables());
         for (Figure figure : figures.values())
         {
-            for (Variable variable : figure.getGlobalVariables())
+            for (ScratchVariable variable : figure.getGlobalVariables())
             {
                 if (!globalVariables.contains(variable))
                     globalVariables.add(variable);

@@ -1,4 +1,5 @@
 package scratch_compiler.Compiler;
+
 import java.util.ArrayList;
 
 import scratch_compiler.Compiler.lexer.Lexer;
@@ -27,29 +28,38 @@ public class CompilerUtils {
         }
     }
 
-    public static void throwExpected(String expected, int line, String found) {
+    public static void throwExpected(String expected, int line, String found) throws RuntimeException {
         throw new RuntimeException("Expected " + expected + " at line " + line + ". Found '" + found + "'");
     }
 
-    public static void throwExpected(String expected, int line, Token found) {
+    public static void throwExpected(String expected, int line, Token found) throws RuntimeException {
         if (found == null)
             throwExpected(expected, line, "nothing");
         throwExpected(expected, line, found.getValue());
     }
 
-    public static void throwMustBeOfType(TokenType expected, TokenType found) {
+    public static void throwMustBeOfType(TokenType expected, TokenType found) throws RuntimeException {
         throw new IllegalArgumentException("Expected " + expected + ". Found " + found);
     }
 
-    public static void throwOperationNotDefined(TokenType operator, TokenType left, TokenType right) {
+    public static void throwOperationNotDefined(TokenType operator, TokenType left, TokenType right)
+            throws RuntimeException {
         throw new IllegalArgumentException(
                 "Operation " + operator + " not defined for types " + left + " and " + right);
     }
 
-    public static void assertIsType(Token token, TokenType type) {
+    public static void assertIsType(Token token, TokenType type) throws RuntimeException {
         if (token.getType() != type)
             throwMustBeOfType(type, token.getType());
     }
 
+    public static void throwInvalidType(String name, int line, Type type, Type type2) {
+        throw new RuntimeException(
+                "Invalid type " + type + " for " + name + " at line " + line + ". Expected " + type2);
+    }
+
+    public static void throwError(String string, int line) {
+        throw new RuntimeException(string + " at line " + line);
+    }
 
 }

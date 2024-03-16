@@ -5,46 +5,26 @@ public enum VariableType {
     FLOAT,
     INT,
     BOOLEAN,
-    STRUCT;
+    STRUCT,
+    VOID;
 
-    //make a can be converted to function   
-    public boolean canBeConvertedTo(VariableType other) {
-        int score = score();
-        int otherScore = other.score();
-
-        if (score == -1 || otherScore == -1)
-            return false;
-
-        return score >= otherScore;
-    }
-
-    public VariableType next() {
+    @Override
+    public String toString() {
         switch (this) {
-            case BOOLEAN:
-                return INT;
-            case INT:
-                return FLOAT;
-            case FLOAT:
-                return STRING;
             case STRING:
-                return STRING;
+                return "string";
+            case FLOAT:
+                return "float";
+            case INT:
+                return "int";
+            case BOOLEAN:
+                return "boolean";
+            case STRUCT:
+                return "struct";
+            case VOID:
+                return "void";
             default:
                 return null;
-            }
-    }
-
-    private int score() {
-        switch (this) {
-            case STRING:
-                return 0;
-            case FLOAT:
-                return 1;
-            case INT:
-                return 2;
-            case BOOLEAN:
-                return 3;
-            default:
-                return -1;
         }
     }
 }

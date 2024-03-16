@@ -32,11 +32,6 @@ public class StringReader {
         return string.substring(position).startsWith(s);
     }
 
-    public void stripWhitespace() {
-        while (position < string.length() && Character.isWhitespace(string.charAt(position)))
-            position++;
-    }
-
     public void strip(String string) {
         if (startsWith(string))
             position += string.length();

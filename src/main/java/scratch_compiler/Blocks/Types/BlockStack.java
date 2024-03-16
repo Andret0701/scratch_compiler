@@ -16,7 +16,6 @@ public class BlockStack implements Iterable<StackBlock> {
     }
 
     public void push(StackBlock block) {
-        System.out.println("Pushing " + block + " to " + this);
         if (isFinished())
             throw new RuntimeException("BlockStack is finished");
         if (blocks.contains(block))
@@ -30,11 +29,11 @@ public class BlockStack implements Iterable<StackBlock> {
     }
 
     public void push(BlockStack blockStack) {
-        for (StackBlock block : blockStack.blocks) 
+        for (StackBlock block : blockStack.blocks)
             push(block);
     }
 
-    private boolean isFinished() {
+    public boolean isFinished() {
         if (blocks.size() == 0)
             return false;
         return blocks.get(blocks.size() - 1).isEnd();
