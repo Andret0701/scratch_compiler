@@ -1,15 +1,12 @@
 package scratch_compiler.Compiler.parser.statements;
 
-import scratch_compiler.Compiler.DeclarationTable;
 import java.util.ArrayList;
 
 public class Scope extends Statement {
-    public final DeclarationTable declarationTable;
     private ArrayList<Statement> statements;
 
-    public Scope(DeclarationTable declarationTable) {
+    public Scope() {
         statements = new ArrayList<>();
-        this.declarationTable = declarationTable.copy();
     }
 
     public void addStatement(Statement statement) {

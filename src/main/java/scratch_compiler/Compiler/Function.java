@@ -52,4 +52,16 @@ public class Function {
         args = "(" + args + ")";
         return returnType + " " + name + args;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (obj == this)
+            return true;
+        if (!(obj instanceof Function))
+            return false;
+        Function f = (Function) obj;
+        return f.name.equals(this.name);
+    }
 }

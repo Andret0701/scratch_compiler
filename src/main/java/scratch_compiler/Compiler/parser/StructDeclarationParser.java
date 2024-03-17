@@ -10,7 +10,7 @@ import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
 
 public class StructDeclarationParser {
-    public static void parse(TokenReader tokens, DeclarationTable declarationTable) {
+    public static Type parse(TokenReader tokens, DeclarationTable declarationTable) {
         tokens.expectNext(TokenType.STRUCT_DECLARATION);
         Token identifierToken = tokens.expectNext(TokenType.IDENTIFIER);
         String name = identifierToken.getValue();
@@ -23,6 +23,7 @@ public class StructDeclarationParser {
 
         Type structType = new Type(name, fields);
         declarationTable.declareType(structType);
+        return structType;
     }
 
     public static boolean nextIsStructDeclaration(TokenReader tokens) {

@@ -57,8 +57,7 @@ import scratch_compiler.ValueFields.LogicFields.LessThanField;
 
 public class ScratchAssembler {
     public static ScratchProgram assemble(String code) {
-        CompiledCode compiledCode = CompiledCode.compile(code, ScratchCoreAssembler.getDeclarationTable());
-        System.out.println(compiledCode);
+        CompiledCode compiledCode = CompiledCode.compile(code, ScratchCoreAssembler.getDeclarationTable(), true);
 
         ArrayList<FunctionDeclaration> functionDeclarations = compiledCode.getFunctions();
 
@@ -120,7 +119,8 @@ public class ScratchAssembler {
             boolean isFunction) {
         stack.addVariable(getVariable(declaration));
         BlockStack blockStack = new BlockStack();
-        for (Expression argument : declaration.getArguments())
+        // StackAssembler.addExpressionToStack(bl
+        for (Expression argument : declaration.getValue().getArguments())
             blockStack.push(StackAssembler.addValueToStack(assembleExpression(argument, stack, isFunction)));
         return blockStack;
     }
@@ -148,17 +148,25 @@ public class ScratchAssembler {
                 new NumberField(stack.getVariableIndex(getVariable(assignment))));
     }
 
-    static ValueField assembleExpression(Expression expression, VariableStackReference stack, boolean isFunction) {
+    static ArrayList<ValueField> toArray(ValueField... fields) {
+        ArrayList<ValueField> list = new ArrayList<>();
+        for (ValueField field : fields)
+            list.add(field);
+        return list;
+    }
+
+    static ArrayList<ValueField> assembleExpression(Expression expression, VariableStackReference stack,
+            boolean isFunction) {
         if (expression instanceof IntValue)
-            return new NumberField(((IntValue) expression).getValue());
+            return toArray(new NumberField(((IntValue) expression).getValue()));
         if (expression instanceof FloatValue)
-            return new NumberField(((FloatValue) expression).getValue());
+            return toArray(new NumberField(((FloatValue) expression).getValue()));
         if (expression instanceof BooleanValue)
-            return new NumberField(((BooleanValue) expression).getValue() ? 1 : 0);
+            return toArray(new NumberField(((BooleanValue) expression).getValue() ? 1 : 0));
         if (expression instanceof StringValue)
-            return new StringField(((StringValue) expression).getString());
+            return toArray(new StringField(((StringValue) expression).getString()));
         if (expression instanceof VariableValue) {
-            String name = ((VariableValue) expression).getName();
+            String name = ((VariableValue) expression).
             if (ScratchCoreAssembler.isVariable(name))
                 return ScratchCoreAssembler.assembleExpression(name);
 

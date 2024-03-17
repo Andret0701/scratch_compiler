@@ -9,23 +9,17 @@ public class ExpressionOptimiser {
     public static Expression optimise(Expression expression) {
         if (expression instanceof BinaryOperationExpression)
             expression = optimiseBinaryOperationExpression((BinaryOperationExpression) expression);
-              
 
         return expression;
     }
 
     private static Expression optimiseBinaryOperationExpression(BinaryOperationExpression expression) {
-        expression.setLeft(optimise(expression.getLeft()));
-        expression.setRight(optimise(expression.getRight()));
+        expression.setLeft(optimize(expression.getLeft()));
+        expression.setRight(optimize(expression.getRight()));
         if (expression instanceof AdditionExpression || expression instanceof SubtractionExpression)
-            return AdditionSubtractionOptimiser.optimise(expression);
+            return AdditionSubtractionOptimiser.optimize(expression);
 
         return expression;
     }
-
-
-
-
-
 
 }

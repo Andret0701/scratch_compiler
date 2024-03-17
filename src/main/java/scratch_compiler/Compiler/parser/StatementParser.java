@@ -59,16 +59,16 @@ public class StatementParser {
         return statement;
     }
 
-    public static Scope parseScope(TokenReader tokens, DeclarationTable identifierTypes) {
+    public static Scope parseScope(TokenReader tokens, DeclarationTable declarationTable) {
         if (!tokens.isNext(TokenType.OPEN_BRACE))
             return null;
 
-        DeclarationTable innerIdentifierTypes = identifierTypes.copy();
-        Scope scope = new Scope(innerIdentifierTypes);
+        DeclarationTable innerDeclarationTable = declarationTable.copy();
+        Scope scope = new Scope();
 
         tokens.next();
         while (!tokens.isAtEnd() && !tokens.isNext(TokenType.CLOSE_BRACE)) {
-            Statement statement = StatementParser.parse(tokens, innerIdentifierTypes);
+            Statement statement = StatementParser.parse(tokens, innerDeclarationTable);
             if (statement == null)
                 break;
             scope.addStatement(statement);
