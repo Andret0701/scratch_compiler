@@ -37,6 +37,7 @@ public enum TokenType {
     CLOSE("\\)"),
     COMMA(","),
     DOT("\\."),
+    SIZE("#"),
 
     SQUARE_BRACKET_OPEN("\\["),
     SQUARE_BRACKET_CLOSE("\\]"),

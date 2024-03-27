@@ -15,6 +15,7 @@ public class TypeConversionExpression extends Expression {
         return expression;
     }
 
+    @Override
     public Type getType() {
         return type;
     }

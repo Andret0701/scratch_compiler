@@ -2,12 +2,14 @@ package scratch_compiler.Compiler.optimiser;
 
 import java.util.ArrayList;
 import scratch_compiler.Compiler.CompiledCode;
+import scratch_compiler.Compiler.optimiser.constant_folding.ConstantFolding;
 import scratch_compiler.Compiler.optimiser.unreachable_code.UnreachableCode;
 
 public class Optimizer {
     private static ArrayList<Optimization> optimizations = new ArrayList<Optimization>() {
         {
             add(new UnreachableCode());
+            add(new ConstantFolding());
         }
     };
 

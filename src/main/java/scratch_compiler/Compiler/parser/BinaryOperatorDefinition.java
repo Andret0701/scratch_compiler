@@ -1,15 +1,16 @@
 package scratch_compiler.Compiler.parser;
 
-import scratch_compiler.Compiler.Type;
+import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.parser.expressions.types.OperatorType;
 
 public class BinaryOperatorDefinition {
     private OperatorType operatorType;
-    private Type leftType;
-    private Type rightType;
-    private Type returnType;
+    private TypeDefinition leftType;
+    private TypeDefinition rightType;
+    private TypeDefinition returnType;
 
-    public BinaryOperatorDefinition(OperatorType operatorType, Type leftType, Type rightType, Type returnType) {
+    public BinaryOperatorDefinition(OperatorType operatorType, TypeDefinition leftType, TypeDefinition rightType,
+            TypeDefinition returnType) {
         this.operatorType = operatorType;
         this.leftType = leftType;
         this.rightType = rightType;
@@ -20,15 +21,15 @@ public class BinaryOperatorDefinition {
         return operatorType;
     }
 
-    public Type getLeftType() {
+    public TypeDefinition getLeftType() {
         return leftType;
     }
 
-    public Type getRightType() {
+    public TypeDefinition getRightType() {
         return rightType;
     }
 
-    public Type getReturnType() {
+    public TypeDefinition getReturnType() {
         return returnType;
     }
 

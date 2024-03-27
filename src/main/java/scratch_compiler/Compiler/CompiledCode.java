@@ -18,24 +18,12 @@ import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 public class CompiledCode {
     private Scope globalScope = new Scope();
     private ArrayList<FunctionDeclaration> functions = new ArrayList<>();
-    private ArrayList<Type> structs = new ArrayList<>();
+    private ArrayList<TypeDefinition> structs = new ArrayList<>();
 
-    public CompiledCode(Scope scope, ArrayList<FunctionDeclaration> functions, ArrayList<Type> structs) {
+    public CompiledCode(Scope scope, ArrayList<FunctionDeclaration> functions, ArrayList<TypeDefinition> structs) {
         this.globalScope = scope;
         this.functions = new ArrayList<>(functions);
         this.structs = new ArrayList<>(structs);
-    }
-
-    public static CompiledCode compile(String code, DeclarationTable declarationTable, boolean optimise) {
-        ArrayList<Token> tokens = Lexer.lex(code);
-        System.out.println(tokens);
-
-        TokenReader reader = new TokenReader(tokens);
-        CompiledCode compiledCode = GlobalParser.parse(reader, declarationTable);
-        if (optimise)
-            compiledCode = Optimizer.optimize(compiledCode);
-
-        return compiledCode;
     }
 
     public ArrayList<FunctionDeclaration> getFunctions() {
@@ -46,11 +34,11 @@ public class CompiledCode {
         this.functions = new ArrayList<>(functions);
     }
 
-    public ArrayList<Type> getStructs() {
+    public ArrayList<TypeDefinition> getStructs() {
         return new ArrayList<>(structs);
     }
 
-    public void setStructs(ArrayList<Type> structs) {
+    public void setStructs(ArrayList<TypeDefinition> structs) {
         this.structs = new ArrayList<>(structs);
     }
 

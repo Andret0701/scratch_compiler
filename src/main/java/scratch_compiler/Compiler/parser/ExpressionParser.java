@@ -9,9 +9,8 @@ import scratch_compiler.Compiler.lexer.TokenType;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 import scratch_compiler.Compiler.parser.expressions.FunctionCallExpression;
-import scratch_compiler.Compiler.parser.expressions.OperatorExpression;
 import scratch_compiler.Compiler.parser.expressions.ParsedExpression;
-import scratch_compiler.Compiler.parser.expressions.TypeConversionExpression;
+import scratch_compiler.Compiler.parser.expressions.SizeOfExpression;
 import scratch_compiler.Compiler.parser.expressions.UnaryOperator;
 import scratch_compiler.Compiler.parser.expressions.types.Associativity;
 import scratch_compiler.Compiler.parser.expressions.types.ExpressionType;
@@ -23,13 +22,26 @@ import scratch_compiler.Compiler.parser.expressions.values.StringValue;
 import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.CompilerUtils;
 import scratch_compiler.Compiler.DeclarationTable;
+import scratch_compiler.Compiler.Function;
 import scratch_compiler.Compiler.Type;
+import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.UnaryOperatorDefinition;
 
 public class ExpressionParser {
+    public static Expression parse(TypeDefinition type, TokenReader tokens, DeclarationTable declarationTable) {
+        return parse(new Type(type), tokens, declarationTable);
+    }
+
     public static Expression parse(Type type, TokenReader tokens, DeclarationTable declarationTable) {
-        if (tokens.isNext(TokenType.OPEN_BRACE))
-            return StructParser.parse(type, tokens, declarationTable);
+        if (tokens.isNext(TokenType.OPEN_BRACE)) {
+            if (type.isArray())
+                return ArrayParser.parseArrayValue(type.getType(), tokens, declarationTable);
+            else
+                return StructParser.parse(type.getType(), tokens, declarationTable);
+        }
+
+        if (TypeParser.nextIsType(tokens, declarationTable) && type.isArray())
+            return ArrayParser.parseArrayDeclaration(type.getType(), tokens, declarationTable);
 
         Expression expression = parse(tokens, declarationTable);
         if (expression == null)
@@ -141,8 +153,6 @@ public class ExpressionParser {
 
         String functionName = functionToken.getValue();
         declarationTable.validateFunctionUsage(functionName, tokens.peek().getLine());
-        Type returnType = declarationTable.getFunction(functionName).getReturnType();
-
         tokens.expectNext(TokenType.OPEN);
         ArrayList<Expression> arguments = new ArrayList<Expression>();
         while (tokens.peek().getType() != TokenType.CLOSE) {
@@ -154,23 +164,32 @@ public class ExpressionParser {
         }
         tokens.expectNext(TokenType.CLOSE);
 
-        FunctionCallExpression functionCall = new FunctionCallExpression(functionName, arguments, returnType);
+        Function function = declarationTable.getFunction(functionName);
+        FunctionCallExpression functionCall = new FunctionCallExpression(function, arguments);
 
         return new ParsedExpression(functionCall, functionToken, ExpressionType.VALUE);
     }
 
     private static boolean nextIsVariable(TokenReader tokens) {
         TokenType type = tokens.peek().getType();
-        return type == TokenType.IDENTIFIER && !nextIsFunctionCall(tokens);
+        return (type == TokenType.IDENTIFIER && !nextIsFunctionCall(tokens)) || tokens.isNext(TokenType.SIZE);
     }
 
     private static ParsedExpression parseVariable(TokenReader tokens, DeclarationTable declarationTable) {
         if (!nextIsVariable(tokens))
             CompilerUtils.throwExpected("variable", tokens.peek().getLine(), tokens.peek());
 
+        boolean useSize = false;
+        if (tokens.isNext(TokenType.SIZE)) {
+            tokens.expectNext(TokenType.SIZE);
+            useSize = true;
+        }
+
         Token variableToken = tokens.peek();
-        VariableValue variable = VariableParser.parse(tokens, declarationTable);
-        return new ParsedExpression(variable, variableToken, ExpressionType.VALUE);
+        Expression value = VariableParser.parse(tokens, declarationTable);
+        if (useSize)
+            value = new SizeOfExpression((VariableValue) value);
+        return new ParsedExpression(value, variableToken, ExpressionType.VALUE);
     }
 
     private static boolean nextIsValue(TokenReader tokens) {
@@ -278,9 +297,9 @@ public class ExpressionParser {
                         expression.getToken().getLine());
 
                 UnaryOperatorDefinition unaryOperator = declarationTable.getUnaryOperator(operatorType,
-                        operand.getType());
+                        operand.getType().getType());
                 UnaryOperator operatorExpression = new UnaryOperator(operatorType, operand,
-                        unaryOperator.getReturnType());
+                        new Type(unaryOperator.getReturnType()));
 
                 expressions.set(highestPrecedenceIndex,
                         new ParsedExpression(operatorExpression, expression.getToken(), ExpressionType.VALUE));
@@ -297,10 +316,10 @@ public class ExpressionParser {
                         expression.getToken().getLine());
 
                 BinaryOperatorDefinition binaryOperator = declarationTable.getBinaryOperator(operatorType,
-                        left.getType(),
-                        right.getType());
-                OperatorExpression operatorExpression = new BinaryOperator(operatorType, left, right,
-                        binaryOperator.getReturnType());
+                        left.getType().getType(),
+                        right.getType().getType());
+                BinaryOperator operatorExpression = new BinaryOperator(operatorType, left, right,
+                        new Type(binaryOperator.getReturnType()));
                 expressions.set(highestPrecedenceIndex - 1,
                         new ParsedExpression(operatorExpression, expression.getToken(), ExpressionType.VALUE));
                 expressions.remove(highestPrecedenceIndex);

@@ -6,10 +6,10 @@ import scratch_compiler.Compiler.parser.expressions.types.OperatorType;
 
 public class UnaryOperatorDefinition {
     private OperatorType operatorType;
-    private Type operandType;
-    private Type returnType;
+    private TypeDefinition operandType;
+    private TypeDefinition returnType;
 
-    public UnaryOperatorDefinition(OperatorType operatorType, Type operandType, Type returnType) {
+    public UnaryOperatorDefinition(OperatorType operatorType, TypeDefinition operandType, TypeDefinition returnType) {
         this.operatorType = operatorType;
         this.operandType = operandType;
         this.returnType = returnType;
@@ -19,11 +19,11 @@ public class UnaryOperatorDefinition {
         return operatorType;
     }
 
-    public Type getOperandType() {
+    public TypeDefinition getOperandType() {
         return operandType;
     }
 
-    public Type getReturnType() {
+    public TypeDefinition getReturnType() {
         return returnType;
     }
 

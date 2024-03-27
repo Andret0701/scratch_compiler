@@ -30,8 +30,9 @@ public class App {
     public static void main(String[] args) throws Exception {
         ArrayList<Token> tokens = Lexer.lex("2+1.0");
         System.out.println(tokens);
-        TokenReader tokenReader = new TokenReader(tokens);
-        System.out.println(ExpressionParser.parse(tokenReader, DeclarationTable.loadDeclarationTable()));
+        // TokenReader tokenReader = new TokenReader(tokens);
+        // System.out.println(ExpressionParser.parse(tokenReader,
+        // DeclarationTable.loadDeclarationTable()));
 
         ScratchProject project = new ScratchProject();
 

@@ -14,6 +14,7 @@ import scratch_compiler.Compiler.parser.statements.FunctionDeclaration;
 import scratch_compiler.Compiler.parser.statements.IfStatement;
 import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
+import scratch_compiler.Compiler.parser.statements.WhileStatement;
 
 public class UnreachableCode implements Optimization {
     @SuppressWarnings("unchecked")
@@ -58,6 +59,13 @@ public class UnreachableCode implements Optimization {
                         optimisedScope.addStatement(ifStatement.getElseStatement());
                 } else
                     optimisedScope.addStatement(ifStatement);
+
+            } else if (statement instanceof WhileStatement) {
+                WhileStatement whileStatement = (WhileStatement) statement;
+                if (whileStatement.getExpression().equals(new BooleanValue(false))) {
+                    changed = true;
+                } else
+                    optimisedScope.addStatement(whileStatement);
             } else
                 optimisedScope.addStatement(statement);
         }
@@ -87,7 +95,7 @@ public class UnreachableCode implements Optimization {
             }
         }
 
-        for (Statement child : statement.getChildren()) {
+        for (Statement child : statement.getStatements()) {
             referencedFunctions = getReferencedFunctions(child, functions, referencedFunctions);
         }
 

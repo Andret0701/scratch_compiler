@@ -8,16 +8,10 @@ import scratch_compiler.Compiler.parser.expressions.Expression;
 public class FunctionCall extends Statement {
     private Function function;
     private ArrayList<Expression> arguments;
-    private boolean storeOutput;
 
     public FunctionCall(Function function, ArrayList<Expression> arguments) {
-        this(function, arguments, false);
-    }
-
-    public FunctionCall(Function function, ArrayList<Expression> arguments, boolean storeOutput) {
         this.function = function;
         this.arguments = new ArrayList<Expression>(arguments);
-        this.storeOutput = storeOutput;
     }
 
     public Function getFunction() {
@@ -26,10 +20,6 @@ public class FunctionCall extends Statement {
 
     public ArrayList<Expression> getArguments() {
         return new ArrayList<Expression>(arguments);
-    }
-
-    public boolean getStoreOutput() {
-        return storeOutput;
     }
 
     @Override
@@ -44,7 +34,7 @@ public class FunctionCall extends Statement {
         return function.getName() + args;
     }
 
-    public ArrayList<Statement> getChildren() {
+    public ArrayList<Statement> getStatements() {
         return new ArrayList<Statement>();
     }
 }

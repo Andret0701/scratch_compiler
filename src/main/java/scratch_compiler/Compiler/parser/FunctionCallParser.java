@@ -3,7 +3,6 @@ package scratch_compiler.Compiler.parser;
 import java.util.ArrayList;
 
 import scratch_compiler.Compiler.DeclarationTable;
-import scratch_compiler.Compiler.Function;
 import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Compiler.lexer.Token;
 import scratch_compiler.Compiler.lexer.TokenReader;
@@ -24,6 +23,16 @@ public class FunctionCallParser {
         tokens.expectNext(TokenType.CLOSE);
 
         return new FunctionCall(declarationTable.getFunction(name), arguments);
+    }
+
+    public static boolean nextIsFunctionCall(TokenReader tokens, DeclarationTable declarationTable) {
+        if (!tokens.isNext(TokenType.IDENTIFIER))
+            return false;
+        String functionName = tokens.peek().getValue();
+        if (!declarationTable.isFunctionDeclared(functionName))
+            return false;
+
+        return true;
     }
 
     private static ArrayList<Expression> parseArguments(ArrayList<Variable> arguments, TokenReader tokens,

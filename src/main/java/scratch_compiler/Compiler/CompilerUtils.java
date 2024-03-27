@@ -53,9 +53,9 @@ public class CompilerUtils {
             throwMustBeOfType(type, token.getType());
     }
 
-    public static void throwInvalidType(String name, int line, Type type, Type type2) {
+    public static void throwInvalidType(String name, int line, TypeDefinition found, TypeDefinition expected) {
         throw new RuntimeException(
-                "Invalid type " + type + " for " + name + " at line " + line + ". Expected " + type2);
+                "Invalid type " + found + " for " + name + " at line " + line + ". Expected " + expected);
     }
 
     public static void throwError(String string, int line) {

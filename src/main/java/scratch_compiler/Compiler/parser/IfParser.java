@@ -1,7 +1,7 @@
 package scratch_compiler.Compiler.parser;
 
 import scratch_compiler.Compiler.DeclarationTable;
-import scratch_compiler.Compiler.Type;
+import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
@@ -14,7 +14,7 @@ public class IfParser {
         tokens.expectNext(TokenType.OPEN);
 
         Expression expression = ExpressionParser.parse(tokens, identifierTypes);
-        if (!expression.getType().equals(new Type(VariableType.BOOLEAN)))
+        if (!expression.getType().equals(new TypeDefinition(VariableType.BOOLEAN)))
             throw new RuntimeException("Expected boolean expression at line " + tokens.peek().getLine());
 
         tokens.expectNext(TokenType.CLOSE);

@@ -8,14 +8,9 @@ import scratch_compiler.Blocks.PenDownBlock;
 import scratch_compiler.Blocks.PenUpBlock;
 import scratch_compiler.Blocks.SayBlock;
 import scratch_compiler.Blocks.SetPositionBlock;
-import scratch_compiler.Blocks.SetXBlock;
-import scratch_compiler.Blocks.SetYBlock;
-import scratch_compiler.Blocks.WaitBlock;
-import scratch_compiler.Blocks.Types.Block;
 import scratch_compiler.Blocks.Types.BlockStack;
-import scratch_compiler.Blocks.Types.StackBlock;
-import scratch_compiler.Compiler.DeclarationTable;
-import scratch_compiler.Compiler.Function;
+import scratch_compiler.Compiler.SystemCall;
+import scratch_compiler.Compiler.SystemCallFlag;
 import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Compiler.parser.VariableType;
@@ -25,29 +20,33 @@ import scratch_compiler.ValueFields.ScratchValues.XPositionField;
 import scratch_compiler.ValueFields.ScratchValues.YPositionField;
 
 public class ScratchCoreAssembler {
-    public static DeclarationTable getDeclarationTable() {
-        DeclarationTable declarationTable = DeclarationTable.loadDeclarationTable();
-        declarationTable.declareVariable(new Variable("x", new Type(VariableType.FLOAT)));
-        declarationTable.declareVariable(new Variable("y", new Type(VariableType.FLOAT)));
-        declarationTable.declareVariable(new Variable("direction", new Type(VariableType.FLOAT)));
+    private final static ArrayList<SystemCall> systemCalls = new ArrayList<>(Arrays.asList(
+            new SystemCall("say", new Type(VariableType.VOID),
+                    new ArrayList<>(Arrays.asList(new Variable("message", new Type(VariableType.STRING)))),
+                    SystemCallFlag.ChangesGlobalState, SystemCallFlag.OnlyInGlobalScope),
+            new SystemCall("penUp", new Type(VariableType.VOID), new ArrayList<Variable>(),
+                    SystemCallFlag.ChangesGlobalState),
+            new SystemCall("penDown", new Type(VariableType.VOID), new ArrayList<Variable>(),
+                    SystemCallFlag.ChangesGlobalState),
+            new SystemCall("moveTo", new Type(VariableType.VOID),
+                    new ArrayList<>(Arrays.asList(new Variable("x", new Type(VariableType.FLOAT)),
+                            new Variable("y", new Type(VariableType.FLOAT)))),
+                    SystemCallFlag.ChangesGlobalState)));
 
-        declarationTable.declareFunction(new Function("say", new Type(VariableType.VOID),
-                new Variable("message", new Type(VariableType.STRING))));
-        declarationTable.declareFunction(new Function("penUp", new Type(VariableType.VOID)));
-        declarationTable.declareFunction(new Function("penDown", new Type(VariableType.VOID)));
-        declarationTable.declareFunction(new Function("moveTo", new Type(VariableType.VOID),
-                new Variable("x", new Type(VariableType.FLOAT)),
-                new Variable("y", new Type(VariableType.FLOAT))));
-
-        return declarationTable;
+    public static ArrayList<SystemCall> getSystemCalls() {
+        return new ArrayList<SystemCall>(systemCalls);
     }
 
-    public static boolean isVariable(String name) {
-        return getDeclarationTable().isVariableDeclared(name);
-    }
+    // public static boolean isVariable(String name) {
+    // return getDeclarationTable().isVariableDeclared(name);
+    // }
 
-    public static boolean isFunction(String name) {
-        return getDeclarationTable().isFunctionDeclared(name);
+    public static boolean isSystemCall(String name) {
+        for (SystemCall systemCall : systemCalls) {
+            if (systemCall.getName().equals(name))
+                return true;
+        }
+        return false;
     }
 
     public static ValueField assembleExpression(String name) {
@@ -60,20 +59,20 @@ public class ScratchCoreAssembler {
         return ScratchAssembler.defaultField();
     }
 
-    public static BlockStack assembleAssignment(String name, ValueField value) {
+    // public static BlockStack assembleAssignment(String name, ValueField value) {
 
-        StackBlock stackBlock;
-        if (name.equals("x"))
-            stackBlock = new SetXBlock(value);
-        else if (name.equals("y"))
-            stackBlock = new SetYBlock(value);
-        else
-            stackBlock = ScratchAssembler.defaultBlock();
+    // StackBlock stackBlock;
+    // if (name.equals("x"))
+    // stackBlock = new SetXBlock(value);
+    // else if (name.equals("y"))
+    // stackBlock = new SetYBlock(value);
+    // else
+    // stackBlock = ScratchAssembler.defaultBlock();
 
-        return new BlockStack(stackBlock);
-    }
+    // return new BlockStack(stackBlock);
+    // }
 
-    public static BlockStack assembleFunctionCall(String name, List<ValueField> arguments) {
+    public static BlockStack assembleSystemCall(String name, List<ValueField> arguments) {
         if (name.equals("say"))
             return new BlockStack(new SayBlock(arguments.get(0)));
         if (name.equals("penUp"))

@@ -3,80 +3,39 @@ package scratch_compiler.Compiler.parser;
 import scratch_compiler.Compiler.CompilerUtils;
 import scratch_compiler.Compiler.DeclarationTable;
 import scratch_compiler.Compiler.Type;
-import scratch_compiler.Compiler.Variable;
-
-import java.util.ArrayList;
-
+import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.lexer.Token;
 import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
-import scratch_compiler.Compiler.parser.expressions.values.BooleanValue;
-import scratch_compiler.Compiler.parser.expressions.values.FloatValue;
-import scratch_compiler.Compiler.parser.expressions.values.IntValue;
-import scratch_compiler.Compiler.parser.expressions.values.StringValue;
-import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 
 public class VariableDeclarationParser {
     public static VariableDeclaration parse(TokenReader tokens, DeclarationTable declarationTable) {
         Type type = TypeParser.parse(tokens, declarationTable);
-        if (type == new Type(VariableType.VOID))
+        if (type.getType() == new TypeDefinition(VariableType.VOID))
             CompilerUtils.throwError("Cannot declare variable of type void", tokens.peek().getLine());
 
         Token identifierToken = tokens.expectNext(TokenType.IDENTIFIER);
         String name = identifierToken.getValue();
         declarationTable.validateVariableDeclaration(name, identifierToken.getLine());
-        tokens.expectNext(TokenType.ASSIGN);
 
-        Expression value = ExpressionParser.parse(type, tokens, declarationTable);
-        declarationTable.declareVariable(new Variable(name, type));
+        Expression value = null;
+        if (tokens.isNext(TokenType.ASSIGN)) {
+            tokens.expectNext(TokenType.ASSIGN);
+            value = ExpressionParser.parse(type, tokens, declarationTable);
+        }
+
+        declarationTable.declareVariable(name, type);
         return new VariableDeclaration(name, type, value);
     }
 
-    // private static VariableDeclaration parseArrayDeclaration(TokenReader tokens,
-    // DeclarationTable declarationTable,
-    // TokenType declarationType, VariableType type) {
+    public static boolean nextIsVariableDeclaration(TokenReader tokens, DeclarationTable declarationTable) {
+        if (!TypeParser.nextIsType(tokens, declarationTable))
+            return false;
 
-    // tokens.expectNext(TokenType.SQUARE_BRACKET_OPEN);
-    // tokens.expectNext(TokenType.SQUARE_BRACKET_CLOSE);
-
-    // Token identifier = tokens.expectNext(TokenType.IDENTIFIER);
-    // String name = identifier.getValue();
-    // declarationTable.validateVariableDeclaration(name, identifier.getLine());
-
-    // tokens.expectNext(TokenType.ASSIGN);
-    // tokens.expectNext(declarationType);
-    // tokens.expectNext(TokenType.SQUARE_BRACKET_OPEN);
-
-    // Expression expression = ExpressionParser.parse(tokens, declarationTable);
-    // Expression.validateType(expression, VariableType.INT,
-    // tokens.peek().getLine());
-
-    // tokens.expectNext(TokenType.SQUARE_BRACKET_CLOSE);
-    // tokens.expectNext(TokenType.SEMICOLON);
-
-    // declarationTable.declareVariable(new Variable(name, type));
-    // return new VariableDeclaration(name, type, expression);
-    // }
-
-    public static Expression getDefaultValue(VariableType type) {
-        switch (type) {
-            case FLOAT:
-                return new FloatValue(0);
-            case INT:
-                return new IntValue(0);
-            case BOOLEAN:
-                return new BooleanValue(false);
-            case STRING:
-                return new StringValue("");
-            default:
-                throw new RuntimeException("Invalid type " + type);
-        }
+        TokenType nextType = tokens.peek(1).getType();
+        return nextType == TokenType.IDENTIFIER || nextType == TokenType.SQUARE_BRACKET_OPEN;
     }
-
-    // int[] a = int[5];
-    // int[5] a;
-    // int[] a = {1, 2, 3};
 
 }

@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import scratch_compiler.Compiler.parser.BinaryOperatorDefinition;
-import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
-import scratch_compiler.Compiler.parser.expressions.types.BinaryOperatorDefinitionType;
 import scratch_compiler.Compiler.parser.expressions.types.OperatorType;
-import scratch_compiler.Compiler.parser.expressions.types.UnaryOperatorDefinitionType;
 
 public class DeclarationTable {
-    private HashMap<String, Type> declaredTypes;
+    private HashMap<String, TypeDefinition> declaredTypes;
     private HashMap<String, Variable> declaredVariables;
     private HashMap<String, Function> declaredFunctions;
+    private HashMap<String, SystemCall> declaredSystemCalls;
     private HashMap<OperatorType, ArrayList<UnaryOperatorDefinition>> unaryOperators;
     private HashMap<OperatorType, ArrayList<BinaryOperatorDefinition>> binaryOperators;
     private TypeConversionTable typeConversionTable;
@@ -22,56 +20,23 @@ public class DeclarationTable {
         declaredTypes = new HashMap<>();
         declaredVariables = new HashMap<>();
         declaredFunctions = new HashMap<>();
+        declaredSystemCalls = new HashMap<>();
         unaryOperators = new HashMap<>();
         binaryOperators = new HashMap<>();
         typeConversionTable = new TypeConversionTable();
     }
 
-    public static DeclarationTable loadDeclarationTable() {
-        DeclarationTable declarationTable = new DeclarationTable();
-
-        // Declare primitive types
-        declarationTable.declareType(new Type(VariableType.BOOLEAN));
-        declarationTable.declareType(new Type(VariableType.INT));
-        declarationTable.declareType(new Type(VariableType.FLOAT));
-        declarationTable.declareType(new Type(VariableType.STRING));
-        declarationTable.declareType(new Type(VariableType.VOID));
-
-        // Declare unary operators
-        for (UnaryOperatorDefinitionType unaryOperator : UnaryOperatorDefinitionType.values()) {
-            declarationTable.declareOperator(new UnaryOperatorDefinition(unaryOperator.getOperatorType(),
-                    new Type(unaryOperator.getOperandType()), new Type(unaryOperator.getReturnType())));
-        }
-
-        // Declare binary operators
-        for (BinaryOperatorDefinitionType binaryOperator : BinaryOperatorDefinitionType.values()) {
-            declarationTable.declareOperator(new BinaryOperatorDefinition(binaryOperator.getOperatorType(),
-                    new Type(binaryOperator.getLeftType()), new Type(binaryOperator.getRightType()),
-                    new Type(binaryOperator.getReturnType())));
-        }
-
-        // Declare type conversions
-        declarationTable.typeConversionTable.addConversion(new Type(VariableType.BOOLEAN),
-                new Type(VariableType.INT));
-        declarationTable.typeConversionTable.addConversion(new Type(VariableType.INT),
-                new Type(VariableType.FLOAT));
-        declarationTable.typeConversionTable.addConversion(new Type(VariableType.FLOAT), new Type(VariableType.STRING));
-
-        return declarationTable;
-    }
-
-    public void declareType(Type type) {
+    public void declareType(TypeDefinition type) {
         String name = type.getName();
         if (isTypeDeclared(name))
             throw new IllegalArgumentException("Type " + name + " is already declared");
         declaredTypes.put(name, type);
     }
 
-    public void declareVariable(Variable variable) {
-        String name = variable.getName();
+    public void declareVariable(String name, Type type) {
         if (isVariableDeclared(name))
             throw new IllegalArgumentException("Variable " + name + " is already declared");
-        declaredVariables.put(name, variable);
+        declaredVariables.put(name, new Variable(name, type));
     }
 
     public void declareFunction(Function function) {
@@ -81,13 +46,20 @@ public class DeclarationTable {
         declaredFunctions.put(name, function);
     }
 
+    public void declareSystemCall(SystemCall systemCall) {
+        String name = systemCall.getName();
+        if (isSystemCallDeclared(name))
+            throw new IllegalArgumentException("System call " + name + " is already declared");
+        declaredSystemCalls.put(name, systemCall);
+    }
+
     public void declareOperator(UnaryOperatorDefinition unaryOperator) {
         OperatorType operatorType = unaryOperator.getOperatorType();
         if (!unaryOperators.containsKey(operatorType))
             unaryOperators.put(operatorType, new ArrayList<UnaryOperatorDefinition>());
 
-        Type operandType = unaryOperator.getOperandType();
-        Type returnType = unaryOperator.getReturnType();
+        TypeDefinition operandType = unaryOperator.getOperandType();
+        TypeDefinition returnType = unaryOperator.getReturnType();
 
         unaryOperators.get(operatorType).add(new UnaryOperatorDefinition(operatorType, operandType, returnType));
     }
@@ -97,12 +69,16 @@ public class DeclarationTable {
         if (!binaryOperators.containsKey(operatorType))
             binaryOperators.put(operatorType, new ArrayList<BinaryOperatorDefinition>());
 
-        Type leftType = binaryOperator.getLeftType();
-        Type rightType = binaryOperator.getRightType();
-        Type returnType = binaryOperator.getReturnType();
+        TypeDefinition leftType = binaryOperator.getLeftType();
+        TypeDefinition rightType = binaryOperator.getRightType();
+        TypeDefinition returnType = binaryOperator.getReturnType();
 
         binaryOperators.get(operatorType)
                 .add(new BinaryOperatorDefinition(operatorType, leftType, rightType, returnType));
+    }
+
+    public void declareConversion(Type from, Type to) {
+        typeConversionTable.addConversion(from, to);
     }
 
     public boolean isTypeDeclared(String typeName) {
@@ -117,7 +93,11 @@ public class DeclarationTable {
         return declaredFunctions.containsKey(functionName);
     }
 
-    private boolean isOperatorDeclared(OperatorType operatorType, Type operandType) {
+    public boolean isSystemCallDeclared(String systemCallName) {
+        return declaredSystemCalls.containsKey(systemCallName);
+    }
+
+    private boolean isOperatorDeclared(OperatorType operatorType, TypeDefinition operandType) {
         if (!unaryOperators.containsKey(operatorType))
             return false;
 
@@ -129,7 +109,7 @@ public class DeclarationTable {
         return false;
     }
 
-    private boolean isOperatorDeclared(OperatorType operatorType, Type leftType, Type rightType) {
+    private boolean isOperatorDeclared(OperatorType operatorType, TypeDefinition leftType, TypeDefinition rightType) {
         if (!binaryOperators.containsKey(operatorType))
             return false;
         for (BinaryOperatorDefinition binaryOperator : binaryOperators.get(operatorType)) {
@@ -140,7 +120,7 @@ public class DeclarationTable {
         return false;
     }
 
-    public Type getType(String typeName) {
+    public TypeDefinition getType(String typeName) {
         if (!isTypeDeclared(typeName))
             throw new IllegalArgumentException("Type " + typeName + " is not declared");
         return declaredTypes.get(typeName);
@@ -158,7 +138,13 @@ public class DeclarationTable {
         return declaredFunctions.get(functionName);
     }
 
-    public UnaryOperatorDefinition getUnaryOperator(OperatorType operatorType, Type operandType) {
+    public SystemCall getSystemCall(String systemCallName) {
+        if (!isSystemCallDeclared(systemCallName))
+            throw new IllegalArgumentException("System call " + systemCallName + " is not declared");
+        return declaredSystemCalls.get(systemCallName);
+    }
+
+    public UnaryOperatorDefinition getUnaryOperator(OperatorType operatorType, TypeDefinition operandType) {
         if (!isOperatorDeclared(operatorType, operandType))
             throw new IllegalArgumentException("Operator " + operatorType + " is not declared for type " + operandType);
         for (UnaryOperatorDefinition unaryOperator : unaryOperators.get(operatorType)) {
@@ -168,7 +154,8 @@ public class DeclarationTable {
         throw new IllegalArgumentException("Operator " + operatorType + " is not declared for type " + operandType);
     }
 
-    public BinaryOperatorDefinition getBinaryOperator(OperatorType operatorType, Type leftType, Type rightType) {
+    public BinaryOperatorDefinition getBinaryOperator(OperatorType operatorType, TypeDefinition leftType,
+            TypeDefinition rightType) {
         if (!isOperatorDeclared(operatorType, leftType, rightType))
             throw new IllegalArgumentException(
                     "Operator " + operatorType + " is not declared for types " + leftType + " and "
@@ -202,13 +189,34 @@ public class DeclarationTable {
             throw new IllegalArgumentException("Function " + functionName + " is not declared at line " + line);
     }
 
+    public void validateSystemCallUsage(String systemCallName, int line) {
+        if (!isSystemCallDeclared(systemCallName))
+            throw new IllegalArgumentException("System call " + systemCallName + " is not declared at line " + line);
+    }
+
     public void validateOperatorUsage(OperatorType operatorType, Type operandType, int line) {
+        if (operandType.isArray())
+            throw new IllegalArgumentException(
+                    "Cannot use operator " + operatorType + " on array type at line " + line);
+        validateOperatorUsage(operatorType, operandType.getType(), line);
+    }
+
+    public void validateOperatorUsage(OperatorType operatorType, TypeDefinition operandType, int line) {
         if (!isOperatorDeclared(operatorType, operandType))
             throw new IllegalArgumentException("Operator " + operatorType + " is not declared for type " + operandType
                     + " at line " + line);
     }
 
     public void validateOperatorUsage(OperatorType operatorType, Type leftType, Type rightType, int line) {
+        if (leftType.isArray() || rightType.isArray())
+            throw new IllegalArgumentException(
+                    "Cannot use operator " + operatorType + " on array type at line " + line);
+
+        validateOperatorUsage(operatorType, leftType.getType(), rightType.getType(), line);
+    }
+
+    public void validateOperatorUsage(OperatorType operatorType, TypeDefinition leftType, TypeDefinition rightType,
+            int line) {
         if (!isOperatorDeclared(operatorType, leftType, rightType))
             throw new IllegalArgumentException(
                     "Operator " + operatorType + " is not declared for types " + leftType + " and "
@@ -216,10 +224,8 @@ public class DeclarationTable {
     }
 
     public void validateTypeConversion(Expression from, Type to, int line) {
-        if (from == null) {
-            validateTypeConversion(new Type(VariableType.VOID), to, line);
-            return;
-        }
+        if (from == null)
+            throw new IllegalArgumentException("Cannot convert null to " + to + " at line " + line);
         validateTypeConversion(from.getType(), to, line);
     }
 
@@ -238,6 +244,7 @@ public class DeclarationTable {
         DeclarationTable copy = new DeclarationTable();
         copy.declaredVariables = new HashMap<>(declaredVariables);
         copy.declaredFunctions = new HashMap<>(declaredFunctions);
+        copy.declaredSystemCalls = new HashMap<>(declaredSystemCalls);
         copy.declaredTypes = new HashMap<>(declaredTypes);
         copy.unaryOperators = new HashMap<>(unaryOperators);
         copy.binaryOperators = new HashMap<>(binaryOperators);

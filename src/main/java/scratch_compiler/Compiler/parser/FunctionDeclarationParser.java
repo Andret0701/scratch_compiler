@@ -1,18 +1,15 @@
 package scratch_compiler.Compiler.parser;
 
 import java.util.ArrayList;
-
-import javax.swing.plaf.nimbus.State;
-
 import scratch_compiler.Compiler.DeclarationTable;
 import scratch_compiler.Compiler.Function;
 import scratch_compiler.Compiler.Type;
+import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Compiler.lexer.Token;
 import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
-import scratch_compiler.Compiler.parser.statements.ControlFlowStatement;
 import scratch_compiler.Compiler.parser.statements.FunctionDeclaration;
 import scratch_compiler.Compiler.parser.statements.IfStatement;
 import scratch_compiler.Compiler.parser.statements.ReturnStatement;
@@ -33,11 +30,11 @@ public class FunctionDeclarationParser {
         declarationTable.declareFunction(new Function(name, returnType, arguments));
         DeclarationTable functionDeclarationTable = declarationTable.copy();
         for (Variable argument : arguments)
-            functionDeclarationTable.declareVariable(argument);
+            functionDeclarationTable.declareVariable(argument.getName(), argument.getType());
 
         Scope scope = StatementParser.parseScope(tokens, functionDeclarationTable);
         fixReturnType(scope, returnType, functionDeclarationTable);
-        if (!scopeReturns(scope) && !returnType.equals(new Type(VariableType.VOID)))
+        if (!scopeReturns(scope) && !returnType.equals(new TypeDefinition(VariableType.VOID)))
             throw new RuntimeException("Function " + name + " does not return a value in all code paths");
 
         return new FunctionDeclaration(new Function(name, returnType, arguments), scope);
@@ -55,7 +52,8 @@ public class FunctionDeclarationParser {
         return new ReturnStatement(expression);
     }
 
-    private static void fixReturnType(Statement statement, Type returnType, DeclarationTable declarationTable) {
+    private static void fixReturnType(Statement statement, Type returnType,
+            DeclarationTable declarationTable) {
         if (statement instanceof ReturnStatement) {
             ReturnStatement returnStatement = (ReturnStatement) statement;
             declarationTable.validateTypeConversion(returnStatement.getExpression(), returnType, 0);
@@ -64,8 +62,11 @@ public class FunctionDeclarationParser {
             return;
         }
 
-        for (Statement child : statement.getChildren())
-            fixReturnType(child, returnType, declarationTable);
+        for (int i = 0; i < statement.getScopeCount(); i++) {
+            for (Statement child : statement.getScope(i).getStatements()) {
+                fixReturnType(child, returnType, declarationTable);
+            }
+        }
     }
 
     private static boolean statementReturns(Statement statement) {
@@ -91,10 +92,10 @@ public class FunctionDeclarationParser {
     }
 
     private static boolean ifStatementReturns(IfStatement ifStatement) {
-        if (ifStatement.getElseStatement() == null)
+        if (ifStatement.getElseScope() == null)
             return false;
 
-        return statementReturns(ifStatement.getStatement()) && statementReturns(ifStatement.getElseStatement());
+        return statementReturns(ifStatement.getIfScope()) && statementReturns(ifStatement.getElseScope());
     }
 
 }

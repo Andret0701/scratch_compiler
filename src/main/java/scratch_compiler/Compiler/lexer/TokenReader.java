@@ -52,20 +52,19 @@ public class TokenReader {
                 return pop();
 
         String expected = "";
-        for (int i = 0; i < types.length; i++)
-        {
+        for (int i = 0; i < types.length; i++) {
             expected += types[i];
-            if (i != types.length - 2)
+            if (types.length > 1 && i == types.length - 2)
                 expected += " or ";
-            else if (i == types.length - 2)
+            else if (types.length > 2 && i < types.length - 3)
                 expected += ", ";
         }
         CompilerUtils.throwExpected(expected, peek().getLine(), peek());
         return null;
     }
 
-    public  boolean isNext(TokenType type) {
-        if (peek()==null||peek().getType() != type)
+    public boolean isNext(TokenType type) {
+        if (peek() == null || peek().getType() != type)
             return false;
         return true;
     }
@@ -80,8 +79,10 @@ public class TokenReader {
     @Override
     public String toString() {
         String result = "";
-        for (Token token : tokens)
+        for (int i = position; i < tokens.size(); i++) {
+            String token = tokens.get(i).toString();
             result += token + " ";
+        }
         return result;
     }
 }

@@ -1,7 +1,7 @@
 package scratch_compiler.Compiler.parser.expressions.values;
 
 import scratch_compiler.Compiler.Type;
-import scratch_compiler.Compiler.parser.VariableType;
+import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 
 public class FloatValue extends Expression {
@@ -17,12 +17,16 @@ public class FloatValue extends Expression {
 
     @Override
     public Type getType() {
-        return new Type(VariableType.FLOAT);
+        return new Type(TypeDefinition.FLOAT);
     }
 
     @Override
     public String toString() {
         return Double.toString(getValue());
+    }
+
+    public boolean isConstant() {
+        return true;
     }
 
 }

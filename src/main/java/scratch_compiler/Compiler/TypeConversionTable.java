@@ -1,6 +1,5 @@
 package scratch_compiler.Compiler;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -67,7 +66,7 @@ public class TypeConversionTable {
         if (expression.getType().equals(to))
             return expression;
 
-        if (!canConvert(expression.getType(), to))
+        if (expression.getType().isArray() || !canConvert(expression.getType(), to))
             throw new RuntimeException("Invalid conversion from " + expression.getType() + " to " + to);
 
         ArrayList<Type> conversions = getConversions(expression.getType(), to);

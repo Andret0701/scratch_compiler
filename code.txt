@@ -1,15 +1,14 @@
-// struct Vector2{
-//     float x;
-//     float y;
-// }
+struct Vector2{
+    float x;
+    float y;
+}
 
-// struct Figure{
-//     Vector2 position;
-//     float rotation;
-//     float size;
-//     string name;
-// }
-
+struct Figure{
+    Vector2 position;
+    float rotation;
+    float size;
+    string name;
+}
 
 int getValue1()
 {
@@ -23,43 +22,65 @@ int getValue2()
 
 int thisShouldBeOptimizedOut()
 {
-    return getValue1()+getValue2();
+    return getValue1() + getValue2();
 }
 
-// int update()
-// {
-//     Vector2 position={0.0,0.0};
-//     Figure figure = {position,0.0,1.0, "Chris"};
-//     figure={position,0.0,1.0, "Chris"};
 
-//     say(figure.name);
-//     say(figure.position.x);
-//     say(figure.position.y);
-//     say(figure.rotation);
+int update()
+{
+    Vector2 position={0.0,0.0};
+    Figure figure = {position,0.0,1.0, "Chris"};
+    figure={position,0.0,1.0, "Chris"};
 
-//     say(true);
-//     say(1);
+    say(figure.name);
+    say(figure.position.x);
+    say(figure.position.y);
+    say(figure.rotation);
 
-//     int test=1;
-//     if(false)
-//         test=thisShouldBeOptimizedOut();
+    say(true);
+    say(1);
 
-//     if(true)
-//         return 1;
-//     else
-//         return thisShouldBeOptimizedOut();
-// }
+    int test=1;
+    if(false)
+        test=thisShouldBeOptimizedOut();
 
-
-// int wonga=0;
-
-// update();
+    if(true)
+        return 1;
+    else
+        return thisShouldBeOptimizedOut();
+}
 
 
+int wonga=0;
+
+update();
+
+
+
+
+int[] array3={1,2,3,4,5,6,7,8,9,10};
+int[] array2=int[10]; //this should move the stack pointer but not change the value
+int test2=array3[0];
+
+
+
+struct test {
+    int val;
+    int val2;
+}
+
+test[] test_array = { {1,2}, {3,4}, {5,6} };
+for(int i=0; i<#test_array; i++)
+{
+    say(test_array[i].val);
+}
+
+int a=1;
+int b=2;
+int[] array = int[a+b];
 
 int test=1;
-
-if(false)
+if(false) 
     test=thisShouldBeOptimizedOut();
 
 if(true)
@@ -67,3 +88,45 @@ if(true)
 else
     test=thisShouldBeOptimizedOut();
 
+
+
+
+
+struct foo{
+    int a;
+    int b;
+}
+
+struct bar{
+    foo c;
+    foo d;
+}
+
+bar[] e= bar[10];
+
+
+bar f = { {1,2}, {3,4}};
+bar g;
+
+
+
+foo[] h = { {1,2}, {3,4}, {5,6}, {7,8}, {9,10}, {11,12}, {13,14}, {15,16}, {17,18}, {19,20} };
+h[0]= {1,2};
+h[1].a=3;
+
+foo j = {3,4};
+h[2]= j;
+h[3]=f.c;
+h[4]=h[3];
+
+
+
+
+foo[] array_func()
+{
+    return foo[10];
+}
+
+
+foo[] k=array_func();
+int l=array_func()[0].a;

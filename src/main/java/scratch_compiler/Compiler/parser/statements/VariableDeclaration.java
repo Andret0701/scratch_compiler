@@ -3,41 +3,48 @@ package scratch_compiler.Compiler.parser.statements;
 import java.util.ArrayList;
 
 import scratch_compiler.Compiler.Type;
+import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 
 public class VariableDeclaration extends Statement {
-    private String name;
-    private Type type;
-    private Expression value;
+    private Variable variable;
 
     public VariableDeclaration(String name, Type type, Expression value) {
-        this.name = name;
-        this.type = type;
+        super(1);
+        this.variable = new Variable(name, type);
         validateValue(value);
-        this.value = value;
+        setExpression(0, value);
     }
 
     private void validateValue(Expression value) {
+        // add some array check stuff
+        if (variable.getType().isArray() && value == null)
+            throw new RuntimeException("Array declaration must have a value");
+
         if (value == null)
-            throw new RuntimeException("Invalid value for variable " + name);
-        if (!value.getType().equals(type))
-            throw new RuntimeException("Invalid type for variable " + name);
+            return;
+
+        if (!value.getType().equals(variable.getType()))
+            throw new RuntimeException("Invalid type for variable " + variable.getName());
     }
 
-    public String getName() {
-        return name;
+    public Variable getVariable() {
+        return variable;
     }
 
-    public Expression getValue() {
-        return value;
+    public Expression getExpression() {
+        return getExpression(0);
     }
 
     @Override
     public String toString() {
-        return type.toString() + " " + name + " = " + value;
+        if (getExpression() == null)
+            return variable.toString();
+
+        return variable + " = " + getExpression();
     }
 
-    public ArrayList<Statement> getChildren() {
+    public ArrayList<Statement> getStatements() {
         return new ArrayList<Statement>();
     }
 }

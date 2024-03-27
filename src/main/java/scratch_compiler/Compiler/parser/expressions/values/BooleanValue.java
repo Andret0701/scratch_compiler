@@ -1,7 +1,7 @@
 package scratch_compiler.Compiler.parser.expressions.values;
 
 import scratch_compiler.Compiler.Type;
-import scratch_compiler.Compiler.parser.VariableType;
+import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 
 public class BooleanValue extends Expression {
@@ -18,7 +18,7 @@ public class BooleanValue extends Expression {
 
     @Override
     public Type getType() {
-        return new Type(VariableType.BOOLEAN);
+        return new Type(TypeDefinition.BOOLEAN);
     }
 
     @Override
@@ -36,6 +36,10 @@ public class BooleanValue extends Expression {
             return false;
         BooleanValue rhs = (BooleanValue) obj;
         return value == rhs.value;
+    }
+
+    public boolean isConstant() {
+        return true;
     }
 
 }

@@ -19,6 +19,7 @@ import scratch_compiler.Blocks.Types.BlockStack;
 import scratch_compiler.Blocks.Types.HatBlock;
 import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.Compiler.CompiledCode;
+import scratch_compiler.Compiler.Compiler;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
@@ -57,7 +58,7 @@ import scratch_compiler.ValueFields.LogicFields.LessThanField;
 
 public class ScratchAssembler {
     public static ScratchProgram assemble(String code) {
-        CompiledCode compiledCode = CompiledCode.compile(code, ScratchCoreAssembler.getDeclarationTable(), true);
+        CompiledCode compiledCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
 
         ArrayList<FunctionDeclaration> functionDeclarations = compiledCode.getFunctions();
 

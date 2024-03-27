@@ -2,6 +2,7 @@ package scratch_compiler.Compiler.parser;
 
 import scratch_compiler.Compiler.DeclarationTable;
 import scratch_compiler.Compiler.Type;
+import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.lexer.Token;
 import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
@@ -16,15 +17,19 @@ public class AssignmentParser {
     public static Assignment parse(TokenReader tokens, DeclarationTable declarationTable) {
         Token token = tokens.peek();
         VariableValue variable = VariableParser.parse(tokens, declarationTable);
+        if (variable.isArray() && variable.getIndex() == null)
+            throw new RuntimeException("Cannot assign to array at line " + token.getLine());
 
         OperatorType operatorType = null;
         Expression value = null;
 
         TokenType operator = tokens.peek().getType();
         if (operator == TokenType.INCREMENT) {
+            tokens.pop();
             operatorType = OperatorType.ADDITION;
             value = new IntValue(1);
         } else if (operator == TokenType.DECREMENT) {
+            tokens.pop();
             operatorType = OperatorType.SUBTRACTION;
             value = new IntValue(1);
         } else {
@@ -52,10 +57,11 @@ public class AssignmentParser {
 
         declarationTable.validateOperatorUsage(operator, identifier.getType(), expression.getType(), line);
 
-        Type returnType = declarationTable.getBinaryOperator(operator, identifier.getType(), expression.getType())
+        TypeDefinition returnType = declarationTable
+                .getBinaryOperator(operator, identifier.getType().getType(), expression.getType().getType())
                 .getReturnType();
 
-        BinaryOperator binaryOperation = new BinaryOperator(operator, identifier, expression, returnType);
+        BinaryOperator binaryOperation = new BinaryOperator(operator, identifier, expression, new Type(returnType));
         return binaryOperation;
     }
 

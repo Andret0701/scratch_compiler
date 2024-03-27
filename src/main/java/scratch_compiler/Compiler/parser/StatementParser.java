@@ -41,12 +41,13 @@ public class StatementParser {
                 break;
             case IDENTIFIER:
                 String name = tokens.peek().getValue();
-                TokenType nextType = tokens.peek(1).getType();
-                if (declarationTable.isFunctionDeclared(name) && nextType == TokenType.OPEN)
+                if (FunctionCallParser.nextIsFunctionCall(tokens, declarationTable))
                     statement = FunctionCallParser.parse(tokens, declarationTable);
+                else if (SystemCallParser.nextIsSystemCall(tokens, declarationTable))
+                    statement = SystemCallParser.parse(tokens, declarationTable);
                 else if (declarationTable.isVariableDeclared(name))
                     statement = AssignmentParser.parse(tokens, declarationTable);
-                else if (declarationTable.isTypeDeclared(name) && nextType == TokenType.IDENTIFIER)
+                else if (VariableDeclarationParser.nextIsVariableDeclaration(tokens, declarationTable))
                     statement = VariableDeclarationParser.parse(tokens, declarationTable);
                 else
                     CompilerUtils.throwExpected("statement", tokens.peek().getLine(), tokens.peek());
