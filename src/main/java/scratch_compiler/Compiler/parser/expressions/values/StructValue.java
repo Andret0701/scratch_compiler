@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.TypeDefinition;
+import scratch_compiler.Compiler.TypeField;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 
 public class StructValue extends Expression {
@@ -20,11 +21,11 @@ public class StructValue extends Expression {
         if (fields.size() != type.getFields().size())
             throw new RuntimeException("Invalid number of fields for struct " + type.getName());
 
-        ArrayList<String> fieldNames = type.getFields();
+        ArrayList<TypeField> typeFields = type.getFields();
         for (int i = 0; i < fields.size(); i++) {
-            if (!fields.get(i).getType().getType().equals(type.getField(fieldNames.get(i))))
+            if (!fields.get(i).getType().getType().equals(typeFields.get(i).getType()))
                 throw new RuntimeException(
-                        "Invalid type for field " + fieldNames.get(i) + " in struct " + type.getName());
+                        "Invalid type for field " + typeFields.get(i).getName() + " in struct " + type.getName());
         }
     }
 
@@ -34,9 +35,9 @@ public class StructValue extends Expression {
     }
 
     public Expression getField(String name) {
-        ArrayList<String> fieldNames = type.getFields();
-        for (int i = 0; i < fieldNames.size(); i++) {
-            if (fieldNames.get(i).equals(name))
+        ArrayList<TypeField> typeFields = type.getFields();
+        for (int i = 0; i < typeFields.size(); i++) {
+            if (typeFields.get(i).getName().equals(name))
                 return fields.get(i);
         }
         throw new RuntimeException("Field " + name + " not found in struct " + type.getName());

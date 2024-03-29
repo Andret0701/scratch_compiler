@@ -14,17 +14,15 @@ import scratch_compiler.Compiler.parser.expressions.values.ArrayValue;
 
 public class ArrayParser {
     public static ArrayDeclarationValue parseArrayDeclaration(
-            TypeDefinition type, TokenReader tokens,
+            TokenReader tokens,
             DeclarationTable declarationTable) {
         TypeDefinition arrayType = TypeParser.parseDefinition(tokens, declarationTable);
-        if (!arrayType.equals(type))
-            CompilerUtils.throwError("Array type mismatch", tokens.peek().getLine());
 
         tokens.expectNext(TokenType.SQUARE_BRACKET_OPEN);
         Expression size = ExpressionParser.parse(new Type(VariableType.INT), tokens, declarationTable);
         tokens.expectNext(TokenType.SQUARE_BRACKET_CLOSE);
 
-        return new ArrayDeclarationValue(type, size);
+        return new ArrayDeclarationValue(arrayType, size);
     }
 
     public static ArrayValue parseArrayValue(TypeDefinition type, TokenReader tokens,

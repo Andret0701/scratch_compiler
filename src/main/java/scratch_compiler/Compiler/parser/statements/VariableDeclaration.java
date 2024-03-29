@@ -18,6 +18,7 @@ public class VariableDeclaration extends Statement {
 
     private void validateValue(Expression value) {
         // add some array check stuff
+        System.out.println(variable + ": " + value);
         if (variable.getType().isArray() && value == null)
             throw new RuntimeException("Array declaration must have a value");
 

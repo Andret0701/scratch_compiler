@@ -16,4 +16,9 @@ public class TypeField {
     public TypeDefinition getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return type + " " + name;
+    }
 }

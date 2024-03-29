@@ -9,7 +9,9 @@ import scratch_compiler.Compiler.lexer.TokenType;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 import scratch_compiler.Compiler.parser.expressions.FunctionCallExpression;
+import scratch_compiler.Compiler.parser.expressions.IndexExpression;
 import scratch_compiler.Compiler.parser.expressions.ParsedExpression;
+import scratch_compiler.Compiler.parser.expressions.ReferenceExpression;
 import scratch_compiler.Compiler.parser.expressions.SizeOfExpression;
 import scratch_compiler.Compiler.parser.expressions.UnaryOperator;
 import scratch_compiler.Compiler.parser.expressions.types.Associativity;
@@ -26,6 +28,7 @@ import scratch_compiler.Compiler.Function;
 import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.UnaryOperatorDefinition;
+import scratch_compiler.Compiler.Variable;
 
 public class ExpressionParser {
     public static Expression parse(TypeDefinition type, TokenReader tokens, DeclarationTable declarationTable) {
@@ -40,9 +43,6 @@ public class ExpressionParser {
                 return StructParser.parse(type.getType(), tokens, declarationTable);
         }
 
-        if (TypeParser.nextIsType(tokens, declarationTable) && type.isArray())
-            return ArrayParser.parseArrayDeclaration(type.getType(), tokens, declarationTable);
-
         Expression expression = parse(tokens, declarationTable);
         if (expression == null)
             return null;
@@ -52,6 +52,9 @@ public class ExpressionParser {
     }
 
     public static Expression parse(TokenReader tokens, DeclarationTable declarationTable) {
+        if (TypeParser.nextIsType(tokens, declarationTable))
+            return ArrayParser.parseArrayDeclaration(tokens, declarationTable);
+
         ArrayList<ParsedExpression> expressions = parseExpressions(tokens, declarationTable);
         Expression expression = assembleExpression(expressions, declarationTable);
         return expression;
@@ -170,26 +173,22 @@ public class ExpressionParser {
         return new ParsedExpression(functionCall, functionToken, ExpressionType.VALUE);
     }
 
-    private static boolean nextIsVariable(TokenReader tokens) {
+    public static boolean nextIsVariable(TokenReader tokens) {
         TokenType type = tokens.peek().getType();
-        return (type == TokenType.IDENTIFIER && !nextIsFunctionCall(tokens)) || tokens.isNext(TokenType.SIZE);
+        return (type == TokenType.IDENTIFIER && !nextIsFunctionCall(tokens));
     }
 
-    private static ParsedExpression parseVariable(TokenReader tokens, DeclarationTable declarationTable) {
+    public static ParsedExpression parseVariable(TokenReader tokens, DeclarationTable declarationTable) {
         if (!nextIsVariable(tokens))
             CompilerUtils.throwExpected("variable", tokens.peek().getLine(), tokens.peek());
 
-        boolean useSize = false;
-        if (tokens.isNext(TokenType.SIZE)) {
-            tokens.expectNext(TokenType.SIZE);
-            useSize = true;
-        }
-
         Token variableToken = tokens.peek();
-        Expression value = VariableParser.parse(tokens, declarationTable);
-        if (useSize)
-            value = new SizeOfExpression((VariableValue) value);
-        return new ParsedExpression(value, variableToken, ExpressionType.VALUE);
+        String variableName = tokens.expectNext(TokenType.IDENTIFIER).getValue();
+        declarationTable.validateVariableUsage(variableName, variableToken.getLine());
+        Variable variable = declarationTable.getVariable(variableName);
+
+        return new ParsedExpression(new VariableValue(variable.getName(), variable.getType()), variableToken,
+                ExpressionType.VALUE);
     }
 
     private static boolean nextIsValue(TokenReader tokens) {
@@ -239,33 +238,69 @@ public class ExpressionParser {
         return new ParsedExpression(expression, openToken, ExpressionType.VALUE);
     }
 
+    private static boolean nextIsSize(TokenReader tokenReader) {
+        return tokenReader.isNext(TokenType.SIZE);
+    }
+
+    private static ParsedExpression parseSize(TokenReader tokenReader, DeclarationTable declarationTable) {
+        if (!nextIsSize(tokenReader))
+            CompilerUtils.throwExpected("size of", tokenReader.peek().getLine(), tokenReader.peek());
+
+        tokenReader.expectNext(TokenType.SIZE);
+        return new ParsedExpression(null, tokenReader.peek(), ExpressionType.SIZE);
+    }
+
+    public static boolean nextIsIndex(TokenReader tokenReader) {
+        return tokenReader.isNext(TokenType.SQUARE_BRACKET_OPEN);
+    }
+
+    public static ParsedExpression parseIndex(TokenReader tokenReader, DeclarationTable declarationTable) {
+        if (!nextIsIndex(tokenReader))
+            CompilerUtils.throwExpected("index", tokenReader.peek().getLine(), tokenReader.peek());
+
+        tokenReader.expectNext(TokenType.SQUARE_BRACKET_OPEN);
+        Expression index = parse(tokenReader, declarationTable);
+        tokenReader.expectNext(TokenType.SQUARE_BRACKET_CLOSE);
+        return new ParsedExpression(null, tokenReader.peek(), ExpressionType.INDEX, index);
+    }
+
+    public static boolean nextIsReference(TokenReader tokenReader) {
+        return tokenReader.isNext(TokenType.DOT);
+    }
+
+    public static ParsedExpression parseReference(TokenReader tokenReader, DeclarationTable declarationTable) {
+        if (!nextIsReference(tokenReader))
+            CompilerUtils.throwExpected("reference", tokenReader.peek().getLine(), tokenReader.peek());
+
+        tokenReader.expectNext(TokenType.DOT);
+        Token identifierToken = tokenReader.expectNext(TokenType.IDENTIFIER);
+        String identifier = identifierToken.getValue();
+        return new ParsedExpression(null, identifierToken, ExpressionType.REFERENCE, identifier);
+    }
+
     private static ArrayList<ParsedExpression> parseExpressions(TokenReader tokens, DeclarationTable declarationTable) {
         ArrayList<ParsedExpression> expressions = new ArrayList<ParsedExpression>();
-        ExpressionType lastExpression = ExpressionType.BINARY_OPERATION;
         while (!tokens.isAtEnd()) {
-            if (nextIsUnaryOperator(tokens) && (lastExpression == ExpressionType.BINARY_OPERATION
-                    || lastExpression == ExpressionType.UNARY_OPERATION)) {
+            boolean hasLeftValue = expressions.size() > 0
+                    && (expressions.get(expressions.size() - 1).getExpression() != null);
+            if (nextIsUnaryOperator(tokens) && !hasLeftValue) {
                 expressions.add(parseUnaryOperator(tokens));
-                lastExpression = ExpressionType.UNARY_OPERATION;
-            } else if (nextIsBinaryOperator(tokens) && (lastExpression == ExpressionType.VALUE)) {
+            } else if (nextIsBinaryOperator(tokens) && hasLeftValue) {
                 expressions.add(parseBinaryOperator(tokens));
-                lastExpression = ExpressionType.BINARY_OPERATION;
-            } else if (nextIsFunctionCall(tokens) && (lastExpression == ExpressionType.UNARY_OPERATION
-                    || lastExpression == ExpressionType.BINARY_OPERATION)) {
+            } else if (nextIsFunctionCall(tokens)) {
                 expressions.add(parseFunctionCall(tokens, declarationTable));
-                lastExpression = ExpressionType.VALUE;
-            } else if (nextIsVariable(tokens) && (lastExpression == ExpressionType.UNARY_OPERATION
-                    || lastExpression == ExpressionType.BINARY_OPERATION)) {
+            } else if (nextIsVariable(tokens)) {
                 expressions.add(parseVariable(tokens, declarationTable));
-                lastExpression = ExpressionType.VALUE;
-            } else if (nextIsValue(tokens) && (lastExpression == ExpressionType.UNARY_OPERATION
-                    || lastExpression == ExpressionType.BINARY_OPERATION)) {
+            } else if (nextIsValue(tokens)) {
                 expressions.add(parseValue(tokens, declarationTable));
-                lastExpression = ExpressionType.VALUE;
-            } else if (nextIsOpen(tokens) && (lastExpression == ExpressionType.UNARY_OPERATION
-                    || lastExpression == ExpressionType.BINARY_OPERATION)) {
+            } else if (nextIsOpen(tokens)) {
                 expressions.add(parseOpen(tokens, declarationTable));
-                lastExpression = ExpressionType.VALUE;
+            } else if (nextIsSize(tokens)) {
+                expressions.add(parseSize(tokens, declarationTable));
+            } else if (nextIsIndex(tokens)) {
+                expressions.add(parseIndex(tokens, declarationTable));
+            } else if (nextIsReference(tokens)) {
+                expressions.add(parseReference(tokens, declarationTable));
             } else
                 break;
         }
@@ -284,49 +319,121 @@ public class ExpressionParser {
                 throw new RuntimeException("Invalid expression: " + expressions);
 
             ParsedExpression expression = expressions.get(highestPrecedenceIndex);
-            boolean isUnary = expression.getType() == ExpressionType.UNARY_OPERATION;
-            OperatorType operatorType = getOperatorType(expression.getToken().getType(), isUnary);
 
-            if (isUnary) {
-                ParsedExpression nextExpression = expressions.get(highestPrecedenceIndex + 1);
-                if (nextExpression.getExpression() == null)
-                    throw new RuntimeException("Invalid expression: " + expressions);
+            if (expression.getType() == ExpressionType.UNARY_OPERATION
+                    || expression.getType() == ExpressionType.BINARY_OPERATION) {
+                boolean isUnary = expression.getType() == ExpressionType.UNARY_OPERATION;
+                OperatorType operatorType = getOperatorType(expression.getToken().getType(), isUnary);
+                if (expression.getType() == ExpressionType.UNARY_OPERATION) {
+                    ParsedExpression nextExpression = expressions.get(highestPrecedenceIndex + 1);
+                    if (nextExpression.getExpression() == null)
+                        throw new RuntimeException("Invalid expression: " + expressions);
 
-                Expression operand = nextExpression.getExpression();
-                declarationTable.validateOperatorUsage(operatorType, operand.getType(),
-                        expression.getToken().getLine());
+                    Expression operand = nextExpression.getExpression();
+                    declarationTable.validateOperatorUsage(operatorType, operand.getType(),
+                            expression.getToken().getLine());
 
-                UnaryOperatorDefinition unaryOperator = declarationTable.getUnaryOperator(operatorType,
-                        operand.getType().getType());
-                UnaryOperator operatorExpression = new UnaryOperator(operatorType, operand,
-                        new Type(unaryOperator.getReturnType()));
+                    UnaryOperatorDefinition unaryOperator = declarationTable.getUnaryOperator(operatorType,
+                            operand.getType().getType());
+                    UnaryOperator operatorExpression = new UnaryOperator(operatorType, operand,
+                            new Type(unaryOperator.getReturnType()));
 
-                expressions.set(highestPrecedenceIndex,
-                        new ParsedExpression(operatorExpression, expression.getToken(), ExpressionType.VALUE));
-                expressions.remove(highestPrecedenceIndex + 1);
-            } else {
-                ParsedExpression leftExpression = expressions.get(highestPrecedenceIndex - 1);
-                ParsedExpression rightExpression = expressions.get(highestPrecedenceIndex + 1);
-                if (leftExpression.getExpression() == null || rightExpression.getExpression() == null)
-                    throw new RuntimeException("Invalid expression: " + expressions);
+                    expressions.set(highestPrecedenceIndex,
+                            new ParsedExpression(operatorExpression, expression.getToken(), ExpressionType.VALUE));
+                    expressions.remove(highestPrecedenceIndex + 1);
+                } else {
+                    ParsedExpression leftExpression = expressions.get(highestPrecedenceIndex - 1);
+                    ParsedExpression rightExpression = expressions.get(highestPrecedenceIndex + 1);
+                    if (leftExpression.getExpression() == null || rightExpression.getExpression() == null)
+                        throw new RuntimeException("Invalid expression: " + expressions);
+
+                    Expression left = leftExpression.getExpression();
+                    Expression right = rightExpression.getExpression();
+                    declarationTable.validateOperatorUsage(operatorType, left.getType(), right.getType(),
+                            expression.getToken().getLine());
+
+                    BinaryOperatorDefinition binaryOperator = declarationTable.getBinaryOperator(operatorType,
+                            left.getType().getType(),
+                            right.getType().getType());
+                    BinaryOperator operatorExpression = new BinaryOperator(operatorType, left, right,
+                            new Type(binaryOperator.getReturnType()));
+                    expressions.set(highestPrecedenceIndex - 1,
+                            new ParsedExpression(operatorExpression, expression.getToken(), ExpressionType.VALUE));
+                    expressions.remove(highestPrecedenceIndex);
+                    expressions.remove(highestPrecedenceIndex);
+                }
+            } else if (expression.getType() == ExpressionType.REFERENCE) {
+                int leftIndex = highestPrecedenceIndex - 1;
+                if (leftIndex < 0)
+                    CompilerUtils.throwError("Expected something before reference", expression.getToken().getLine());
+
+                ParsedExpression leftExpression = expressions.get(leftIndex);
+                if (leftExpression.getExpression() == null)
+                    CompilerUtils.throwError("Expected something referencable before reference",
+                            expression.getToken().getLine());
 
                 Expression left = leftExpression.getExpression();
-                Expression right = rightExpression.getExpression();
-                declarationTable.validateOperatorUsage(operatorType, left.getType(), right.getType(),
-                        expression.getToken().getLine());
+                if (left.getType().isArray())
+                    CompilerUtils.throwError("Cannot reference array", expression.getToken().getLine());
 
-                BinaryOperatorDefinition binaryOperator = declarationTable.getBinaryOperator(operatorType,
-                        left.getType().getType(),
-                        right.getType().getType());
-                BinaryOperator operatorExpression = new BinaryOperator(operatorType, left, right,
-                        new Type(binaryOperator.getReturnType()));
-                expressions.set(highestPrecedenceIndex - 1,
-                        new ParsedExpression(operatorExpression, expression.getToken(), ExpressionType.VALUE));
+                if (left.getType().getType().getType() != VariableType.STRUCT)
+                    CompilerUtils.throwError("Cannot reference non-struct", expression.getToken().getLine());
+
+                String reference = (String) expression.getData();
+
+                Expression referenceExpression = new ReferenceExpression(reference, left);
+                // set the new expression
+
+                expressions.set(leftIndex,
+                        new ParsedExpression(referenceExpression, expression.getToken(), ExpressionType.VALUE));
                 expressions.remove(highestPrecedenceIndex);
+            } else if (expression.getType() == ExpressionType.INDEX) {
+                int leftIndex = highestPrecedenceIndex - 1;
+                if (leftIndex < 0)
+                    CompilerUtils.throwError("Expected something before index", expression.getToken().getLine());
+
+                ParsedExpression leftExpression = expressions.get(leftIndex);
+                if (leftExpression.getExpression() == null)
+                    CompilerUtils.throwError("Expected something indexable before index",
+                            expression.getToken().getLine());
+
+                Expression left = leftExpression.getExpression();
+                if (!left.getType().isArray())
+                    CompilerUtils.throwError("Cannot index non-array", expression.getToken().getLine());
+
+                Expression index = (Expression) expression.getData();
+                Expression indexExpression = new IndexExpression(left, index);
+                // set the new expression
+                expressions.set(leftIndex,
+                        new ParsedExpression(indexExpression, expression.getToken(), ExpressionType.VALUE));
                 expressions.remove(highestPrecedenceIndex);
+
+            } else if (expression.getType() == ExpressionType.SIZE) {
+                int rightIndex = highestPrecedenceIndex + 1;
+                if (rightIndex >= expressions.size())
+                    CompilerUtils.throwError("Expected something after size", expression.getToken().getLine());
+
+                ParsedExpression rightExpression = expressions.get(rightIndex);
+                if (rightExpression.getExpression() == null)
+                    CompilerUtils.throwError("Expected something sizeable after size", expression.getToken().getLine());
+
+                Expression right = rightExpression.getExpression();
+                if (!right.getType().isArray())
+                    CompilerUtils.throwError("Cannot get size of non-array", expression.getToken().getLine());
+
+                Expression sizeExpression = new SizeOfExpression(right);
+                // set the new expression
+                expressions.set(highestPrecedenceIndex,
+                        new ParsedExpression(sizeExpression, expression.getToken(), ExpressionType.VALUE));
+                expressions.remove(rightIndex);
             }
+
+            else
+                CompilerUtils.throwError("Invalid expression: " + expressions, expression.getToken().getLine());
+
         }
         return expressions.get(0).getExpression();
+
     }
 
     private static int findHighestPrecedence(List<ParsedExpression> expressions) {
@@ -351,6 +458,22 @@ public class ExpressionParser {
                 Associativity associativity = getBinaryOperatorAssociativity(operatorType);
                 if (precedence < highest
                         || (precedence == highest && associativity == Associativity.RIGHT_TO_LEFT && i > index)) {
+                    highest = precedence;
+                    index = i;
+                }
+            }
+
+            if (expression.getType() == ExpressionType.INDEX || expression.getType() == ExpressionType.REFERENCE) {
+                int precedence = -100;
+                if (precedence < highest) {
+                    highest = precedence;
+                    index = i;
+                }
+            }
+
+            if (expression.getType() == ExpressionType.SIZE) {
+                int precedence = -99;
+                if (precedence < highest) {
                     highest = precedence;
                     index = i;
                 }

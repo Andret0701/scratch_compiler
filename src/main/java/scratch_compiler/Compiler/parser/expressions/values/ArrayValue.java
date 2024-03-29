@@ -18,7 +18,7 @@ public class ArrayValue extends Expression {
 
     private void validateValues(ArrayList<Expression> values) {
         for (Expression value : values) {
-            if (!value.getType().equals(type))
+            if (!value.getType().getType().equals(type.getType()))
                 throw new RuntimeException("Invalid type for array value");
         }
     }

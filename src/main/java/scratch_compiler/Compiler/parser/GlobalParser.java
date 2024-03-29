@@ -22,7 +22,7 @@ public class GlobalParser {
             else if (StructDeclarationParser.nextIsStructDeclaration(tokens))
                 structs.add(StructDeclarationParser.parse(tokens, declarationTable));
             else {
-                Statement statement = StatementParser.parse(tokens, declarationTable);
+                Statement statement = StatementParser.parse(tokens, declarationTable, null);
                 if (statement != null)
                     globalScope.addStatement(statement);
                 else

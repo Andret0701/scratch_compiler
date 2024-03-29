@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableValue;
 import scratch_compiler.Compiler.parser.ExpressionContainer;
-import scratch_compiler.Compiler.parser.VariableReference;
+import scratch_compiler.Compiler.parser.TypeReference;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 import scratch_compiler.Compiler.parser.expressions.SizeOfExpression;
@@ -37,7 +37,7 @@ public class ConvertExpression {
 
     private static Expression convertVariableValue(VariableValue variableValue) {
         String name = variableValue.getName();
-        VariableReference reference = variableValue.getReference();
+        TypeReference reference = variableValue.getReference();
         while (reference != null) {
             name = reference.getName() + ":" + name;
             reference = reference.getNext();

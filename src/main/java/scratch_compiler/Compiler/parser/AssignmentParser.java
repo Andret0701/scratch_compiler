@@ -1,5 +1,6 @@
 package scratch_compiler.Compiler.parser;
 
+import scratch_compiler.Compiler.CompilerUtils;
 import scratch_compiler.Compiler.DeclarationTable;
 import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.TypeDefinition;
@@ -8,6 +9,9 @@ import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
+import scratch_compiler.Compiler.parser.expressions.IndexExpression;
+import scratch_compiler.Compiler.parser.expressions.ParsedExpression;
+import scratch_compiler.Compiler.parser.expressions.ReferenceExpression;
 import scratch_compiler.Compiler.parser.expressions.types.OperatorType;
 import scratch_compiler.Compiler.parser.expressions.values.IntValue;
 import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
@@ -16,9 +20,8 @@ import scratch_compiler.Compiler.parser.statements.Assignment;
 public class AssignmentParser {
     public static Assignment parse(TokenReader tokens, DeclarationTable declarationTable) {
         Token token = tokens.peek();
-        VariableValue variable = VariableParser.parse(tokens, declarationTable);
-        if (variable.isArray() && variable.getIndex() == null)
-            throw new RuntimeException("Cannot assign to array at line " + token.getLine());
+
+        Expression variable = parseVariableReference(tokens, declarationTable);
 
         OperatorType operatorType = null;
         Expression value = null;
@@ -50,7 +53,7 @@ public class AssignmentParser {
         return new Assignment(variable, value);
     }
 
-    private static Expression parseExpression(VariableValue identifier, OperatorType operator, Expression expression,
+    private static Expression parseExpression(Expression identifier, OperatorType operator, Expression expression,
             DeclarationTable declarationTable, int line) {
         if (operator == null)
             return expression;
@@ -63,6 +66,27 @@ public class AssignmentParser {
 
         BinaryOperator binaryOperation = new BinaryOperator(operator, identifier, expression, new Type(returnType));
         return binaryOperation;
+    }
+
+    private static Expression parseVariableReference(TokenReader tokens, DeclarationTable declarationTable) {
+        if (!ExpressionParser.nextIsVariable(tokens))
+            CompilerUtils.throwError("Expected variable", tokens.peek().getLine());
+
+        Expression expression = ExpressionParser.parseVariable(tokens, declarationTable).getExpression();
+        if (expression.getType().isArray()) {
+            if (!ExpressionParser.nextIsIndex(tokens))
+                CompilerUtils.throwError("Expected index", tokens.peek().getLine());
+            Expression index = (Expression) ExpressionParser.parseIndex(tokens, declarationTable).getData();
+            expression = new IndexExpression(expression, index);
+        }
+
+        while (ExpressionParser.nextIsReference(tokens)) {
+            String reference = (String) ExpressionParser.parseReference(tokens, declarationTable).getData();
+            expression = new ReferenceExpression(reference, expression);
+        }
+
+        return expression;
+
     }
 
 }

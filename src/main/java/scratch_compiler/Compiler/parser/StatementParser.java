@@ -1,6 +1,7 @@
 package scratch_compiler.Compiler.parser;
 
 import scratch_compiler.Compiler.DeclarationTable;
+import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.CompilerUtils;
 import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
@@ -8,19 +9,19 @@ import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class StatementParser {
-    public static Statement parse(TokenReader tokens, DeclarationTable declarationTable) {
+    public static Statement parse(TokenReader tokens, DeclarationTable declarationTable, Type returnType) {
         if (tokens.isAtEnd())
             return null;
 
         TokenType type = tokens.peek().getType();
         if (type == TokenType.OPEN_BRACE)
-            return parseScope(tokens, declarationTable);
+            return parseScope(tokens, declarationTable, returnType);
         if (type == TokenType.IF)
-            return IfParser.parse(tokens, declarationTable);
+            return IfParser.parse(tokens, declarationTable, returnType);
         if (type == TokenType.WHILE)
-            return WhileParser.parse(tokens, declarationTable);
+            return WhileParser.parse(tokens, declarationTable, returnType);
         if (type == TokenType.FOR)
-            return ForParser.parse(tokens, declarationTable);
+            return ForParser.parse(tokens, declarationTable, returnType);
 
         Statement statement = null;
         switch (type) {
@@ -37,7 +38,10 @@ public class StatementParser {
                 statement = VariableDeclarationParser.parse(tokens, declarationTable);
                 break;
             case RETURN:
-                statement = FunctionDeclarationParser.parseReturnStatement(tokens, declarationTable);
+                if (returnType == null)
+                    CompilerUtils.throwError("Return statement outside of function", tokens.peek().getLine());
+
+                statement = FunctionDeclarationParser.parseReturnStatement(tokens, declarationTable, returnType);
                 break;
             case IDENTIFIER:
                 String name = tokens.peek().getValue();
@@ -60,7 +64,7 @@ public class StatementParser {
         return statement;
     }
 
-    public static Scope parseScope(TokenReader tokens, DeclarationTable declarationTable) {
+    public static Scope parseScope(TokenReader tokens, DeclarationTable declarationTable, Type returnType) {
         if (!tokens.isNext(TokenType.OPEN_BRACE))
             return null;
 
@@ -69,7 +73,7 @@ public class StatementParser {
 
         tokens.next();
         while (!tokens.isAtEnd() && !tokens.isNext(TokenType.CLOSE_BRACE)) {
-            Statement statement = StatementParser.parse(tokens, innerDeclarationTable);
+            Statement statement = StatementParser.parse(tokens, innerDeclarationTable, returnType);
             if (statement == null)
                 break;
             scope.addStatement(statement);

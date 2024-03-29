@@ -41,6 +41,11 @@ public class Type {
     }
 
     @Override
+    public int hashCode() {
+        return getType().hashCode();
+    }
+
+    @Override
     public String toString() {
         return type.toString() + (isArray ? "[]" : "");
     }

@@ -1,7 +1,6 @@
 package scratch_compiler.Compiler;
 
 import java.util.ArrayList;
-import scratch_compiler.Compiler.parser.VariableReference;
 import scratch_compiler.Compiler.parser.VariableType;
 
 public class TypeDefinition {
@@ -55,28 +54,20 @@ public class TypeDefinition {
         return false;
     }
 
-    public TypeDefinition reference(VariableReference reference) {
-        if (reference == null)
-            return this;
-        TypeDefinition field = getField(reference.getName());
-        if (field == null)
-            throw new RuntimeException("Field " + reference.getName() + " not found in struct " + name);
-
-        VariableReference next = reference.getNext();
-        return field.reference(next);
-
+    public TypeDefinition reference(String reference) {
+        for (TypeField field : fields) {
+            if (field.getName().equals(reference))
+                return field.getType();
+        }
+        throw new RuntimeException("Field " + reference + " not found in struct " + name);
     }
 
-    public boolean containsReference(VariableReference reference) {
-        if (reference == null)
-            return true;
-
-        TypeDefinition field = getField(reference.getName());
-        if (field == null)
-            return false;
-
-        VariableReference next = reference.getNext();
-        return field.containsReference(next);
+    public boolean containsReference(String reference) {
+        for (TypeField field : fields) {
+            if (field.getName().equals(reference))
+                return true;
+        }
+        return false;
     }
 
     @Override

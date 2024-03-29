@@ -2,16 +2,19 @@ package scratch_compiler.Compiler.parser.expressions;
 
 import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.parser.VariableType;
-import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 
 public class SizeOfExpression extends Expression {
-    public SizeOfExpression(VariableValue variableValue) {
+    public SizeOfExpression(Expression expression) {
         super(1);
-        setExpression(0, variableValue);
+
+        if (!expression.getType().isArray())
+            throw new IllegalArgumentException("The expression must be an array");
+
+        setExpression(0, expression);
     }
 
-    public VariableValue getVariable() {
-        return (VariableValue) getExpression(0);
+    public Expression getExpression() {
+        return getExpression(0);
     }
 
     @Override
@@ -21,6 +24,6 @@ public class SizeOfExpression extends Expression {
 
     @Override
     public String toString() {
-        return "sizeof(" + getVariable() + ")";
+        return "sizeof(" + getExpression() + ")";
     }
 }

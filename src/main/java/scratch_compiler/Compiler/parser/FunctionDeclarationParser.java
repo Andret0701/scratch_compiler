@@ -32,23 +32,27 @@ public class FunctionDeclarationParser {
         for (Variable argument : arguments)
             functionDeclarationTable.declareVariable(argument.getName(), argument.getType());
 
-        Scope scope = StatementParser.parseScope(tokens, functionDeclarationTable);
+        Scope scope = StatementParser.parseScope(tokens, functionDeclarationTable, returnType);
         fixReturnType(scope, returnType, functionDeclarationTable);
-        if (!scopeReturns(scope) && !returnType.equals(new TypeDefinition(VariableType.VOID)))
+        if (!scopeReturns(scope) && !returnType.equals(new Type(VariableType.VOID)))
             throw new RuntimeException("Function " + name + " does not return a value in all code paths");
 
         return new FunctionDeclaration(new Function(name, returnType, arguments), scope);
     }
 
     public static boolean nextIsFunctionDeclaration(TokenReader tokens, DeclarationTable declarationTable) {
-        return TypeParser.nextIsType(tokens, declarationTable) && tokens.peek(1).getType() == TokenType.IDENTIFIER
-                && tokens.peek(2).getType() == TokenType.OPEN;
+        System.out.println(tokens.peek() + " " + tokens.peek(1));
+        return TypeParser.nextIsType(tokens, declarationTable) && ((tokens.peek(1).getType() == TokenType.IDENTIFIER
+                && tokens.peek(2).getType() == TokenType.OPEN)
+                || (tokens.peek(1).getType() == TokenType.SQUARE_BRACKET_OPEN
+                        && tokens.peek(3).getType() == TokenType.IDENTIFIER
+                        && tokens.peek(4).getType() == TokenType.OPEN));
     }
 
     public static ReturnStatement parseReturnStatement(TokenReader tokens,
-            DeclarationTable declarationTable) {
+            DeclarationTable declarationTable, Type returnType) {
         tokens.expectNext(TokenType.RETURN);
-        Expression expression = ExpressionParser.parse(tokens, declarationTable);
+        Expression expression = ExpressionParser.parse(returnType, tokens, declarationTable);
         return new ReturnStatement(expression);
     }
 
