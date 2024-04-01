@@ -7,7 +7,6 @@ import scratch_compiler.Compiler.Type;
 
 public class FunctionCallExpression extends Expression {
     private Function function;
-    private ArrayList<Expression> arguments;
 
     public FunctionCallExpression(Function function, ArrayList<Expression> arguments) {
         super(arguments.size());
@@ -22,11 +21,15 @@ public class FunctionCallExpression extends Expression {
         return function.getReturnType();
     }
 
-    public Function geFunction() {
+    public Function getFunction() {
         return function;
     }
 
     public ArrayList<Expression> getArguments() {
+        ArrayList<Expression> arguments = new ArrayList<>();
+        for (int i = 0; i < getExpressionCount(); i++) {
+            arguments.add(getExpression(i));
+        }
         return arguments;
     }
 

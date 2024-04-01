@@ -23,6 +23,10 @@ public class Scope extends Statement {
         statements.add(statement);
     }
 
+    public void addAllStatements(ArrayList<Statement> statements) {
+        this.statements.addAll(statements);
+    }
+
     public ArrayList<Statement> getStatements() {
         return new ArrayList<>(statements);
     }

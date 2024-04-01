@@ -2,7 +2,9 @@ package scratch_compiler.Compiler.intermediate;
 
 import java.util.ArrayList;
 
+import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.TypeDefinition;
+import scratch_compiler.Compiler.TypeField;
 import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayDeclaration;
@@ -20,26 +22,58 @@ import scratch_compiler.Compiler.parser.statements.Statement;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 
 public class ConvertDeclaration {
+    public static ArrayList<Statement> declareVariable(String name, TypeDefinition type) {
+        ArrayList<Statement> statements = new ArrayList<>();
+        if (type.getType() != VariableType.STRUCT) {
+            statements.add(new SimpleVariableDeclaration(name, type.getType()));
+            return statements;
+        }
+
+        for (TypeField field : type.getFields()) {
+            String fieldName = name + ":" + field.getName();
+            TypeDefinition fieldType = field.getType();
+            statements.addAll(declareVariable(fieldName, fieldType));
+        }
+
+        return statements;
+    }
+
+    public static ArrayList<Statement> declareArray(String name, String size, TypeDefinition type) {
+        ArrayList<Statement> statements = new ArrayList<>();
+        if (type.getType() != VariableType.STRUCT) {
+            statements.add(
+                    new SimpleArrayDeclaration(name, type.getType(), new SimpleVariableValue(size, VariableType.INT)));
+            return statements;
+        }
+
+        for (TypeField field : type.getFields()) {
+            String fieldName = name + ":" + field.getName();
+            statements.addAll(declareArray(fieldName, size, field.getType()));
+        }
+
+        return statements;
+    }
+
     public static ArrayList<Statement> convert(VariableDeclaration declaration) {
-        TypeDefinition type = declaration.getVariable().getType();
+        Type type = declaration.getVariable().getType();
         String name = declaration.getVariable().getName();
         Expression value = declaration.getExpression();
 
         ArrayList<Statement> statements = new ArrayList<>();
-        if (declaration.getVariable().isArray()) {
+        if (declaration.getVariable().getType().isArray()) {
             statements.add(new SimpleVariableDeclaration("size:" + name, VariableType.INT));
             statements.add(new SimpleVariableAssignment("size:" + name, getArraySize(declaration)));
             statements.addAll(
-                    convertArrayDeclaration("array:" + name, type,
+                    convertArrayDeclaration("array:" + name, type.getType(),
                             new SimpleVariableValue("size:" + name, VariableType.INT)));
 
             if (value instanceof ArrayValue)
-                statements.addAll(convertArrayValue(name, type, (ArrayValue) value));
+                statements.addAll(convertArrayValue(name, type.getType(), (ArrayValue) value));
 
             return statements;
         }
 
-        statements.addAll(convertVariableDeclaration("var:" + name, type, value));
+        statements.addAll(convertVariableDeclaration("var:" + name, type.getType(), value));
         return statements;
     }
 
@@ -51,8 +85,8 @@ public class ConvertDeclaration {
             return statements;
         }
 
-        ArrayList<Variable> fields = type.getFields();
-        for (Variable field : fields) {
+        ArrayList<TypeField> fields = type.getFields();
+        for (TypeField field : fields) {
             String fieldName = name + ":" + field.getName();
             TypeDefinition fieldType = field.getType();
             statements.addAll(convertArrayDeclaration(fieldName, fieldType, size));
@@ -80,8 +114,8 @@ public class ConvertDeclaration {
         }
 
         StructValue structValue = (StructValue) value;
-        ArrayList<Variable> fields = type.getFields();
-        for (Variable field : fields) {
+        ArrayList<TypeField> fields = type.getFields();
+        for (TypeField field : fields) {
             String fieldName = name + ":" + field.getName();
             TypeDefinition fieldType = field.getType();
             Expression fieldValue = structValue.getField(field.getName());
@@ -103,7 +137,7 @@ public class ConvertDeclaration {
 
     private static ArrayList<Statement> convertVariableDeclaration(String name, TypeDefinition type, Expression value) {
         ArrayList<Statement> statements = new ArrayList<>();
-        ArrayList<Variable> fields = type.getFields();
+        ArrayList<TypeField> fields = type.getFields();
         if (type.getType() != VariableType.STRUCT) {
             statements.add(new SimpleVariableDeclaration(name, type.getType()));
             if (value != null)
@@ -112,14 +146,14 @@ public class ConvertDeclaration {
         }
 
         if (value == null) {
-            for (Variable field : fields) {
+            for (TypeField field : fields) {
                 String fieldName = name + ":" + field.getName();
                 TypeDefinition fieldType = field.getType();
                 statements.addAll(convertVariableDeclaration(fieldName, fieldType, value));
             }
         } else if (value instanceof StructValue) {
             StructValue structValue = (StructValue) value;
-            for (Variable field : fields) {
+            for (TypeField field : fields) {
                 String fieldName = name + ":" + field.getName();
                 TypeDefinition fieldType = field.getType();
                 Expression fieldValue = structValue.getField(field.getName());
@@ -127,11 +161,11 @@ public class ConvertDeclaration {
             }
         } else if (value instanceof VariableValue) {
             VariableValue variableValue = (VariableValue) value;
-            for (Variable field : fields) {
+            for (TypeField field : fields) {
                 String variableName = name + ":" + field.getName();
                 TypeDefinition variableType = field.getType();
                 statements.addAll(convertVariableDeclaration(variableName, variableType,
-                        new VariableValue(variableValue.getName(), variableValue.getReference(), variableType)));
+                        new VariableValue(variableValue.getName(), new Type(variableType))));
             }
         }
         return statements;

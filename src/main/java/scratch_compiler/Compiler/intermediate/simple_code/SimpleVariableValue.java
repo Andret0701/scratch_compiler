@@ -1,5 +1,6 @@
 package scratch_compiler.Compiler.intermediate.simple_code;
 
+import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
@@ -18,8 +19,8 @@ public class SimpleVariableValue extends Expression {
     }
 
     @Override
-    public TypeDefinition getType() {
-        return new TypeDefinition(type);
+    public Type getType() {
+        return new Type(type);
     }
 
     @Override

@@ -36,6 +36,6 @@ public class UnaryOperator extends Expression {
 
     @Override
     public String toString() {
-        return getOperator() + "" + getOperand();
+        return "(" + getOperator() + "" + getOperand() + ")";
     }
 }

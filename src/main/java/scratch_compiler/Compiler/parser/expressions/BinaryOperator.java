@@ -41,6 +41,6 @@ public class BinaryOperator extends Expression {
 
     @Override
     public String toString() {
-        return getLeft() + " " + getOperator() + " " + getRight();
+        return "(" + getLeft() + " " + getOperator() + " " + getRight() + ")";
     }
 }

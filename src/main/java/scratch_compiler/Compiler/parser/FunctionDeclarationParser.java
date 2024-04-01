@@ -1,6 +1,8 @@
 package scratch_compiler.Compiler.parser;
 
 import java.util.ArrayList;
+
+import scratch_compiler.Compiler.CompilerUtils;
 import scratch_compiler.Compiler.DeclarationTable;
 import scratch_compiler.Compiler.Function;
 import scratch_compiler.Compiler.Type;
@@ -10,6 +12,7 @@ import scratch_compiler.Compiler.lexer.Token;
 import scratch_compiler.Compiler.lexer.TokenReader;
 import scratch_compiler.Compiler.lexer.TokenType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
+import scratch_compiler.Compiler.parser.expressions.values.ArrayDeclarationValue;
 import scratch_compiler.Compiler.parser.statements.FunctionDeclaration;
 import scratch_compiler.Compiler.parser.statements.IfStatement;
 import scratch_compiler.Compiler.parser.statements.ReturnStatement;
@@ -51,8 +54,14 @@ public class FunctionDeclarationParser {
 
     public static ReturnStatement parseReturnStatement(TokenReader tokens,
             DeclarationTable declarationTable, Type returnType) {
-        tokens.expectNext(TokenType.RETURN);
+        Token returnToken = tokens.expectNext(TokenType.RETURN);
         Expression expression = ExpressionParser.parse(returnType, tokens, declarationTable);
+        if (expression == null)
+            CompilerUtils.throwError("Return statement must have an expression", returnToken.getLine());
+
+        if (expression instanceof ArrayDeclarationValue)
+            CompilerUtils.throwError("Cannot return uninitialized array", returnToken.getLine());
+
         return new ReturnStatement(expression);
     }
 

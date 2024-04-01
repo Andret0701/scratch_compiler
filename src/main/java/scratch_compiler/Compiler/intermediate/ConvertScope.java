@@ -7,26 +7,29 @@ import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class ConvertScope {
-    public static void convert(ScopeContainer container) {
-        if (container == null)
-            return;
+    // public static void convert(ScopeContainer container) {
+    // if (container == null)
+    // return;
 
-        for (int i = 0; i < container.getScopeCount(); i++) {
-            Scope converted = convertScope(container.getScope(i));
-            convert(converted);
-            container.setScope(i, converted);
-        }
-    }
+    // for (int i = 0; i < container.getScopeCount(); i++) {
+    // Scope converted = convertScope(container.getScope(i));
+    // convert(converted);
+    // container.setScope(i, converted);
+    // }
+    // }
 
-    public static Scope convertScope(Scope scope) {
+    public static Scope convert(Scope scope, IntermediateTable table) {
         Scope convertedScope = new Scope();
         for (Statement statement : scope.getStatements()) {
-            ArrayList<Statement> convertedStatements = ConvertStatement.convert(statement);
+            ArrayList<Statement> convertedStatements = ConvertStatement.convert(statement, table);
             for (Statement convertedStatement : convertedStatements) {
+                for (int i = 0; i < convertedStatement.getScopeCount(); i++) {
+                    convertedStatement.setScope(i, convert(convertedStatement.getScope(i), table));
+                }
                 convertedScope.addStatement(convertedStatement);
             }
         }
-        convert(convertedScope);
+
         return convertedScope;
     }
 }
