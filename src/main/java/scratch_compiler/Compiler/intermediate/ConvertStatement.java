@@ -19,6 +19,7 @@ import scratch_compiler.Compiler.parser.statements.ErrorStatement;
 import scratch_compiler.Compiler.parser.statements.FunctionCall;
 import scratch_compiler.Compiler.parser.statements.IfStatement;
 import scratch_compiler.Compiler.parser.statements.ReturnStatement;
+import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 
@@ -32,17 +33,36 @@ public class ConvertStatement {
         // else
 
         statements.addAll(ConvertFunctionCall.convert(statement, table));
+        for (Statement converted : statements)
+            ConvertVariableReference.convert(converted);
+        ConvertVariableReference.convert(statement);
 
         if (statement instanceof FunctionCall)
-            statements.addAll(ConvertFunctionCall.convert((FunctionCall) statement, table));
+            statements.addAll(ConvertFunctionCall.convert((FunctionCall) statement,
+                    table));
         else if (statement instanceof ReturnStatement)
             statements.addAll(ConvertReturn.convert((ReturnStatement) statement, table));
+        else if (statement instanceof VariableDeclaration)
+            statements.addAll(ConvertDeclaration.convert((VariableDeclaration) statement));
+        else if (statement instanceof Assignment)
+            statements.addAll(ConvertAssignment.convert((Assignment) statement));
+        else if (statement instanceof Scope)
+            statements.add(ConvertScope.convert((Scope) statement, table));
         else
             statements.add(statement);
 
-        // for (Statement converted : statements) {
-        // ConvertExpression.convert(converted);
-        // }
+        for (Statement converted : statements) {
+            for (int i = 0; i < converted.getExpressionCount(); i++) {
+                Expression expression = ConvertExpression.convert(converted.getExpression(i),
+                        table);
+                converted.setExpression(i, expression);
+            }
+        }
+
+        for (int i = 0; i < statement.getScopeCount(); i++) {
+            Scope scope = statement.getScope(i);
+            statement.setScope(i, ConvertScope.convert(scope, table));
+        }
 
         return statements;
     }

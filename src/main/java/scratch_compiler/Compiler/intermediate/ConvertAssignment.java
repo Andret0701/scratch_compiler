@@ -1,11 +1,12 @@
 package scratch_compiler.Compiler.intermediate;
 
+import java.sql.Struct;
 import java.util.ArrayList;
 
+import scratch_compiler.Compiler.SystemCall;
 import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.TypeField;
-import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayDeclaration;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableAssignment;
@@ -14,15 +15,18 @@ import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableValue;
 import scratch_compiler.Compiler.intermediate.simple_code.VariableReference;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
+import scratch_compiler.Compiler.parser.expressions.IndexExpression;
+import scratch_compiler.Compiler.parser.expressions.ReferenceExpression;
 import scratch_compiler.Compiler.parser.expressions.values.ArrayDeclarationValue;
 import scratch_compiler.Compiler.parser.expressions.values.ArrayValue;
 import scratch_compiler.Compiler.parser.expressions.values.IntValue;
 import scratch_compiler.Compiler.parser.expressions.values.StructValue;
 import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
+import scratch_compiler.Compiler.parser.statements.Assignment;
 import scratch_compiler.Compiler.parser.statements.Statement;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 
-public class ConvertDeclaration {
+public class ConvertAssignment {
     public static ArrayList<Statement> declareVariable(String name, TypeDefinition type) {
         ArrayList<Statement> statements = new ArrayList<>();
         if (type.getType() != VariableType.STRUCT) {
@@ -55,60 +59,69 @@ public class ConvertDeclaration {
         return statements;
     }
 
-    public static ArrayList<Statement> convert(VariableDeclaration declaration) {
-        String name = declaration.getVariable().getName();
-        Type type = declaration.getVariable().getType();
-        Expression value = declaration.getExpression();
-        if (type.isArray()) {
-            Expression size = getArraySize(declaration);
-            ArrayList<Statement> statements = new ArrayList<>();
-            statements.add(new SimpleVariableDeclaration("size:" + name, VariableType.INT));
-            statements.add(new SimpleVariableAssignment("size:" + name, size));
+    public static ArrayList<Statement> convert(Assignment assignment) {
+        return convert((VariableReference) assignment.getVariable(), assignment.getExpression());
+    }
 
-            size = new SimpleVariableValue("size:" + name, VariableType.INT);
-            if (value instanceof ArrayValue)
-                statements.addAll(declareArrayValue(name, type.getType(), (ArrayValue) value, size));
-            if (value instanceof ArrayDeclarationValue)
-                statements.addAll(convertArrayDeclaration(name, type.getType(), size));
-            if (value instanceof VariableReference)
-                statements.addAll(convertArrayDeclaration(name, type.getType(), size));
-            return statements;
-        }
+    public static ArrayList<Statement> convert(VariableReference variable, Expression expression) {
+        if (!variable.getType().equals(expression.getType()))
+            throw new RuntimeException("Invalid type for assignment: " + variable.getType() + " "
+                    + expression);
 
         ArrayList<Statement> statements = new ArrayList<>();
-        statements.addAll(convertVariableDeclaration(name, type.getType()));
-        if (value != null)
-            statements.addAll(ConvertAssignment.convert(new VariableReference(name, type, null), value));
+
+        if (expression instanceof StructValue) {
+            StructValue structValue = (StructValue) expression;
+            System.out.println(variable.getName() + " " + structValue);
+            statements.addAll(convert(variable.getName(), structValue));
+        } else if (expression instanceof VariableReference) {
+            VariableReference value = (VariableReference) expression;
+            statements.addAll(convert(variable.getName(), value));
+        } else {
+            statements.add(new SimpleVariableAssignment(variable.getName(), expression));
+        }
+
         return statements;
     }
 
-    private static ArrayList<Statement> convertArrayDeclaration(String name, TypeDefinition type, Expression size) {
-        ArrayList<Statement> statements = new ArrayList<Statement>();
-        if (type.getType() != VariableType.STRUCT) {
-            SimpleArrayDeclaration arrayDeclaration = new SimpleArrayDeclaration(name, type.getType(), size);
-            statements.add(arrayDeclaration);
+    private static ArrayList<Statement> convert(String name, VariableReference value) {
+        ArrayList<Statement> statements = new ArrayList<>();
+        if (value.getType().getType().getType() != VariableType.STRUCT) {
+            statements.add(new SimpleVariableAssignment(name,
+                    ConvertExpression.convertVariableReference(value)));
             return statements;
         }
 
-        ArrayList<TypeField> fields = type.getFields();
-        for (TypeField field : fields) {
+        for (TypeField field : value.getType().getType().getFields()) {
             String fieldName = name + "." + field.getName();
             TypeDefinition fieldType = field.getType();
-            statements.addAll(convertArrayDeclaration(fieldName, fieldType, size));
+            statements.addAll(convert(name + "." + field.getName(),
+                    new VariableReference(value.getName() + "." + field.getName(), new Type(fieldType),
+                            value.getIndex())));
         }
 
         return statements;
     }
 
-    private static ArrayList<Statement> declareArrayValue(String name, TypeDefinition type, ArrayValue value,
-            Expression size) {
+    private static ArrayList<Statement> convert(String name, StructValue value) {
         ArrayList<Statement> statements = new ArrayList<>();
-        statements.addAll(convertArrayDeclaration(name, type, size));
-        for (int i = 0; i < value.getValues().size(); i++) {
-            Expression element = value.getValues().get(i);
-            statements.addAll(convertArrayValue(name, type, new IntValue(i), element));
-        }
 
+        for (TypeField field : value.getType().getType().getFields()) {
+            TypeDefinition fieldType = field.getType();
+            Expression fieldValue = value.getField(field.getName());
+            if (fieldType.getType() != VariableType.STRUCT) {
+                statements.add(new SimpleVariableAssignment(name + "." + field.getName(), fieldValue));
+                continue;
+            }
+
+            if (fieldValue instanceof VariableReference) {
+                VariableReference variableValue = (VariableReference) fieldValue;
+                statements.addAll(convert(name + "." + field.getName(), variableValue));
+                continue;
+            }
+
+            statements.addAll(convert(name, (StructValue) value.getField(field.getName())));
+        }
         return statements;
     }
 
@@ -138,27 +151,46 @@ public class ConvertDeclaration {
             return new IntValue(((ArrayValue) value).getValues().size());
         if (value instanceof ArrayDeclarationValue)
             return ((ArrayDeclarationValue) value).getSize();
-        if (value instanceof VariableReference)
-            return new SimpleVariableValue("size:" + ((VariableReference) value).getName(),
+        if (value instanceof VariableValue)
+            return new SimpleVariableValue("size:" + ((VariableValue) value).getName(),
                     VariableType.INT);
 
         throw new RuntimeException("Invalid array value: " + value.getClass().getName() + " " + value);
     }
 
-    private static ArrayList<Statement> convertVariableDeclaration(String name, TypeDefinition type) {
+    private static ArrayList<Statement> convertVariableDeclaration(String name, TypeDefinition type, Expression value) {
         ArrayList<Statement> statements = new ArrayList<>();
         ArrayList<TypeField> fields = type.getFields();
         if (type.getType() != VariableType.STRUCT) {
             statements.add(new SimpleVariableDeclaration(name, type.getType()));
+            if (value != null)
+                statements.add(new SimpleVariableAssignment(name, value));
             return statements;
         }
 
-        for (TypeField field : fields) {
-            String fieldName = name + "." + field.getName();
-            TypeDefinition fieldType = field.getType();
+        if (value == null) {
+            for (TypeField field : fields) {
+                String fieldName = name + "." + field.getName();
+                TypeDefinition fieldType = field.getType();
+                statements.addAll(convertVariableDeclaration(fieldName, fieldType, value));
+            }
+        } else if (value instanceof StructValue) {
+            StructValue structValue = (StructValue) value;
+            for (TypeField field : fields) {
+                String fieldName = name + "." + field.getName();
+                TypeDefinition fieldType = field.getType();
+                Expression fieldValue = structValue.getField(field.getName());
+                statements.addAll(convertVariableDeclaration(fieldName, fieldType, fieldValue));
+            }
+        } else if (value instanceof VariableValue) {
+            VariableValue variableValue = (VariableValue) value;
+            for (TypeField field : fields) {
+                String variableName = name + "." + field.getName();
 
-            statements
-                    .addAll(convertVariableDeclaration(fieldName, fieldType));
+                TypeDefinition variableType = field.getType();
+                statements.addAll(convertVariableDeclaration(variableName, variableType,
+                        new VariableValue(variableValue.getName() + "." + field.getName(), new Type(variableType))));
+            }
         }
         return statements;
     }

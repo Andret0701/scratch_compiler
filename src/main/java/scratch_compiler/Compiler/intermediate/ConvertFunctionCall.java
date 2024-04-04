@@ -8,14 +8,18 @@ import scratch_compiler.Compiler.intermediate.simple_code.Push;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayValue;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionCall;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableValue;
+import scratch_compiler.Compiler.intermediate.simple_code.VariableReference;
 import scratch_compiler.Compiler.parser.ExpressionContainer;
+import scratch_compiler.Compiler.parser.ScopeContainer;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 import scratch_compiler.Compiler.parser.expressions.FunctionCallExpression;
 import scratch_compiler.Compiler.parser.expressions.IndexExpression;
 import scratch_compiler.Compiler.parser.expressions.ReferenceExpression;
+import scratch_compiler.Compiler.parser.expressions.SizeOfExpression;
 import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.parser.statements.FunctionCall;
+import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class ConvertFunctionCall {
@@ -33,7 +37,23 @@ public class ConvertFunctionCall {
         return statements;
     }
 
-    public static ArrayList<Statement> convert(ExpressionContainer container, IntermediateTable table) {
+    public static ArrayList<Statement> convert(Statement statement, IntermediateTable table) {
+        ArrayList<Statement> statements = new ArrayList<>();
+
+        statements.addAll(convert((ExpressionContainer) statement, table));
+
+        for (int i = 0; i < statement.getScopeCount(); i++) {
+            Scope scope = statement.getScope(i);
+            for (Statement scopeStatement : scope.getStatements()) {
+                statements.addAll(convert(scopeStatement, table));
+            }
+        }
+
+        return statements;
+    }
+
+    private static ArrayList<Statement> convert(ExpressionContainer container, IntermediateTable table) {
+
         ArrayList<Statement> statements = new ArrayList<>();
         if (container == null) {
             return statements;
@@ -41,46 +61,34 @@ public class ConvertFunctionCall {
 
         for (int i = 0; i < container.getExpressionCount(); i++) {
             Expression expression = container.getExpression(i);
-
-            String referenceName = "";
-            Expression index = null;
-
-            if (expression instanceof IndexExpression) {
-                IndexExpression indexExpression = (IndexExpression) expression;
-                statements.addAll(ConvertFunctionCall.convert(indexExpression, table));
-
-                referenceName = indexExpression.getArray().toString();
-                index = indexExpression.getIndex();
-                expression = indexExpression.getArray();
-            }
-
-            if (expression instanceof ReferenceExpression) {
-                ReferenceExpression reference = (ReferenceExpression) expression;
-                referenceName = ":" + reference.getReference();
-                while (reference.getExpression() instanceof ReferenceExpression) {
-                    reference = (ReferenceExpression) reference.getExpression();
-                    referenceName = ":" + reference.getReference()
-                            + referenceName;
-                }
-            }
-
-            statements.addAll(ConvertFunctionCall.convert(expression, table));
+            statements.addAll(convert(expression, table));
             if (expression instanceof FunctionCallExpression) {
                 FunctionCallExpression functionCall = (FunctionCallExpression) expression;
 
                 String name = table.getUniqueTemp(functionCall.getFunction().getName());
                 statements.addAll(convert(name, functionCall, table));
-                if (functionCall.getType().getType().getType() == VariableType.STRUCT)
-                    container.setExpression(i, new VariableValue(name, functionCall.getType()));
-                else if (functionCall.getType().isArray())
-                    container.setExpression(i,
-                            new SimpleArrayValue(name, functionCall.getType().getType().getType(), functionCall));
-                else
-                    container.setExpression(i,
-                            new SimpleVariableValue(name, functionCall.getType().getType().getType()));
+                container.setExpression(i, new VariableValue(name, functionCall.getType()));
             }
 
         }
+
+        return statements;
+
+    }
+
+    private static ArrayList<Statement> convert(SizeOfExpression sizeOfExpression, ExpressionContainer container,
+            int containerIndex, IntermediateTable table) {
+        ArrayList<Statement> statements = new ArrayList<>();
+        Expression child = sizeOfExpression.getExpression();
+        if (!(child instanceof FunctionCallExpression)) // might need to change this in the future
+            return statements;
+
+        FunctionCallExpression functionCall = (FunctionCallExpression) child;
+        String name = table.getUniqueTemp(functionCall.getFunction().getName());
+        statements.addAll(convert(name, functionCall, table));
+
+        container.setExpression(containerIndex, new SimpleVariableValue("size:" + name,
+                functionCall.getType().getType().getType()));
 
         return statements;
     }

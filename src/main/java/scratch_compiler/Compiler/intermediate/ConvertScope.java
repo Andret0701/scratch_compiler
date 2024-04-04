@@ -23,9 +23,6 @@ public class ConvertScope {
         for (Statement statement : scope.getStatements()) {
             ArrayList<Statement> convertedStatements = ConvertStatement.convert(statement, table);
             for (Statement convertedStatement : convertedStatements) {
-                for (int i = 0; i < convertedStatement.getScopeCount(); i++) {
-                    convertedStatement.setScope(i, convert(convertedStatement.getScope(i), table));
-                }
                 convertedScope.addStatement(convertedStatement);
             }
         }

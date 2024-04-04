@@ -3,6 +3,7 @@ package scratch_compiler.Compiler;
 import java.util.ArrayList;
 
 import scratch_compiler.Compiler.intermediate.ConvertToIntermediate;
+import scratch_compiler.Compiler.intermediate.IntermediateCode;
 import scratch_compiler.Compiler.lexer.Lexer;
 import scratch_compiler.Compiler.lexer.Token;
 import scratch_compiler.Compiler.lexer.TokenReader;
@@ -14,7 +15,7 @@ import scratch_compiler.Compiler.parser.expressions.types.UnaryOperatorDefinitio
 
 public class Compiler {
 
-    public static CompiledCode compile(String code, ArrayList<SystemCall> systemCalls, boolean optimise) {
+    public static IntermediateCode compile(String code, ArrayList<SystemCall> systemCalls, boolean optimise) {
         ArrayList<Token> tokens = Lexer.lex(code);
         System.out.println(tokens);
 
@@ -24,16 +25,16 @@ public class Compiler {
         System.out.println("Parsed code:");
         System.out.println(compiledCode);
         System.out.println();
-        compiledCode = ConvertToIntermediate.convert(compiledCode);
+        IntermediateCode intermediateCode = ConvertToIntermediate.convert(compiledCode);
         System.out.println("Intermediate code:");
-        System.out.println(compiledCode);
+        System.out.println(intermediateCode);
         System.out.println();
         // if (optimise)
         // compiledCode = Optimizer.optimize(compiledCode);
 
-        throw new UnsupportedOperationException("Not implemented yet");
+        // throw new UnsupportedOperationException("Not implemented yet");
 
-        // return compiledCode;
+        return intermediateCode;
     }
 
     private static DeclarationTable createDeclarationTable(ArrayList<SystemCall> systemCalls) {

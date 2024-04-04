@@ -9,12 +9,14 @@ import scratch_compiler.Compiler.parser.expressions.Expression;
 
 public class StructValue extends Expression {
     private TypeDefinition type;
-    private ArrayList<Expression> fields;
 
     public StructValue(TypeDefinition type, ArrayList<Expression> fields) {
+        super(fields.size());
         this.type = type;
         validateFields(fields);
-        this.fields = fields;
+        for (int i = 0; i < fields.size(); i++) {
+            setExpression(i, fields.get(i));
+        }
     }
 
     private void validateFields(ArrayList<Expression> fields) {
@@ -38,18 +40,23 @@ public class StructValue extends Expression {
         ArrayList<TypeField> typeFields = type.getFields();
         for (int i = 0; i < typeFields.size(); i++) {
             if (typeFields.get(i).getName().equals(name))
-                return fields.get(i);
+                return getFields().get(i);
         }
         throw new RuntimeException("Field " + name + " not found in struct " + type.getName());
     }
 
     public ArrayList<Expression> getFields() {
-        return new ArrayList<Expression>(fields);
+        ArrayList<Expression> fields = new ArrayList<>();
+        for (int i = 0; i < getExpressionCount(); i++) {
+            fields.add(getExpression(i));
+        }
+        return fields;
     }
 
     @Override
     public String toString() {
         String out = "{";
+        ArrayList<Expression> fields = getFields();
         for (int i = 0; i < fields.size(); i++) {
             out += fields.get(i);
             if (i < fields.size() - 1)

@@ -8,6 +8,7 @@ import scratch_compiler.ScratchFunction;
 import scratch_compiler.ScratchProgram;
 import scratch_compiler.ScratchVariable;
 import scratch_compiler.Compiler.Variable;
+import scratch_compiler.Compiler.intermediate.IntermediateCode;
 import scratch_compiler.Blocks.AddListBlock;
 import scratch_compiler.Blocks.ChangeListBlock;
 import scratch_compiler.Blocks.ClearListBlock;
@@ -31,7 +32,6 @@ import scratch_compiler.Compiler.parser.expressions.values.IntValue;
 import scratch_compiler.Compiler.parser.expressions.values.StringValue;
 import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.parser.statements.Assignment;
-import scratch_compiler.Compiler.parser.statements.ForStatement;
 import scratch_compiler.Compiler.parser.statements.FunctionCall;
 import scratch_compiler.Compiler.parser.statements.FunctionDeclaration;
 import scratch_compiler.Compiler.parser.statements.IfStatement;
@@ -58,18 +58,21 @@ import scratch_compiler.ValueFields.LogicFields.LessThanField;
 
 public class ScratchAssembler {
     public static ScratchProgram assemble(String code) {
-        CompiledCode compiledCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
+        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
 
-        ArrayList<FunctionDeclaration> functionDeclarations = compiledCode.getFunctions();
+        // ArrayList<FunctionDeclaration> functionDeclarations =
+        // compiledCode.getFunctions();
 
         BlockStack blockStack = new BlockStack();
-        blockStack.push(StackAssembler.initializeStack());
+        blockStack.push(ScopeAssembler.assemble(intermediateCode.getGlobalScope()));
+        // blockStack.push(StackAssembler.initializeStack());
 
         ArrayList<HatBlock> functionDefinitionBlocks = new ArrayList<>();
-        for (FunctionDeclaration functionDeclaration : functionDeclarations) {
-            FunctionDefinitionBlock functionDefinitionBlock = FunctionAssembler.assembleFunction(functionDeclaration);
-            functionDefinitionBlocks.add(functionDefinitionBlock);
-        }
+        // for (FunctionDeclaration functionDeclaration : functionDeclarations) {
+        // FunctionDefinitionBlock functionDefinitionBlock =
+        // FunctionAssembler.assembleFunction(functionDeclaration);
+        // functionDefinitionBlocks.add(functionDefinitionBlock);
+        // }
 
         return new ScratchProgram(blockStack, functionDefinitionBlocks);
     }
@@ -156,20 +159,20 @@ public class ScratchAssembler {
         return list;
     }
 
-    static ArrayList<ValueField> assembleExpression(Expression expression, VariableStackReference stack,
+    static ValueField assembleExpression(Expression expression, VariableStackReference stack,
             boolean isFunction) {
         if (expression instanceof IntValue)
-            return toArray(new NumberField(((IntValue) expression).getValue()));
+            return new NumberField(((IntValue) expression).getValue());
         if (expression instanceof FloatValue)
-            return toArray(new NumberField(((FloatValue) expression).getValue()));
+            return new NumberField(((FloatValue) expression).getValue());
         if (expression instanceof BooleanValue)
-            return toArray(new NumberField(((BooleanValue) expression).getValue() ? 1 : 0));
+            return new NumberField(((BooleanValue) expression).getValue() ? 1 : 0);
         if (expression instanceof StringValue)
-            return toArray(new StringField(((StringValue) expression).getString()));
+            return new StringField(((StringValue) expression).getString());
         if (expression instanceof VariableValue) {
-            String name = ((VariableValue) expression).
-            if (ScratchCoreAssembler.isVariable(name))
-                return ScratchCoreAssembler.assembleExpression(name);
+            String name = ((VariableValue) expression).getName();
+            // if (ScratchCoreAssembler.isVariable(name))
+            // return ScratchCoreAssembler.assembleExpression(name);
 
             int stackIndex = stack.getVariableIndex(getVariable((VariableValue) expression));
             if (isFunction)

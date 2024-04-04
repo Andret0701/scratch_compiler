@@ -12,7 +12,7 @@ public class Assignment extends Statement {
     }
 
     public Expression getVariable() {
-        return (Expression) getExpression(0);
+        return getExpression(0);
     }
 
     public Expression getExpression() {

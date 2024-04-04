@@ -6,11 +6,11 @@ import scratch_compiler.Compiler.parser.expressions.Expression;
 
 public class ArrayDeclarationValue extends Expression {
     private Type type;
-    private Expression size;
 
     public ArrayDeclarationValue(TypeDefinition type, Expression size) {
+        super(1);
         this.type = new Type(type, true);
-        this.size = size;
+        setExpression(0, size);
     }
 
     @Override
@@ -19,11 +19,11 @@ public class ArrayDeclarationValue extends Expression {
     }
 
     public Expression getSize() {
-        return size;
+        return getExpression(0);
     }
 
     @Override
     public String toString() {
-        return type.getType() + "[" + size + "]";
+        return type.getType() + "[" + getSize() + "]";
     }
 }

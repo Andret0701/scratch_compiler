@@ -40,7 +40,7 @@ public class App {
         figure.setDirection(90);
 
         String code = CompilerUtils
-                .readFile("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\code.txt");
+                .readFile("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\code.scc");
 
         ScratchProgram program = ScratchAssembler.assemble(code);
 
@@ -52,8 +52,6 @@ public class App {
 
         ArrayList<ValueField> fields = new ArrayList<ValueField>();
         fields.add(new NumberField(1));
-
-        greenFlagBlock.push(new FunctionCallBlock(new ScratchFunction("update", true, arguments), fields));
 
         figure.addBlock(greenFlagBlock);
         for (HatBlock hatBlock : program.getHatBlocks()) {
@@ -74,9 +72,9 @@ public class App {
             String content = ZipUtils.readZipFile(
                     "C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\myScratchProject2.sb3",
                     "project.json");
-            System.out.println(content);
+            // System.out.println(content);
             ToJSON json = ParserJSON.parse(content);
-            System.out.println("Project:" + json.toJSON());
+            // System.out.println("Project:" + json.toJSON());
             // ZipUtils.writeZipFile("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\myScratchProject2.sb3",
             // "project.json", json.toJSON());
 

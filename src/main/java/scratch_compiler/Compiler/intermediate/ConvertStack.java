@@ -109,7 +109,7 @@ public class ConvertStack {
         }
 
         for (TypeField field : type.getFields().reversed()) {
-            String fieldName = name + ":" + field.getName();
+            String fieldName = name + "." + field.getName();
             statements.addAll(pushArray(fieldName, field.getType(), index));
         }
 
@@ -135,7 +135,7 @@ public class ConvertStack {
         }
 
         for (TypeField field : type.getFields()) {
-            String fieldName = name + ":" + field.getName();
+            String fieldName = name + "." + field.getName();
             statements.addAll(popVariable(fieldName, field.getType()));
         }
 
@@ -147,8 +147,11 @@ public class ConvertStack {
         ArrayList<Statement> statements = new ArrayList<>();
 
         String iterator = table.getUniqueTemp("iterator");
-        statements.add(new SimpleVariableDeclaration(iterator, VariableType.INT));
-        statements.add(new SimpleVariableAssignment(iterator, new IntValue(0)));
+
+        Scope scope = new Scope();
+
+        scope.addStatement(new SimpleVariableDeclaration(iterator, VariableType.INT));
+        scope.addStatement(new SimpleVariableAssignment(iterator, new IntValue(0)));
 
         Scope whileBody = new Scope();
         whileBody.addAllStatements(popArray(name, type, new SimpleVariableValue(iterator, VariableType.INT)));
@@ -161,7 +164,8 @@ public class ConvertStack {
                 new SimpleVariableValue(size, VariableType.INT), new Type(VariableType.BOOLEAN)),
                 whileBody);
 
-        statements.add(whileStatement);
+        scope.addStatement(whileStatement);
+        statements.add(scope);
 
         return statements;
     }
@@ -174,7 +178,7 @@ public class ConvertStack {
         }
 
         for (TypeField field : type.getFields()) {
-            String fieldName = name + ":" + field.getName();
+            String fieldName = name + "." + field.getName();
             statements.addAll(popArray(fieldName, field.getType(), index));
         }
 

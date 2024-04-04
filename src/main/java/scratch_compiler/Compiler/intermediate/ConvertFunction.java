@@ -63,7 +63,7 @@ public class ConvertFunction {
     public static String convertFunctionName(Function function) {
         String name = "function:" + function.getName();
         for (Variable argument : function.getArguments())
-            name += ":" + argument.getType();
+            name += "." + argument.getType();
         return name;
     }
 
