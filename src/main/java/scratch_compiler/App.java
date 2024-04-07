@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import scratch_compiler.Blocks.MoveBlock;
 import scratch_compiler.Blocks.WaitBlock;
 import scratch_compiler.Blocks.Types.HatBlock;
+import scratch_compiler.Blocks.PenClearBlock;
+import scratch_compiler.Blocks.PenUpBlock;
+import scratch_compiler.Blocks.SetPositionBlock;
 import scratch_compiler.Blocks.FunctionCallBlock;
 import scratch_compiler.Blocks.FunctionDefinitionBlock;
 import scratch_compiler.Blocks.GreenFlagBlock;
@@ -29,7 +32,6 @@ import scratch_compiler.ValueFields.ValueField;
 public class App {
     public static void main(String[] args) throws Exception {
         ArrayList<Token> tokens = Lexer.lex("2+1.0");
-        System.out.println(tokens);
         // TokenReader tokenReader = new TokenReader(tokens);
         // System.out.println(ExpressionParser.parse(tokenReader,
         // DeclarationTable.loadDeclarationTable()));
@@ -45,6 +47,9 @@ public class App {
         ScratchProgram program = ScratchAssembler.assemble(code);
 
         GreenFlagBlock greenFlagBlock = new GreenFlagBlock();
+        greenFlagBlock.push(new PenClearBlock());
+        greenFlagBlock.push(new PenUpBlock());
+        greenFlagBlock.push(new SetPositionBlock(0, 0));
         greenFlagBlock.push(program.getStack());
 
         ArrayList<String> arguments = new ArrayList<String>();
@@ -59,7 +64,7 @@ public class App {
         }
 
         figure.addCostume(
-                new Costume("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\Assets\\cat2.svg",
+                new Costume("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\Assets\\empty.svg",
                         new Vector2(53, 46)));
         project.addFigure(figure);
         Background background = new Background();
@@ -86,3 +91,30 @@ public class App {
 
     }
 }
+
+// "blocks": {
+// "%r4i?rK*i:(G14jBKs{A": {
+// "next": null,
+// "parent": null,
+// "shadow": false,
+// "inputs": {"INDEX": [1.0,[7.0,"1"]]},
+// "topLevel": true,
+// "x": 228.0,
+// "y": 515.0,
+// "opcode": "data_itemoflist",
+// "fields": {"LIST": ["test","cJp$2!hO_b~|S9*,U.a]"]}
+// },
+// "A%aPNEaTv3#GM5^5}$bb": {
+// "next": null,
+// "parent": null,
+// "shadow": false,
+// "inputs": {
+// "ITEM": [1.0,[10.0,"ting"]],
+// "INDEX": [1.0,[7.0,"1"]]
+// },
+// "topLevel": true,
+// "x": 173.0,
+// "y": 420.0,
+// "opcode": "data_replaceitemoflist",
+// "fields": {"LIST": ["test","cJp$2!hO_b~|S9*,U.a]"]}
+// }

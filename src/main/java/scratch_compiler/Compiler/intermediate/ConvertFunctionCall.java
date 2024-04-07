@@ -30,25 +30,27 @@ public class ConvertFunctionCall {
             statements.addAll(ConvertStack.push(argument, table));
         }
 
-        statements.add(new SimpleFunctionCall(functionCall.getFunction().getName()));
+        String name = ConvertFunction.convertFunctionName(functionCall.getFunction());
+        statements.add(new SimpleFunctionCall(name));
 
         // for (functionCall.getFunction().getReturnType())
 
         return statements;
     }
 
-    public static ArrayList<Statement> convert(Statement statement, IntermediateTable table) {
+    public static Scope convert(Scope scope, IntermediateTable table) {
+        Scope converted = new Scope();
+        for (Statement statement : scope.getStatements()) {
+            converted.addAllStatements(convert(statement, table));
+        }
+        return converted;
+    }
+
+    private static ArrayList<Statement> convert(Statement statement, IntermediateTable table) {
         ArrayList<Statement> statements = new ArrayList<>();
 
         statements.addAll(convert((ExpressionContainer) statement, table));
-
-        for (int i = 0; i < statement.getScopeCount(); i++) {
-            Scope scope = statement.getScope(i);
-            for (Statement scopeStatement : scope.getStatements()) {
-                statements.addAll(convert(scopeStatement, table));
-            }
-        }
-
+        statements.add(statement);
         return statements;
     }
 
@@ -67,30 +69,13 @@ public class ConvertFunctionCall {
 
                 String name = table.getUniqueTemp(functionCall.getFunction().getName());
                 statements.addAll(convert(name, functionCall, table));
-                container.setExpression(i, new VariableValue(name, functionCall.getType()));
+                container.setExpression(i, new VariableValue(name, functionCall.getFunction().getReturnType()));
             }
 
         }
 
         return statements;
 
-    }
-
-    private static ArrayList<Statement> convert(SizeOfExpression sizeOfExpression, ExpressionContainer container,
-            int containerIndex, IntermediateTable table) {
-        ArrayList<Statement> statements = new ArrayList<>();
-        Expression child = sizeOfExpression.getExpression();
-        if (!(child instanceof FunctionCallExpression)) // might need to change this in the future
-            return statements;
-
-        FunctionCallExpression functionCall = (FunctionCallExpression) child;
-        String name = table.getUniqueTemp(functionCall.getFunction().getName());
-        statements.addAll(convert(name, functionCall, table));
-
-        container.setExpression(containerIndex, new SimpleVariableValue("size:" + name,
-                functionCall.getType().getType().getType()));
-
-        return statements;
     }
 
     private static ArrayList<Statement> convert(String name, FunctionCallExpression functionCall,
@@ -101,7 +86,8 @@ public class ConvertFunctionCall {
             statements.addAll(ConvertStack.push(argument, table));
         }
 
-        statements.add(new SimpleFunctionCall(functionCall.getFunction().getName()));
+        String functionName = ConvertFunction.convertFunctionName(functionCall.getFunction());
+        statements.add(new SimpleFunctionCall(functionName));
 
         Type returnType = functionCall.getFunction().getReturnType();
         if (returnType.getType().getType() == VariableType.VOID)

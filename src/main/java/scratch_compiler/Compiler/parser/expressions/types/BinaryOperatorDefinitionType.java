@@ -23,6 +23,10 @@ public enum BinaryOperatorDefinitionType {
     INT_FLOAT_ADDITION(OperatorType.ADDITION, VariableType.INT, VariableType.FLOAT, VariableType.FLOAT),
     FLOAT_INT_ADDITION(OperatorType.ADDITION, VariableType.FLOAT, VariableType.INT, VariableType.FLOAT),
     STRING_ADDITION(OperatorType.ADDITION, VariableType.STRING, VariableType.STRING, VariableType.STRING),
+    STRING_INT_ADDITION(OperatorType.ADDITION, VariableType.STRING, VariableType.INT, VariableType.STRING),
+    STRING_FLOAT_ADDITION(OperatorType.ADDITION, VariableType.STRING, VariableType.FLOAT, VariableType.STRING),
+    INT_STRING_ADDITION(OperatorType.ADDITION, VariableType.INT, VariableType.STRING, VariableType.STRING),
+    FLOAT_STRING_ADDITION(OperatorType.ADDITION, VariableType.FLOAT, VariableType.STRING, VariableType.STRING),
 
     INT_SUBTRACTION(OperatorType.SUBTRACTION, VariableType.INT, VariableType.INT, VariableType.INT),
     FLOAT_SUBTRACTION(OperatorType.SUBTRACTION, VariableType.FLOAT, VariableType.FLOAT, VariableType.FLOAT),

@@ -12,27 +12,31 @@ import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.LogicFields.EqualsField;
 
 public class IfAssembler {
-    public static StackBlock assemble(IfStatement ifStatement, VariableStackReference stack, boolean isFunction) {
-        if (ifStatement.getElseStatement() == null)
-            return IfAssembler.assembleIf(ifStatement, stack, isFunction);
+    public static StackBlock assemble(IfStatement ifStatement) {
+        if (ifStatement.getElseScope() == null)
+            return IfAssembler.assembleIf(ifStatement);
         else
-            return IfAssembler.assembleIfElse(ifStatement, stack, isFunction);
+            return IfAssembler.assembleIfElse(ifStatement);
     }
 
-    private static StackBlock assembleIf(IfStatement ifStatement, VariableStackReference stack, boolean isFunction) {
-        IfBlock ifBlock = new IfBlock(new EqualsField(ScratchAssembler.assembleExpression(ifStatement.getExpression(), stack,isFunction), new NumberField(1)));
-        BlockStack ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack,isFunction);
+    private static StackBlock assembleIf(IfStatement ifStatement) {
+        IfBlock ifBlock = new IfBlock(
+                new EqualsField(ExpressionAssembler.assemble(ifStatement.getExpression()),
+                        new NumberField(1)));
+        BlockStack ifBody = ScopeAssembler.assemble(ifStatement.getIfScope());
         ifBlock.pushIf(ifBody);
         return ifBlock;
     }
 
-    private static StackBlock assembleIfElse(IfStatement ifStatement, VariableStackReference stack, boolean isFunction) {
-        IfElseBlock ifBlock = new IfElseBlock(new EqualsField(ScratchAssembler.assembleExpression(ifStatement.getExpression(), stack,isFunction), new NumberField(1)));
-        BlockStack ifBody = ScratchAssembler.assembleStatement(ifStatement.getStatement(), stack,isFunction);
-        BlockStack elseBody = ScratchAssembler.assembleStatement(ifStatement.getElseStatement(), stack,isFunction);
+    private static StackBlock assembleIfElse(IfStatement ifStatement) {
+        IfElseBlock ifBlock = new IfElseBlock(
+                new EqualsField(ExpressionAssembler.assemble(ifStatement.getExpression()),
+                        new NumberField(1)));
+        BlockStack ifBody = ScopeAssembler.assemble(ifStatement.getIfScope());
+        BlockStack elseBody = ScopeAssembler.assemble(ifStatement.getElseScope());
         ifBlock.pushIf(ifBody);
         ifBlock.pushElse(elseBody);
         return ifBlock;
-        
+
     }
 }

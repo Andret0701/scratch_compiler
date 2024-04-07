@@ -1,66 +1,69 @@
 package scratch_compiler.Compiler.optimiser;
 
 import java.util.ArrayList;
-import scratch_compiler.Compiler.CompiledCode;
+import scratch_compiler.Compiler.intermediate.IntermediateCode;
+import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionDeclaration;
 import scratch_compiler.Compiler.optimiser.constant_folding.ConstantFolding;
+import scratch_compiler.Compiler.optimiser.constant_folding.CopyConstants;
 import scratch_compiler.Compiler.optimiser.unreachable_code.UnreachableCode;
+import scratch_compiler.Compiler.parser.statements.Scope;
+import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class Optimizer {
     private static ArrayList<Optimization> optimizations = new ArrayList<Optimization>() {
         {
             add(new UnreachableCode());
             add(new ConstantFolding());
+            add(new CopyConstants());
         }
     };
 
-    public static CompiledCode optimize(CompiledCode compiledCode) {
+    public static IntermediateCode optimize(IntermediateCode code) {
+
+        int lines = getNumberOfLines(code);
         System.out.println("Optimising...");
-        System.out.println(compiledCode);
+        System.out.println(code);
 
         boolean changed = true;
         while (changed) {
             changed = false;
             for (Optimization optimization : optimizations) {
-                Optimized optimized = optimization.optimize(compiledCode);
+                Optimized optimized = optimization.optimize(code);
                 if (optimized.isOptimized()) {
-                    compiledCode = (CompiledCode) optimized.getObject();
+                    code = (IntermediateCode) optimized.getObject();
                     System.out.println("Optimised " + optimization.getClass().getSimpleName() + ":");
-                    System.out.println(compiledCode);
+                    // System.out.println(code);
                     changed = true;
+
+                    int currentLines = getNumberOfLines(code);
+                    System.out.println(
+                            lines + " -> " + currentLines + " lines: " + (lines - currentLines) + " lines removed");
+                    lines = currentLines;
                 }
             }
         }
-        return compiledCode;
+
+        return code;
     }
 
-    // private static Scope optimise(Scope scope) {
-    // Scope optimisedScope = new Scope(scope.declarationTable);
-    // for (Statement statement : scope.getStatements()) {
-    // if (statement instanceof Scope)
-    // optimisedScope.addStatement(optimise((Scope) statement));
-    // else if(statement instanceof ControlFlowStatement)
-    // {
-    // ControlFlowStatement controlFlowStatement = (ControlFlowStatement) statement;
-    // controlFlowStatement.setExpression(ExpressionOptimiser.optimise(controlFlowStatement.getExpression()));
-    // optimisedScope.addStatement(controlFlowStatement);
-    // }
-    // else if(statement instanceof VariableDeclaration)
-    // {
-    // VariableDeclaration variableDeclaration = (VariableDeclaration) statement;
-    // variableDeclaration.setExpression(ExpressionOptimiser.optimise(variableDeclaration.getExpression()));
-    // optimisedScope.addStatement(variableDeclaration);
-    // }
-    // else if(statement instanceof Assignment)
-    // {
-    // Assignment assignment = (Assignment) statement;
-    // assignment.setExpression(ExpressionOptimiser.optimise(assignment.getExpression()));
-    // optimisedScope.addStatement(assignment);
-    // }
-    // else
-    // optimisedScope.addStatement(statement);
+    private static int getNumberOfLines(IntermediateCode code) {
+        int lines = 0;
+        lines += getNumberOfLines(code.getGlobalScope());
+        for (SimpleFunctionDeclaration function : code.getFunctions()) {
+            lines += getNumberOfLines(function.getScope());
+        }
+        return lines;
+    }
 
-    // }
-
-    // return scope;
-    // }
+    private static int getNumberOfLines(Scope scope) {
+        int lines = 0;
+        for (Statement statement : scope.getStatements()) {
+            lines++;
+            for (int i = 0; i < statement.getScopeCount(); i++) {
+                Scope innerScope = statement.getScope(i);
+                lines += getNumberOfLines(innerScope);
+            }
+        }
+        return lines;
+    }
 }

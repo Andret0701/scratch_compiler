@@ -29,8 +29,16 @@ public class IntermediateCode {
         return new ArrayList<>(functions);
     }
 
+    public void setFunctions(ArrayList<SimpleFunctionDeclaration> functions) {
+        this.functions = new ArrayList<>(functions);
+    }
+
     public Scope getGlobalScope() {
         return globalScope;
+    }
+
+    public void setGlobalScope(Scope globalScope) {
+        this.globalScope = globalScope;
     }
 
     @Override

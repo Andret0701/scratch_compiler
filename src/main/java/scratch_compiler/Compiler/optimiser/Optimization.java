@@ -1,7 +1,7 @@
 package scratch_compiler.Compiler.optimiser;
 
-import scratch_compiler.Compiler.CompiledCode;
+import scratch_compiler.Compiler.intermediate.IntermediateCode;
 
 public interface Optimization {
-    Optimized optimize(CompiledCode code);
+    Optimized optimize(IntermediateCode code);
 }

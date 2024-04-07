@@ -17,4 +17,9 @@ public class SimpleFunctionCall extends Statement {
     public String toString() {
         return "call " + name;
     }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
 }

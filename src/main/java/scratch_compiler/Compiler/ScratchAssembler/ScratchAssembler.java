@@ -9,6 +9,8 @@ import scratch_compiler.ScratchProgram;
 import scratch_compiler.ScratchVariable;
 import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Compiler.intermediate.IntermediateCode;
+import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionDeclaration;
+import scratch_compiler.Compiler.optimiser.Optimizer;
 import scratch_compiler.Blocks.AddListBlock;
 import scratch_compiler.Blocks.ChangeListBlock;
 import scratch_compiler.Blocks.ClearListBlock;
@@ -38,6 +40,7 @@ import scratch_compiler.Compiler.parser.statements.IfStatement;
 import scratch_compiler.Compiler.parser.statements.ReturnStatement;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 import scratch_compiler.Compiler.parser.statements.WhileStatement;
+import scratch_compiler.Compiler.scratchIntermediate.ConvertToScratchIntermediate;
 import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
 import scratch_compiler.ValueFields.AdditionField;
@@ -59,6 +62,8 @@ import scratch_compiler.ValueFields.LogicFields.LessThanField;
 public class ScratchAssembler {
     public static ScratchProgram assemble(String code) {
         IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
+        intermediateCode = ConvertToScratchIntermediate.convert(intermediateCode);
+        intermediateCode = Optimizer.optimize(intermediateCode);
 
         // ArrayList<FunctionDeclaration> functionDeclarations =
         // compiledCode.getFunctions();
@@ -68,11 +73,10 @@ public class ScratchAssembler {
         // blockStack.push(StackAssembler.initializeStack());
 
         ArrayList<HatBlock> functionDefinitionBlocks = new ArrayList<>();
-        // for (FunctionDeclaration functionDeclaration : functionDeclarations) {
-        // FunctionDefinitionBlock functionDefinitionBlock =
-        // FunctionAssembler.assembleFunction(functionDeclaration);
-        // functionDefinitionBlocks.add(functionDefinitionBlock);
-        // }
+        for (SimpleFunctionDeclaration functionDeclaration : intermediateCode.getFunctions()) {
+            FunctionDefinitionBlock functionDefinitionBlock = FunctionAssembler.assembleFunction(functionDeclaration);
+            functionDefinitionBlocks.add(functionDefinitionBlock);
+        }
 
         return new ScratchProgram(blockStack, functionDefinitionBlocks);
     }

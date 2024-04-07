@@ -13,6 +13,7 @@ import scratch_compiler.Compiler.parser.expressions.IndexExpression;
 import scratch_compiler.Compiler.parser.expressions.ParsedExpression;
 import scratch_compiler.Compiler.parser.expressions.ReferenceExpression;
 import scratch_compiler.Compiler.parser.expressions.SizeOfExpression;
+import scratch_compiler.Compiler.parser.expressions.SystemCallExpression;
 import scratch_compiler.Compiler.parser.expressions.UnaryOperator;
 import scratch_compiler.Compiler.parser.expressions.types.Associativity;
 import scratch_compiler.Compiler.parser.expressions.types.ExpressionType;
@@ -25,6 +26,7 @@ import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.CompilerUtils;
 import scratch_compiler.Compiler.DeclarationTable;
 import scratch_compiler.Compiler.Function;
+import scratch_compiler.Compiler.SystemCall;
 import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.TypeDefinition;
 import scratch_compiler.Compiler.UnaryOperatorDefinition;
@@ -144,12 +146,13 @@ public class ExpressionParser {
         return new ParsedExpression(null, binaryToken, ExpressionType.BINARY_OPERATION);
     }
 
-    private static boolean nextIsFunctionCall(TokenReader tokens) {
-        return tokens.isAt(0, TokenType.IDENTIFIER) && tokens.isAt(1, TokenType.OPEN);
+    private static boolean nextIsFunctionCall(TokenReader tokens, DeclarationTable declarationTable) {
+        return tokens.isAt(0, TokenType.IDENTIFIER) && tokens.isAt(1, TokenType.OPEN)
+                && declarationTable.isFunctionDeclared(tokens.peek().getValue());
     }
 
     private static ParsedExpression parseFunctionCall(TokenReader tokens, DeclarationTable declarationTable) {
-        if (!nextIsFunctionCall(tokens))
+        if (!nextIsFunctionCall(tokens, declarationTable))
             CompilerUtils.throwExpected("function call", tokens.peek().getLine(), tokens.peek());
 
         Token functionToken = tokens.expectNext(TokenType.IDENTIFIER);
@@ -173,13 +176,44 @@ public class ExpressionParser {
         return new ParsedExpression(functionCall, functionToken, ExpressionType.VALUE);
     }
 
-    public static boolean nextIsVariable(TokenReader tokens) {
+    public static boolean nextIsSystemCall(TokenReader tokens, DeclarationTable declarationTable) {
+        return tokens.isAt(0, TokenType.IDENTIFIER) && tokens.isAt(1, TokenType.OPEN)
+                && declarationTable.isSystemCallDeclared(tokens.peek().getValue());
+    }
+
+    public static ParsedExpression parseSystemCall(TokenReader tokens, DeclarationTable declarationTable) {
+        if (!nextIsSystemCall(tokens, declarationTable))
+            CompilerUtils.throwExpected("system call", tokens.peek().getLine(), tokens.peek());
+
+        Token systemCallToken = tokens.expectNext(TokenType.IDENTIFIER);
+
+        String systemCallName = systemCallToken.getValue();
+        declarationTable.validateSystemCallUsage(systemCallName, tokens.peek().getLine());
+        tokens.expectNext(TokenType.OPEN);
+        ArrayList<Expression> arguments = new ArrayList<Expression>();
+        while (tokens.peek().getType() != TokenType.CLOSE) {
+            arguments.add(parse(tokens, declarationTable));
+            if (tokens.peek().getType() == TokenType.COMMA)
+                tokens.pop();
+            else if (tokens.peek().getType() != TokenType.CLOSE)
+                CompilerUtils.throwExpected("comma or close parenthesis", tokens.peek().getLine(), tokens.peek());
+        }
+        tokens.expectNext(TokenType.CLOSE);
+
+        SystemCall function = declarationTable.getSystemCall(systemCallName);
+        SystemCallExpression systemCall = new SystemCallExpression(function, arguments);
+
+        return new ParsedExpression(systemCall, systemCallToken, ExpressionType.VALUE);
+    }
+
+    public static boolean nextIsVariable(TokenReader tokens, DeclarationTable declarationTable) {
         TokenType type = tokens.peek().getType();
-        return (type == TokenType.IDENTIFIER && !nextIsFunctionCall(tokens));
+        return type == TokenType.IDENTIFIER && declarationTable
+                .isVariableDeclared(tokens.peek().getValue());
     }
 
     public static ParsedExpression parseVariable(TokenReader tokens, DeclarationTable declarationTable) {
-        if (!nextIsVariable(tokens))
+        if (!nextIsVariable(tokens, declarationTable))
             CompilerUtils.throwExpected("variable", tokens.peek().getLine(), tokens.peek());
 
         Token variableToken = tokens.peek();
@@ -282,14 +316,18 @@ public class ExpressionParser {
         ArrayList<ParsedExpression> expressions = new ArrayList<ParsedExpression>();
         while (!tokens.isAtEnd()) {
             boolean hasLeftValue = expressions.size() > 0
-                    && (expressions.get(expressions.size() - 1).getExpression() != null);
+                    && ((expressions.get(expressions.size() - 1).getExpression() != null) || (expressions
+                            .get(expressions.size() - 1).getType() == ExpressionType.INDEX)
+                            || (expressions.get(expressions.size() - 1).getType() == ExpressionType.REFERENCE));
             if (nextIsUnaryOperator(tokens) && !hasLeftValue) {
                 expressions.add(parseUnaryOperator(tokens));
             } else if (nextIsBinaryOperator(tokens) && hasLeftValue) {
                 expressions.add(parseBinaryOperator(tokens));
-            } else if (nextIsFunctionCall(tokens)) {
+            } else if (nextIsFunctionCall(tokens, declarationTable)) {
                 expressions.add(parseFunctionCall(tokens, declarationTable));
-            } else if (nextIsVariable(tokens)) {
+            } else if (nextIsSystemCall(tokens, declarationTable)) {
+                expressions.add(parseSystemCall(tokens, declarationTable));
+            } else if (nextIsVariable(tokens, declarationTable)) {
                 expressions.add(parseVariable(tokens, declarationTable));
             } else if (nextIsValue(tokens)) {
                 expressions.add(parseValue(tokens, declarationTable));

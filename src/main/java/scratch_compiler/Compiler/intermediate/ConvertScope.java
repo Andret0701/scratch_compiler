@@ -3,6 +3,7 @@ package scratch_compiler.Compiler.intermediate;
 import java.util.ArrayList;
 
 import scratch_compiler.Compiler.parser.ScopeContainer;
+import scratch_compiler.Compiler.parser.statements.FunctionCall;
 import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
@@ -19,6 +20,7 @@ public class ConvertScope {
     // }
 
     public static Scope convert(Scope scope, IntermediateTable table) {
+        scope = ConvertFunctionCall.convert(scope, table);
         Scope convertedScope = new Scope();
         for (Statement statement : scope.getStatements()) {
             ArrayList<Statement> convertedStatements = ConvertStatement.convert(statement, table);

@@ -49,8 +49,7 @@ public class ConvertVariableReference {
         Type type = expression.getType();
         while (expression instanceof ReferenceExpression) {
             ReferenceExpression referenceExpression = (ReferenceExpression) expression;
-            index = referenceExpression.getExpression();
-            reference += "." + referenceExpression.getReference();
+            reference = "." + referenceExpression.getReference() + reference;
             expression = referenceExpression.getExpression();
         }
 

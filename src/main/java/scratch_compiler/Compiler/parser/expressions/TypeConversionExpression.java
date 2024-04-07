@@ -3,16 +3,16 @@ package scratch_compiler.Compiler.parser.expressions;
 import scratch_compiler.Compiler.Type;
 
 public class TypeConversionExpression extends Expression {
-    private Expression expression;
     private Type type;
 
     public TypeConversionExpression(Expression expression, Type type) {
-        this.expression = expression;
+        super(1);
+        setExpression(0, expression);
         this.type = type;
     }
 
     public Expression getExpression() {
-        return expression;
+        return getExpression(0);
     }
 
     @Override
@@ -22,6 +22,6 @@ public class TypeConversionExpression extends Expression {
 
     @Override
     public String toString() {
-        return "(" + type + ") " + expression;
+        return "(" + type + ") " + getExpression();
     }
 }

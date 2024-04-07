@@ -8,9 +8,11 @@ import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.LogicFields.EqualsField;
 
 public class WhileAssembler {
-    public static StackBlock assemble(WhileStatement whileStatement, VariableStackReference stack, boolean isFunction) {
-        RepeatUntilBlock whileBlock = new RepeatUntilBlock(new EqualsField(ScratchAssembler.assembleExpression(whileStatement.getExpression(), stack,isFunction), new NumberField(0)));
-        BlockStack whileBody = ScratchAssembler.assembleStatement(whileStatement.getStatement(), stack,isFunction);
+    public static StackBlock assemble(WhileStatement whileStatement) {
+        RepeatUntilBlock whileBlock = new RepeatUntilBlock(
+                new EqualsField(ExpressionAssembler.assemble(whileStatement.getExpression()),
+                        new NumberField(0)));
+        BlockStack whileBody = ScopeAssembler.assemble(whileStatement.getScope());
         whileBlock.pushRepeat(whileBody);
         return whileBlock;
     }

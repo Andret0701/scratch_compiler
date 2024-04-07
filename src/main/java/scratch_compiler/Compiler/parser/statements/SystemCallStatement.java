@@ -7,11 +7,14 @@ import scratch_compiler.Compiler.parser.expressions.Expression;
 
 public class SystemCallStatement extends Statement {
     private SystemCall systemCall;
-    private ArrayList<Expression> arguments;
 
     public SystemCallStatement(SystemCall systemCall, ArrayList<Expression> arguments) {
+        super(arguments.size());
         this.systemCall = systemCall;
-        this.arguments = new ArrayList<Expression>(arguments);
+
+        for (int i = 0; i < arguments.size(); i++) {
+            setExpression(i, arguments.get(i));
+        }
     }
 
     public SystemCall getSystemCall() {
@@ -19,22 +22,24 @@ public class SystemCallStatement extends Statement {
     }
 
     public ArrayList<Expression> getArguments() {
-        return new ArrayList<Expression>(arguments);
+        ArrayList<Expression> arguments = new ArrayList<>();
+        for (int i = 0; i < getExpressionCount(); i++) {
+            arguments.add(getExpression(i));
+        }
+        return arguments;
     }
 
     @Override
     public String toString() {
         String args = "";
-        for (int i = 0; i < this.arguments.size(); i++) {
-            args += this.arguments.get(i).toString();
-            if (i < this.arguments.size() - 1)
+        ArrayList<Expression> arguments = getArguments();
+        for (int i = 0; i < arguments.size(); i++) {
+            args += arguments.get(i).toString();
+            if (i < arguments.size() - 1)
                 args += ", ";
         }
         args = "*(" + args + ")";
         return systemCall.getName() + args;
     }
 
-    public ArrayList<Statement> getStatements() {
-        return new ArrayList<Statement>();
-    }
 }

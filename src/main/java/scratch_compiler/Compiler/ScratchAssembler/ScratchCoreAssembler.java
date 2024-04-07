@@ -28,10 +28,18 @@ public class ScratchCoreAssembler {
                     SystemCallFlag.ChangesGlobalState),
             new SystemCall("penDown", new Type(VariableType.VOID), new ArrayList<Variable>(),
                     SystemCallFlag.ChangesGlobalState),
+            new SystemCall("penClear", new Type(VariableType.VOID), new ArrayList<Variable>(),
+                    SystemCallFlag.ChangesGlobalState),
             new SystemCall("moveTo", new Type(VariableType.VOID),
                     new ArrayList<>(Arrays.asList(new Variable("x", new Type(VariableType.FLOAT)),
                             new Variable("y", new Type(VariableType.FLOAT)))),
-                    SystemCallFlag.ChangesGlobalState)));
+                    SystemCallFlag.ChangesGlobalState),
+            new SystemCall("sin", new Type(VariableType.FLOAT),
+                    new ArrayList<>(Arrays.asList(new Variable("angle", new Type(VariableType.FLOAT))))),
+            new SystemCall("cos", new Type(VariableType.FLOAT),
+                    new ArrayList<>(Arrays.asList(new Variable("angle", new Type(VariableType.FLOAT))))),
+            new SystemCall("sqrt", new Type(VariableType.FLOAT),
+                    new ArrayList<>(Arrays.asList(new Variable("value", new Type(VariableType.FLOAT)))))));
 
     public static ArrayList<SystemCall> getSystemCalls() {
         return new ArrayList<SystemCall>(systemCalls);

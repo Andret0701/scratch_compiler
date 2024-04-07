@@ -17,22 +17,11 @@ import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class ConvertExpression {
-    public static void convert(ExpressionContainer container) {
-        if (container == null)
-            return;
-
-        for (int i = 0; i < container.getExpressionCount(); i++) {
-            Expression converted = convertExpression(container.getExpression(i));
-            convert(converted);
-            container.setExpression(i, converted);
-        }
-    }
-
     public static Expression convert(Expression expression, IntermediateTable table) {
         if (expression instanceof SizeOfExpression)
-            return convertSize((SizeOfExpression) expression);
+            expression = convertSize((SizeOfExpression) expression);
         if (expression instanceof VariableReference)
-            return convertVariableReference((VariableReference) expression);
+            expression = convertVariableReference((VariableReference) expression);
 
         for (int i = 0; i < expression.getExpressionCount(); i++) {
             if (expression.getExpression(i) == null)
@@ -63,18 +52,6 @@ public class ConvertExpression {
 
         throw new RuntimeException("Invalid size expression: " + size);
         // return new SimpleVariableValue("Fix this", VariableType.INT);
-    }
-
-    private static Expression convertReference(ReferenceExpression reference) {
-        return convertReference("", reference.getType().getType(), reference);
-    }
-
-    private static Expression convertReference(String name, TypeDefinition type, ReferenceExpression reference) {
-        Expression expression = reference.getExpression();
-        if (expression instanceof VariableReference)
-            convertVariableReference((VariableReference) expression);
-
-        throw new RuntimeException("Invalid reference expression: " + reference);
     }
 
     private static Expression convertVariableValue(VariableValue variableValue) {

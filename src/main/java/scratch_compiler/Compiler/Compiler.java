@@ -7,6 +7,7 @@ import scratch_compiler.Compiler.intermediate.IntermediateCode;
 import scratch_compiler.Compiler.lexer.Lexer;
 import scratch_compiler.Compiler.lexer.Token;
 import scratch_compiler.Compiler.lexer.TokenReader;
+import scratch_compiler.Compiler.optimiser.Optimizer;
 import scratch_compiler.Compiler.parser.BinaryOperatorDefinition;
 import scratch_compiler.Compiler.parser.GlobalParser;
 import scratch_compiler.Compiler.parser.VariableType;
@@ -17,7 +18,6 @@ public class Compiler {
 
     public static IntermediateCode compile(String code, ArrayList<SystemCall> systemCalls, boolean optimise) {
         ArrayList<Token> tokens = Lexer.lex(code);
-        System.out.println(tokens);
 
         TokenReader reader = new TokenReader(tokens);
         DeclarationTable declarationTable = createDeclarationTable(systemCalls);
@@ -29,8 +29,8 @@ public class Compiler {
         System.out.println("Intermediate code:");
         System.out.println(intermediateCode);
         System.out.println();
-        // if (optimise)
-        // compiledCode = Optimizer.optimize(compiledCode);
+        if (optimise)
+            intermediateCode = Optimizer.optimize(intermediateCode);
 
         // throw new UnsupportedOperationException("Not implemented yet");
 

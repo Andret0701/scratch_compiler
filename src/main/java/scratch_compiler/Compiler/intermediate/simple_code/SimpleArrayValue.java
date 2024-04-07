@@ -33,4 +33,8 @@ public class SimpleArrayValue extends Expression {
         return name + "[" + getIndex() + "]";
     }
 
+    @Override
+    public boolean isConstant() {
+        return true;
+    }
 }

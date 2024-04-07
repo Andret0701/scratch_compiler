@@ -44,7 +44,6 @@ public class FunctionDeclarationParser {
     }
 
     public static boolean nextIsFunctionDeclaration(TokenReader tokens, DeclarationTable declarationTable) {
-        System.out.println(tokens.peek() + " " + tokens.peek(1));
         return TypeParser.nextIsType(tokens, declarationTable) && ((tokens.peek(1).getType() == TokenType.IDENTIFIER
                 && tokens.peek(2).getType() == TokenType.OPEN)
                 || (tokens.peek(1).getType() == TokenType.SQUARE_BRACKET_OPEN

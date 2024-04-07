@@ -32,7 +32,7 @@ public class ConvertStatement {
         // statement));
         // else
 
-        statements.addAll(ConvertFunctionCall.convert(statement, table));
+        // statements.addAll(ConvertFunctionCall.convert(statement, table));
         for (Statement converted : statements)
             ConvertVariableReference.convert(converted);
         ConvertVariableReference.convert(statement);

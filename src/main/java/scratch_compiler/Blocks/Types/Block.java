@@ -14,6 +14,7 @@ public abstract class Block {
     protected HashMap<String, Field> fields = new HashMap<>();
 
     private int count = 0;
+
     public Block(String opcode) {
         this.opcode = opcode;
 
@@ -28,6 +29,10 @@ public abstract class Block {
     protected void setInput(String name, ValueField field) {
         Input input = new Input(name, field);
         inputs.put(name, input);
+    }
+
+    protected ValueField getInput(String name) {
+        return inputs.get(name).getValueField();
     }
 
     public ArrayList<Input> getInputs() {
@@ -63,6 +68,7 @@ public abstract class Block {
     }
 
     static int blockCount = 0;
+
     @Override
     public int hashCode() {
         return count;

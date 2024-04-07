@@ -19,9 +19,9 @@ public enum TokenType {
     GREATER_THAN(">"),
     AND("&&"),
     OR("\\|\\|"),
+    NOT_EQUALS("!="),
     NOT("!"),
     EQUALS("=="),
-    NOT_EQUALS("!="),
 
     INCREMENT("\\+\\+"),
     DECREMENT("--"),

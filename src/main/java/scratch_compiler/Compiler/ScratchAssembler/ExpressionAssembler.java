@@ -3,9 +3,13 @@ package scratch_compiler.Compiler.ScratchAssembler;
 import scratch_compiler.ScratchVariable;
 import scratch_compiler.Blocks.SayBlock;
 import scratch_compiler.Blocks.Types.StackBlock;
+import scratch_compiler.Compiler.intermediate.ConvertExpression;
+import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayValue;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableValue;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
+import scratch_compiler.Compiler.parser.expressions.SystemCallExpression;
+import scratch_compiler.Compiler.parser.expressions.TypeConversionExpression;
 import scratch_compiler.Compiler.parser.expressions.UnaryOperator;
 import scratch_compiler.Compiler.parser.expressions.types.OperatorType;
 import scratch_compiler.Compiler.parser.expressions.values.BooleanValue;
@@ -15,10 +19,16 @@ import scratch_compiler.Compiler.parser.expressions.values.StringValue;
 import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 import scratch_compiler.ValueFields.AdditionField;
+import scratch_compiler.ValueFields.DivisionField;
+import scratch_compiler.ValueFields.ListElementField;
+import scratch_compiler.ValueFields.MultiplicationField;
 import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.StringField;
+import scratch_compiler.ValueFields.SubtractionField;
 import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.VariableField;
+import scratch_compiler.ValueFields.LogicFields.EqualsField;
+import scratch_compiler.ValueFields.LogicFields.LessThanField;
 
 public class ExpressionAssembler {
     static ValueField assemble(Expression expression) {
@@ -31,7 +41,17 @@ public class ExpressionAssembler {
         if (expression instanceof StringValue)
             return new StringField(((StringValue) expression).getString());
         if (expression instanceof SimpleVariableValue)
-            return assembleVariableValue((SimpleVariableValue) expression);
+            return new VariableField(((SimpleVariableValue) expression).getName(), false);
+        if (expression instanceof SimpleArrayValue)
+            return new ListElementField(((SimpleArrayValue) expression).getName(), false,
+                    new AdditionField(ExpressionAssembler.assemble(((SimpleArrayValue) expression).getIndex()),
+                            new NumberField(1)));
+        if (expression instanceof TypeConversionExpression)
+            return assemble(((TypeConversionExpression) expression).getExpression());
+
+        if (expression instanceof SystemCallExpression)
+            return SystemCallAssembler.assemble((SystemCallExpression) expression);
+
         // if (expression instanceof VariableValue) {
         // String name = ((VariableValue) expression).getName();
         // // if (ScratchCoreAssembler.isVariable(name))
@@ -63,6 +83,18 @@ public class ExpressionAssembler {
         switch (operator) {
             case ADDITION:
                 return new AdditionField(left, right);
+            case SUBTRACTION:
+                return new SubtractionField(left, right);
+            case MULTIPLICATION:
+                return new MultiplicationField(left, right);
+            case DIVISION:
+                return new DivisionField(left, right);
+            case LESS_THAN:
+                return new LessThanField(left, right);
+            case GREATER_THAN:
+                return new LessThanField(right, left);
+            case EQUALS:
+                return new EqualsField(left, right);
             default:
                 return errorField(expression);
         }
@@ -97,11 +129,7 @@ public class ExpressionAssembler {
         // out = new AdditionField(out, new NumberField(0));
     }
 
-    private static ValueField assembleVariableValue(SimpleVariableValue variableValue) {
-        return new VariableField(variableValue.getName(), false);
-    }
-
-    private static ValueField errorField(Expression expression) {
+    public static ValueField errorField(Expression expression) {
         return new StringField("Compile Error: " + expression);
     }
 }

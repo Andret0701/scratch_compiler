@@ -28,4 +28,9 @@ public class SimpleVariableValue extends Expression {
         return name;
     }
 
+    @Override
+    public boolean isConstant() {
+        return true;
+    }
+
 }

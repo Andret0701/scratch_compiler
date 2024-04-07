@@ -7,6 +7,7 @@ import scratch_compiler.ValueFields.ValueField;
 public class ChangeListBlock extends BinaryOperatorBlock {
     private String name;
     private boolean isGlobal;
+
     public ChangeListBlock(String name, boolean isGlobal, ValueField index, ValueField input) {
         super("data_replaceitemoflist", "INDEX", "ITEM");
         setVariable(name, isGlobal);

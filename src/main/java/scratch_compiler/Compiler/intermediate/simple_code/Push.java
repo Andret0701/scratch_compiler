@@ -9,6 +9,10 @@ public class Push extends Statement {
         setExpression(0, expression);
     }
 
+    public Expression getExpression() {
+        return getExpression(0);
+    }
+
     @Override
     public String toString() {
         return "push " + getExpression(0);

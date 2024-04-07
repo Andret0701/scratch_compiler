@@ -68,6 +68,6 @@ public class ConvertFunction {
     }
 
     public static String convertArgumentName(Variable argument) {
-        return "argument:" + argument.getName();
+        return argument.getName();
     }
 }

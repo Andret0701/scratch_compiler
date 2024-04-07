@@ -69,7 +69,7 @@ public class AssignmentParser {
     }
 
     private static Expression parseVariableReference(TokenReader tokens, DeclarationTable declarationTable) {
-        if (!ExpressionParser.nextIsVariable(tokens))
+        if (!ExpressionParser.nextIsVariable(tokens, declarationTable))
             CompilerUtils.throwError("Expected variable", tokens.peek().getLine());
 
         Expression expression = ExpressionParser.parseVariable(tokens, declarationTable).getExpression();

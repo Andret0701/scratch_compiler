@@ -72,30 +72,39 @@ public class ConvertAssignment {
 
         if (expression instanceof StructValue) {
             StructValue structValue = (StructValue) expression;
-            System.out.println(variable.getName() + " " + structValue);
-            statements.addAll(convert(variable.getName(), structValue));
+            statements.addAll(convert(variable, structValue));
         } else if (expression instanceof VariableReference) {
             VariableReference value = (VariableReference) expression;
-            statements.addAll(convert(variable.getName(), value));
+            statements.addAll(convert(variable, value));
         } else {
+            Expression index = variable.getIndex();
+            if (index != null) {
+                statements.add(new SimpleArrayAssignment(variable.getName(), index, expression));
+                return statements;
+            }
             statements.add(new SimpleVariableAssignment(variable.getName(), expression));
         }
 
         return statements;
     }
 
-    private static ArrayList<Statement> convert(String name, VariableReference value) {
+    private static ArrayList<Statement> convert(VariableReference variable, VariableReference value) {
         ArrayList<Statement> statements = new ArrayList<>();
         if (value.getType().getType().getType() != VariableType.STRUCT) {
-            statements.add(new SimpleVariableAssignment(name,
-                    ConvertExpression.convertVariableReference(value)));
+            if (variable.getIndex() == null)
+                statements.add(new SimpleVariableAssignment(variable.getName(),
+                        ConvertExpression.convertVariableReference(value)));
+            else
+                statements.add(new SimpleArrayAssignment(variable.getName(), variable.getIndex(),
+                        ConvertExpression.convertVariableReference(value)));
+
             return statements;
         }
 
         for (TypeField field : value.getType().getType().getFields()) {
-            String fieldName = name + "." + field.getName();
+            String fieldName = variable.getName() + "." + field.getName();
             TypeDefinition fieldType = field.getType();
-            statements.addAll(convert(name + "." + field.getName(),
+            statements.addAll(convert(new VariableReference(fieldName, new Type(fieldType), variable.getIndex()),
                     new VariableReference(value.getName() + "." + field.getName(), new Type(fieldType),
                             value.getIndex())));
         }
@@ -103,95 +112,33 @@ public class ConvertAssignment {
         return statements;
     }
 
-    private static ArrayList<Statement> convert(String name, StructValue value) {
+    private static ArrayList<Statement> convert(VariableReference variable, StructValue value) {
         ArrayList<Statement> statements = new ArrayList<>();
 
         for (TypeField field : value.getType().getType().getFields()) {
             TypeDefinition fieldType = field.getType();
             Expression fieldValue = value.getField(field.getName());
+            String name = variable.getName() + "." + field.getName();
             if (fieldType.getType() != VariableType.STRUCT) {
-                statements.add(new SimpleVariableAssignment(name + "." + field.getName(), fieldValue));
+
+                if (variable.getIndex() == null)
+                    statements.add(new SimpleVariableAssignment(name, fieldValue));
+                else
+                    statements.add(new SimpleArrayAssignment(name, variable.getIndex(), fieldValue));
                 continue;
             }
 
             if (fieldValue instanceof VariableReference) {
                 VariableReference variableValue = (VariableReference) fieldValue;
-                statements.addAll(convert(name + "." + field.getName(), variableValue));
+                statements.addAll(convert(new VariableReference(name, new Type(fieldType), variable.getIndex()),
+                        variableValue));
                 continue;
             }
 
-            statements.addAll(convert(name, (StructValue) value.getField(field.getName())));
+            statements.addAll(convert(new VariableReference(name, variable.getType(), variable.getIndex()),
+                    (StructValue) value.getField(field.getName())));
         }
         return statements;
     }
 
-    private static ArrayList<Statement> convertArrayValue(String name, TypeDefinition type, Expression index,
-            Expression value) {
-        ArrayList<Statement> statements = new ArrayList<>();
-        if (type.getType() != VariableType.STRUCT) {
-            statements.add(new SimpleArrayAssignment(name, index, value));
-            return statements;
-        }
-
-        StructValue structValue = (StructValue) value;
-        ArrayList<TypeField> fields = type.getFields();
-        for (TypeField field : fields) {
-            String fieldName = name + "." + field.getName();
-            TypeDefinition fieldType = field.getType();
-            Expression fieldValue = structValue.getField(field.getName());
-            statements.addAll(convertArrayValue(fieldName, fieldType, index, fieldValue));
-        }
-
-        return statements;
-    }
-
-    private static Expression getArraySize(VariableDeclaration declaration) {
-        Expression value = declaration.getExpression();
-        if (value instanceof ArrayValue)
-            return new IntValue(((ArrayValue) value).getValues().size());
-        if (value instanceof ArrayDeclarationValue)
-            return ((ArrayDeclarationValue) value).getSize();
-        if (value instanceof VariableValue)
-            return new SimpleVariableValue("size:" + ((VariableValue) value).getName(),
-                    VariableType.INT);
-
-        throw new RuntimeException("Invalid array value: " + value.getClass().getName() + " " + value);
-    }
-
-    private static ArrayList<Statement> convertVariableDeclaration(String name, TypeDefinition type, Expression value) {
-        ArrayList<Statement> statements = new ArrayList<>();
-        ArrayList<TypeField> fields = type.getFields();
-        if (type.getType() != VariableType.STRUCT) {
-            statements.add(new SimpleVariableDeclaration(name, type.getType()));
-            if (value != null)
-                statements.add(new SimpleVariableAssignment(name, value));
-            return statements;
-        }
-
-        if (value == null) {
-            for (TypeField field : fields) {
-                String fieldName = name + "." + field.getName();
-                TypeDefinition fieldType = field.getType();
-                statements.addAll(convertVariableDeclaration(fieldName, fieldType, value));
-            }
-        } else if (value instanceof StructValue) {
-            StructValue structValue = (StructValue) value;
-            for (TypeField field : fields) {
-                String fieldName = name + "." + field.getName();
-                TypeDefinition fieldType = field.getType();
-                Expression fieldValue = structValue.getField(field.getName());
-                statements.addAll(convertVariableDeclaration(fieldName, fieldType, fieldValue));
-            }
-        } else if (value instanceof VariableValue) {
-            VariableValue variableValue = (VariableValue) value;
-            for (TypeField field : fields) {
-                String variableName = name + "." + field.getName();
-
-                TypeDefinition variableType = field.getType();
-                statements.addAll(convertVariableDeclaration(variableName, variableType,
-                        new VariableValue(variableValue.getName() + "." + field.getName(), new Type(variableType))));
-            }
-        }
-        return statements;
-    }
 }

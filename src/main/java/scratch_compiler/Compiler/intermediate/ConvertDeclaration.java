@@ -59,6 +59,7 @@ public class ConvertDeclaration {
         String name = declaration.getVariable().getName();
         Type type = declaration.getVariable().getType();
         Expression value = declaration.getExpression();
+
         if (type.isArray()) {
             Expression size = getArraySize(declaration);
             ArrayList<Statement> statements = new ArrayList<>();

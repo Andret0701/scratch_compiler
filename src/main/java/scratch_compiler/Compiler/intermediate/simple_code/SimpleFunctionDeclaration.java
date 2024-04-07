@@ -23,8 +23,17 @@ public class SimpleFunctionDeclaration extends Statement {
         return scope;
     }
 
+    public void setScope(Scope scope) {
+        this.scope = scope;
+    }
+
     @Override
     public String toString() {
         return name + " -> " + scope.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
     }
 }
