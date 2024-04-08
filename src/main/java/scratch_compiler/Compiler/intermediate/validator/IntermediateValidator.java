@@ -34,8 +34,7 @@ public class IntermediateValidator {
         for (Statement statement : scope.getStatements()) {
             if (statement instanceof Assignment)
                 throw new IllegalArgumentException(
-                        "Assignmnet is not allowed in intermediate code. Use simple assignment instead: " + statement
-                                + " " + scope);
+                        "Assignmnet is not allowed in intermediate code. Use simple assignment instead: " + statement);
             if (statement instanceof VariableDeclaration)
                 throw new IllegalArgumentException(
                         "Variable declaration is not allowed in intermediate code. Use simple declaration instead: "

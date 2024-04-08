@@ -61,9 +61,10 @@ import scratch_compiler.ValueFields.LogicFields.LessThanField;
 
 public class ScratchAssembler {
     public static ScratchProgram assemble(String code) {
-        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
+        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), false);
         intermediateCode = ConvertToScratchIntermediate.convert(intermediateCode);
-        intermediateCode = Optimizer.optimize(intermediateCode);
+        // intermediateCode = Optimizer.optimize(intermediateCode);
+        System.out.println(intermediateCode);
 
         // ArrayList<FunctionDeclaration> functionDeclarations =
         // compiledCode.getFunctions();
@@ -187,7 +188,7 @@ public class ScratchAssembler {
         if (expression instanceof BinaryOperator)
             return assembleBinaryExpression((BinaryOperator) expression, stack, isFunction);
         if (expression instanceof UnaryOperator)
-            return defaultField();
+            return assembleUnaryExpression((UnaryOperator) expression, stack, isFunction);
 
         return defaultField();
     }
@@ -235,6 +236,18 @@ public class ScratchAssembler {
 
         // if (expression.getType() == VariableType.BOOLEAN)
         // out = new AdditionField(out, new NumberField(0));
+    }
+
+    private static ValueField assembleUnaryExpression(UnaryOperator expression,
+            VariableStackReference stack, boolean isFunction) {
+        ValueField value = assembleExpression(expression.getOperand(), stack, isFunction);
+
+        switch (expression.getOperatorType()) {
+            case SUBTRACTION:
+                return new SubtractionField(new NumberField(0), value);
+            default:
+                return defaultField();
+        }
     }
 
     static StackBlock defaultBlock() {

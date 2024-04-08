@@ -55,7 +55,7 @@ public class FunctionDeclarationParser {
             DeclarationTable declarationTable, Type returnType) {
         Token returnToken = tokens.expectNext(TokenType.RETURN);
         Expression expression = ExpressionParser.parse(returnType, tokens, declarationTable);
-        if (expression == null)
+        if (expression == null && !returnType.equals(new Type(VariableType.VOID)))
             CompilerUtils.throwError("Return statement must have an expression", returnToken.getLine());
 
         if (expression instanceof ArrayDeclarationValue)

@@ -28,12 +28,12 @@ public class SimpleDeclarationTable {
     }
 
     public void declareVariable(String name) {
-        validateDeclaration(name);
+        // validateDeclaration(name);
         addVariable(name);
     }
 
     public void declareArray(String name) {
-        validateDeclaration(name);
+        // validateDeclaration(name);
         addArray(name);
     }
 

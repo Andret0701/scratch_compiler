@@ -30,6 +30,9 @@ public class ConvertStack {
     public static ArrayList<Statement> push(Expression expression, IntermediateTable table) {
         // if array then its either a arrayValue or a variableValue
         ArrayList<Statement> statements = new ArrayList<>();
+        if (expression == null) {
+            return statements;
+        }
 
         boolean isArray = expression.getType().isArray();
         if (isArray) {

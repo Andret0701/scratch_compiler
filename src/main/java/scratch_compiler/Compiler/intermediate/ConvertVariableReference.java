@@ -40,6 +40,7 @@ public class ConvertVariableReference {
     }
 
     private static Expression convert(Expression expression) {
+
         if (!(expression instanceof ReferenceExpression || expression instanceof IndexExpression
                 || expression instanceof VariableValue))
             return expression;

@@ -33,8 +33,7 @@ public class ConvertStatement {
         // else
 
         // statements.addAll(ConvertFunctionCall.convert(statement, table));
-        for (Statement converted : statements)
-            ConvertVariableReference.convert(converted);
+
         ConvertVariableReference.convert(statement);
 
         if (statement instanceof FunctionCall)
@@ -50,6 +49,9 @@ public class ConvertStatement {
             statements.add(ConvertScope.convert((Scope) statement, table));
         else
             statements.add(statement);
+
+        for (Statement converted : statements)
+            ConvertVariableReference.convert(converted);
 
         for (Statement converted : statements) {
             for (int i = 0; i < converted.getExpressionCount(); i++) {

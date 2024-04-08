@@ -5,6 +5,7 @@ import scratch_compiler.Blocks.PenDownBlock;
 import scratch_compiler.Blocks.PenUpBlock;
 import scratch_compiler.Blocks.SayBlock;
 import scratch_compiler.Blocks.SetPositionBlock;
+import scratch_compiler.Blocks.WaitBlock;
 import scratch_compiler.Blocks.Types.BlockStack;
 import scratch_compiler.Compiler.SystemCall;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableAssignment;
@@ -24,6 +25,8 @@ public class SystemCallAssembler {
         String name = systemCall.getSystemCall().getName();
         if (name.equals("say"))
             stackBlock.push(new SayBlock(ExpressionAssembler.assemble(systemCall.getArguments().get(0))));
+        else if (name.equals("wait"))
+            stackBlock.push(new WaitBlock(ExpressionAssembler.assemble(systemCall.getArguments().get(0))));
         else if (name.equals("penUp"))
             stackBlock.push(new PenUpBlock());
         else if (name.equals("penDown"))

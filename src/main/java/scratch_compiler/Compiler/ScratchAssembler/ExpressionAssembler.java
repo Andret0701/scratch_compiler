@@ -6,6 +6,7 @@ import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.Compiler.intermediate.ConvertExpression;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayValue;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableValue;
+import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 import scratch_compiler.Compiler.parser.expressions.SystemCallExpression;
@@ -20,6 +21,7 @@ import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 import scratch_compiler.ValueFields.AdditionField;
 import scratch_compiler.ValueFields.DivisionField;
+import scratch_compiler.ValueFields.JoinField;
 import scratch_compiler.ValueFields.ListElementField;
 import scratch_compiler.ValueFields.MultiplicationField;
 import scratch_compiler.ValueFields.NumberField;
@@ -27,6 +29,7 @@ import scratch_compiler.ValueFields.StringField;
 import scratch_compiler.ValueFields.SubtractionField;
 import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.VariableField;
+import scratch_compiler.ValueFields.LogicFields.AndField;
 import scratch_compiler.ValueFields.LogicFields.EqualsField;
 import scratch_compiler.ValueFields.LogicFields.LessThanField;
 
@@ -68,8 +71,9 @@ public class ExpressionAssembler {
         if (expression instanceof BinaryOperator)
             return assembleBinaryExpression((BinaryOperator) expression);
         if (expression instanceof UnaryOperator)
-            return errorField(expression);
+            return assembleUnaryExpression((UnaryOperator) expression);
 
+        System.out.println("Error: " + expression + " " + expression.getClass());
         return errorField(expression);
     }
 
@@ -82,6 +86,9 @@ public class ExpressionAssembler {
         // add the rest of the operators
         switch (operator) {
             case ADDITION:
+                if (expression.getLeft().getType().getType().getType() == VariableType.STRING
+                        || expression.getRight().getType().getType().getType() == VariableType.STRING)
+                    return new JoinField(left, right);
                 return new AdditionField(left, right);
             case SUBTRACTION:
                 return new SubtractionField(left, right);
@@ -95,38 +102,23 @@ public class ExpressionAssembler {
                 return new LessThanField(right, left);
             case EQUALS:
                 return new EqualsField(left, right);
+            case AND:
+                return new AndField(left, right);
             default:
                 return errorField(expression);
         }
 
-        // switch (expression.getOperatorType()) {
-        // case ADD:
-        // out = new AdditionField(left, right);
-        // break;
-        // case SUB:
+    }
 
-        // if (expression instanceof AdditionExpression) {
-        // if (expression.getType() == VariableType.STRING)
-        // out = new JoinField(left, right);
-        // else
-        // out = new AdditionField(left, right);
-        // } else if (expression instanceof SubtractionExpression)
-        // out = new SubtractionField(left, right);
-        // else if (expression instanceof MultiplicationExpression)
-        // out = new MultiplicationField(left, right);
-        // else if (expression instanceof DivisionExpression)
-        // out = new DivisionField(left, right);
-        // else if (expression instanceof ModulusExpression)
-        // out = new ModulusField(left, right);
-        // else if (expression instanceof EqualsExpression)
-        // out = new EqualsField(left, right);
-        // else if (expression instanceof GreaterThanExpression)
-        // out = new GreaterThanField(left, right);
-        // else if (expression instanceof LessThanExpression)
-        // out = new LessThanField(left, right);
+    private static ValueField assembleUnaryExpression(UnaryOperator expression) {
+        ValueField value = assemble(expression.getOperand());
 
-        // if (expression.getType() == VariableType.BOOLEAN)
-        // out = new AdditionField(out, new NumberField(0));
+        switch (expression.getOperatorType()) {
+            case UNARY_NEGATION:
+                return new SubtractionField(new NumberField(0), value);
+            default:
+                return errorField(expression);
+        }
     }
 
     public static ValueField errorField(Expression expression) {
