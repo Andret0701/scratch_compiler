@@ -19,6 +19,7 @@ import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 public class IntermediateCode {
     private Scope globalScope = new Scope();
     private ArrayList<SimpleFunctionDeclaration> functions = new ArrayList<>();
+    private boolean zeroIndexed = true;
 
     public IntermediateCode(Scope globalScope, ArrayList<SimpleFunctionDeclaration> functions) {
         this.globalScope = globalScope;
@@ -39,6 +40,14 @@ public class IntermediateCode {
 
     public void setGlobalScope(Scope globalScope) {
         this.globalScope = globalScope;
+    }
+
+    public boolean isZeroIndexed() {
+        return zeroIndexed;
+    }
+
+    public void setZeroIndexed(boolean zeroIndexed) {
+        this.zeroIndexed = zeroIndexed;
     }
 
     @Override

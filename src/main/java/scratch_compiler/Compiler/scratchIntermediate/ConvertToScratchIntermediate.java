@@ -21,7 +21,8 @@ public class ConvertToScratchIntermediate {
             functions.add(ConvertFunction.convert(function));
         }
 
-        return new IntermediateCode(globalScope, functions);
+        code = new IntermediateCode(globalScope, functions);
+        return ConvertOneIndexed.convert(code);
     }
 
     private static Scope convertGlobaScope(Scope scope, ArrayList<SimpleFunctionDeclaration> functions) {

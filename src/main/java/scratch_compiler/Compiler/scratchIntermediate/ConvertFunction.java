@@ -21,9 +21,6 @@ import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class ConvertFunction {
     public static SimpleFunctionDeclaration convert(SimpleFunctionDeclaration function) {
-        System.out.println(
-                "Converting function " + function.getName() + " " + getDeclaredVariables(function.getScope())
-                        + " to scratch intermediate");
         return new SimpleFunctionDeclaration(function.getName(),
                 convertFunctionScope(ConvertScope.convert(function.getScope()), function));
     }

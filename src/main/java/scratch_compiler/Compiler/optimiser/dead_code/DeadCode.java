@@ -10,4 +10,5 @@ public class DeadCode implements Optimization {
     public Optimized optimize(IntermediateCode code) {
         return new Optimized(code, false);
     }
+
 }

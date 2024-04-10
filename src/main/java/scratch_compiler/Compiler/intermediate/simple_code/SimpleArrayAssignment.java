@@ -21,6 +21,10 @@ public class SimpleArrayAssignment extends Statement {
         return getExpression(0);
     }
 
+    public void setIndex(Expression index) {
+        setExpression(0, index);
+    }
+
     public Expression getValue() {
         return getExpression(1);
     }

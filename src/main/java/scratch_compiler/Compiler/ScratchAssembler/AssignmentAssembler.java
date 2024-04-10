@@ -44,8 +44,7 @@ public class AssignmentAssembler {
         BlockStack stackBlock = new BlockStack();
 
         ValueField value = ExpressionAssembler.assemble(assignment.getValue());
-        ValueField index = new AdditionField(ExpressionAssembler.assemble(assignment.getIndex()),
-                new NumberField(1));
+        ValueField index = ExpressionAssembler.assemble(assignment.getIndex());
         stackBlock.push(new ChangeListBlock(assignment.getName(), false,
                 index, value));
         return stackBlock;

@@ -48,8 +48,7 @@ public class ExpressionAssembler {
             return new VariableField(((SimpleVariableValue) expression).getName(), false);
         if (expression instanceof SimpleArrayValue)
             return new ListElementField(((SimpleArrayValue) expression).getName(), false,
-                    new AdditionField(ExpressionAssembler.assemble(((SimpleArrayValue) expression).getIndex()),
-                            new NumberField(1)));
+                    ExpressionAssembler.assemble(((SimpleArrayValue) expression).getIndex()));
         if (expression instanceof TypeConversionExpression)
             return assemble(((TypeConversionExpression) expression).getExpression());
 

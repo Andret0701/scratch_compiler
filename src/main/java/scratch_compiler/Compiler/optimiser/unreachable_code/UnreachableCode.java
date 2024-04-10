@@ -126,10 +126,17 @@ public class UnreachableCode implements Optimization {
             }
         }
 
-        for (int i = 0; i < statement.getScopeCount(); i++) {
-            Scope child = statement.getScope(i);
-            for (Statement scopeStatement : child.getStatements()) {
+        if (statement instanceof Scope) {
+            Scope scope = (Scope) statement;
+            for (Statement scopeStatement : scope.getStatements()) {
                 referencedFunctions.addAll(getReferencedFunctions(scopeStatement, functions, referencedFunctions));
+            }
+        } else {
+            for (int i = 0; i < statement.getScopeCount(); i++) {
+                Scope child = statement.getScope(i);
+                for (Statement scopeStatement : child.getStatements()) {
+                    referencedFunctions.addAll(getReferencedFunctions(scopeStatement, functions, referencedFunctions));
+                }
             }
         }
 

@@ -294,7 +294,7 @@ void update()
 
     
     Vector2 input=getInput();
-    position=add(position, multiply(input, 30));
+    position=add(position, multiply(input, 10));
     
 }
 

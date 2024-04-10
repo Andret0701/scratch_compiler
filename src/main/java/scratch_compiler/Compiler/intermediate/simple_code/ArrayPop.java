@@ -20,6 +20,10 @@ public class ArrayPop extends Statement {
         return getExpression(0);
     }
 
+    public void setIndex(Expression index) {
+        setExpression(0, index);
+    }
+
     @Override
     public String toString() {
         return "pop " + name + "[" + getExpression(0) + "]";

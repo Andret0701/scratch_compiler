@@ -10,6 +10,7 @@ import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayValue;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableValue;
+import scratch_compiler.Compiler.parser.ExpressionContainer;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.types.OperatorType;
@@ -38,6 +39,9 @@ public class ConvertStatement {
                             new SimpleVariableValue("stack:pointer", VariableType.INT))));
         } else if (statement instanceof ArrayPop) {
             ArrayPop arrayPop = (ArrayPop) statement;
+            arrayPop.setIndex(new BinaryOperator(OperatorType.ADDITION, arrayPop.getIndex(), new IntValue(1),
+                    new Type(VariableType.INT)));
+
             statements.add(new SimpleVariableAssignment("stack:pointer", new BinaryOperator(OperatorType.SUBTRACTION,
                     new SimpleVariableValue("stack:pointer", VariableType.INT), new IntValue(1),
                     new Type(VariableType.INT))));
@@ -45,6 +49,12 @@ public class ConvertStatement {
                     new SimpleVariableValue("stack:pointer", VariableType.INT), arrayPop.getIndex()));
         } else if (statement instanceof Scope)
             statements.add(ConvertScope.convert((Scope) statement));
+        else if (statement instanceof SimpleArrayAssignment) {
+            SimpleArrayAssignment arrayAssignment = (SimpleArrayAssignment) statement;
+            arrayAssignment.setIndex(new BinaryOperator(OperatorType.ADDITION, arrayAssignment.getIndex(),
+                    new IntValue(1), new Type(VariableType.INT)));
+            statements.add(arrayAssignment);
+        }
 
         else {
             for (int i = 0; i < statement.getScopeCount(); i++) {
@@ -52,6 +62,8 @@ public class ConvertStatement {
             }
             statements.add(statement);
         }
+
+        // ConvertExpression.convert(statement);
 
         return statements;
     }

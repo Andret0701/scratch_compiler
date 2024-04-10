@@ -22,7 +22,7 @@ public class Optimizer {
 
         int lines = getNumberOfLines(code);
         System.out.println("Optimising...");
-        System.out.println(code);
+        // System.out.println(code);
 
         boolean changed = true;
         while (changed) {
