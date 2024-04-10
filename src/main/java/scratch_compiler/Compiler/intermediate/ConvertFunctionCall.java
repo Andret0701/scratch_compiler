@@ -98,7 +98,6 @@ public class ConvertFunctionCall {
                     || argument instanceof IndexExpression
                     || argument instanceof SizeOfExpression)
                 throw new IllegalArgumentException("Function call is not allowed in intermediate code: " + argument);
-            System.out.println("Function call is not allowed in intermediate code: " + argument);
             statements.addAll(ConvertStack.push(argument, table));
         }
 

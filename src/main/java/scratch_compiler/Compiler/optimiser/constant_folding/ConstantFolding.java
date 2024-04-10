@@ -7,6 +7,7 @@ import scratch_compiler.Compiler.optimiser.Optimization;
 import scratch_compiler.Compiler.optimiser.Optimized;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
+import scratch_compiler.Compiler.parser.expressions.UnaryOperator;
 import scratch_compiler.Compiler.parser.expressions.types.OperatorType;
 import scratch_compiler.Compiler.parser.expressions.values.BooleanValue;
 import scratch_compiler.Compiler.parser.expressions.values.FloatValue;
@@ -60,6 +61,10 @@ public class ConstantFolding implements Optimization {
             return optimizeBinary((BinaryOperator) expression);
         }
 
+        if (expression instanceof UnaryOperator) {
+            return optimizeUnary((UnaryOperator) expression);
+        }
+
         return new Optimized(expression, false);
     }
 
@@ -72,37 +77,78 @@ public class ConstantFolding implements Optimization {
         binaryOperator = new BinaryOperator(binaryOperator.getOperatorType(),
                 (Expression) left.getObject(), (Expression) right.getObject(), binaryOperator.getType());
 
+        Expression optimizedExpression = binaryOperator;
+        Optimized optimized = null;
         switch (binaryOperator.getOperatorType()) {
             case ADDITION:
-                return optimizeAddition(binaryOperator);
+                optimized = optimizeAddition(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case SUBTRACTION:
-                return optimizeSubtraction(binaryOperator);
+                optimized = optimizeSubtraction(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case MULTIPLICATION:
-                return optimizeMultiplication(binaryOperator);
+                optimized = optimizeMultiplication(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case DIVISION:
-                return optimizeDivision(binaryOperator);
+                optimized = optimizeDivision(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case MODULUS:
-                return optimizeModulus(binaryOperator);
+                optimized = optimizeModulus(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case LESS_THAN:
-                return optimizeLessThan(binaryOperator);
+                optimized = optimizeLessThan(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case GREATER_THAN:
-                return optimizeGreaterThan(binaryOperator);
+                optimized = optimizeGreaterThan(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case LESS_EQUALS:
-                return optimizeLessEquals(binaryOperator);
+                optimized = optimizeLessEquals(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case GREATER_EQUALS:
-                return optimizeGreaterEquals(binaryOperator);
+                optimized = optimizeGreaterEquals(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case EQUALS:
-                return optimizeEquals(binaryOperator);
+                optimized = optimizeEquals(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case NOT_EQUALS:
-                return optimizeNotEquals(binaryOperator);
+                optimized = optimizeNotEquals(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case AND:
-                return optimizeAnd(binaryOperator);
+                optimized = optimizeAnd(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             case OR:
-                return optimizeOr(binaryOperator);
+                optimized = optimizeOr(binaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
             default:
                 break;
         }
-        return new Optimized(binaryOperator, changed);
+        return new Optimized(optimizedExpression, changed);
     }
 
     private static Optimized optimizeAddition(BinaryOperator binaryOperator) {
@@ -501,6 +547,59 @@ public class ConstantFolding implements Optimization {
         }
 
         return new Optimized(binaryOperator, false);
+    }
+
+    private static Optimized optimizeUnary(UnaryOperator unaryOperator) {
+        Optimized operand = optimizeExpression(unaryOperator.getOperand());
+
+        boolean changed = operand.isOptimized();
+
+        unaryOperator = new UnaryOperator(unaryOperator.getOperatorType(), (Expression) operand.getObject(),
+                unaryOperator.getType());
+
+        Expression optimizedExpression = unaryOperator;
+        Optimized optimized = null;
+        switch (unaryOperator.getOperatorType()) {
+            case UNARY_NEGATION:
+                optimized = optimizeNegation(unaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+                break;
+            case NOT:
+                optimized = optimizeNot(unaryOperator);
+                changed = changed || optimized.isOptimized();
+                optimizedExpression = (Expression) optimized.getObject();
+            default:
+                break;
+        }
+        return new Optimized(optimizedExpression, changed);
+    }
+
+    private static Optimized optimizeNegation(UnaryOperator unaryOperator) {
+        Expression operand = unaryOperator.getOperand();
+
+        // -int
+        if (operand instanceof IntValue) {
+            return new Optimized(new IntValue(-((IntValue) operand).getValue()), true);
+        }
+
+        // -float
+        if (operand instanceof FloatValue) {
+            return new Optimized(new FloatValue(-((FloatValue) operand).getValue()), true);
+        }
+
+        return new Optimized(unaryOperator, false);
+    }
+
+    private static Optimized optimizeNot(UnaryOperator unaryOperator) {
+        Expression operand = unaryOperator.getOperand();
+
+        // !boolean
+        if (operand instanceof BooleanValue) {
+            return new Optimized(new BooleanValue(!((BooleanValue) operand).getValue()), true);
+        }
+
+        return new Optimized(unaryOperator, false);
     }
 
 }

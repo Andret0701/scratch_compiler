@@ -64,7 +64,7 @@ public class ScratchAssembler {
         IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
         intermediateCode = ConvertToScratchIntermediate.convert(intermediateCode);
         intermediateCode = Optimizer.optimize(intermediateCode);
-        System.out.println(intermediateCode);
+        // System.out.println(intermediateCode);
 
         // ArrayList<FunctionDeclaration> functionDeclarations =
         // compiledCode.getFunctions();

@@ -52,9 +52,6 @@ public class App {
         greenFlagBlock.push(new SetPositionBlock(0, 0));
         greenFlagBlock.push(program.getStack());
 
-        ArrayList<String> arguments = new ArrayList<String>();
-        arguments.add("stackOffset");
-
         ArrayList<ValueField> fields = new ArrayList<ValueField>();
         fields.add(new NumberField(1));
 

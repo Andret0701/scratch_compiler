@@ -47,9 +47,7 @@ public class ConvertOneIndexed {
         }
 
         for (int i = 0; i < statement.getScopeCount(); i++) {
-            System.out.println(statement.getClass().getSimpleName());
             Scope scope = statement.getScope(i);
-            System.out.println(scope.getStatements().size());
             statement.setScope(i, convert(scope));
         }
 

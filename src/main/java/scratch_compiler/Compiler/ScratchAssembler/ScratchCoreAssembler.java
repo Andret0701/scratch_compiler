@@ -33,6 +33,14 @@ public class ScratchCoreAssembler {
                     SystemCallFlag.ChangesGlobalState),
             new SystemCall("penClear", new Type(VariableType.VOID), new ArrayList<Variable>(),
                     SystemCallFlag.ChangesGlobalState),
+            new SystemCall("penSize", new Type(VariableType.VOID),
+                    new ArrayList<>(Arrays.asList(new Variable("size", new Type(VariableType.FLOAT)))),
+                    SystemCallFlag.ChangesGlobalState),
+            new SystemCall("penColor", new Type(VariableType.VOID),
+                    new ArrayList<>(Arrays.asList(new Variable("red", new Type(VariableType.FLOAT)),
+                            new Variable("green", new Type(VariableType.FLOAT)),
+                            new Variable("blue", new Type(VariableType.FLOAT)))),
+                    SystemCallFlag.ChangesGlobalState),
             new SystemCall("moveTo", new Type(VariableType.VOID),
                     new ArrayList<>(Arrays.asList(new Variable("x", new Type(VariableType.FLOAT)),
                             new Variable("y", new Type(VariableType.FLOAT)))),
@@ -43,6 +51,17 @@ public class ScratchCoreAssembler {
                     new ArrayList<>(Arrays.asList(new Variable("angle", new Type(VariableType.FLOAT))))),
             new SystemCall("cos", new Type(VariableType.FLOAT),
                     new ArrayList<>(Arrays.asList(new Variable("angle", new Type(VariableType.FLOAT))))),
+            new SystemCall("random", new Type(VariableType.FLOAT),
+                    new ArrayList<>(Arrays.asList(new Variable("min", new Type(VariableType.FLOAT)),
+                            new Variable("max", new Type(VariableType.FLOAT))))),
+            new SystemCall("abs", new Type(VariableType.FLOAT),
+                    new ArrayList<>(Arrays.asList(new Variable("value", new Type(VariableType.FLOAT))))),
+            new SystemCall("ceil", new Type(VariableType.FLOAT),
+                    new ArrayList<>(Arrays.asList(new Variable("value", new Type(VariableType.FLOAT))))),
+            new SystemCall("floor", new Type(VariableType.FLOAT),
+                    new ArrayList<>(Arrays.asList(new Variable("value", new Type(VariableType.FLOAT))))),
+            new SystemCall("round", new Type(VariableType.FLOAT),
+                    new ArrayList<>(Arrays.asList(new Variable("value", new Type(VariableType.FLOAT))))),
             new SystemCall("sqrt", new Type(VariableType.FLOAT),
                     new ArrayList<>(Arrays.asList(new Variable("value", new Type(VariableType.FLOAT)))))));
 
@@ -60,41 +79,5 @@ public class ScratchCoreAssembler {
                 return true;
         }
         return false;
-    }
-
-    public static ValueField assembleExpression(String name) {
-        if (name.equals("x"))
-            return new XPositionField();
-        if (name.equals("y"))
-            return new YPositionField();
-        if (name.equals("direction"))
-            return new DirectionField();
-        return ScratchAssembler.defaultField();
-    }
-
-    // public static BlockStack assembleAssignment(String name, ValueField value) {
-
-    // StackBlock stackBlock;
-    // if (name.equals("x"))
-    // stackBlock = new SetXBlock(value);
-    // else if (name.equals("y"))
-    // stackBlock = new SetYBlock(value);
-    // else
-    // stackBlock = ScratchAssembler.defaultBlock();
-
-    // return new BlockStack(stackBlock);
-    // }
-
-    public static BlockStack assembleSystemCall(String name, List<ValueField> arguments) {
-        if (name.equals("say"))
-            return new BlockStack(new SayBlock(arguments.get(0)));
-        if (name.equals("penUp"))
-            return new BlockStack(new PenUpBlock());
-        if (name.equals("penDown"))
-            return new BlockStack(new PenDownBlock());
-        if (name.equals("moveTo"))
-            return new BlockStack(new SetPositionBlock(arguments.get(0), arguments.get(1)));
-
-        return new BlockStack(ScratchAssembler.defaultBlock());
     }
 }

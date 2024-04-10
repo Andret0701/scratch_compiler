@@ -1,3 +1,5 @@
+
+
 struct Vector2{
     float x;
     float y;
@@ -7,6 +9,11 @@ struct Body{
     Vector2 position;
     Vector2 velocity;
     float mass;
+}
+
+struct Player{
+    Body body;
+    float size;
 }
 
 
@@ -27,7 +34,7 @@ Vector2 multiply(Vector2 a, float b)
 }
 
 
-Body player={{0,0}, {0,0}, 1};
+Player player={{{0,0}, {0,0}, 1}, 10};
 
 Vector2 getInput()
 {
@@ -60,22 +67,38 @@ Vector2 loopScreen(Vector2 position)
 
 void update()
 {
-   // penClear();
-    penUp();
-    moveTo(player.position.x, player.position.y);
-    penDown();
+    penSize(player.size);
 
 
     
     Vector2 input=getInput();
-    player.velocity=add(player.velocity, multiply(input, 20));
-    player.velocity=multiply(player.velocity, 0.9);
+    player.body.velocity=add(player.body.velocity, multiply(input, 20));
+    player.body.velocity=multiply(player.body.velocity, 0.9);
 
-    player.position=add(player.position, multiply(player.velocity, 0.1));
+    player.body.position=add(player.body.position, multiply(player.body.velocity, 0.1));
+
+    if(getKey("space"))
+    {
+        penColor(random(100,255), random(100,255), random(100,255));
+    }
+
+    moveTo(player.body.position.x, player.body.position.y);
+    penUp();
+    player.body.position= loopScreen(player.body.position);
+    moveTo(player.body.position.x, player.body.position.y);
+    penDown();
 
 
-    player.position= loopScreen(player.position);
+    if(getKey("c"))
+        penClear();
 
+    if(getKey("r"))
+        player.size*=1.1;
+    if(getKey("f"))
+        player.size/=1.1;   
+
+
+    float test=round(ceil(floor(abs(1))));
 }
 
 while(true)
