@@ -1,6 +1,7 @@
 package scratch_compiler.Compiler.intermediate;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.TypeDefinition;
@@ -13,6 +14,7 @@ import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayValue;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableDeclaration;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableValue;
+import scratch_compiler.Compiler.intermediate.simple_code.VariableReference;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
@@ -28,6 +30,7 @@ import scratch_compiler.Compiler.parser.statements.WhileStatement;
 public class ConvertStack {
 
     public static ArrayList<Statement> push(Expression expression, IntermediateTable table) {
+
         // if array then its either a arrayValue or a variableValue
         ArrayList<Statement> statements = new ArrayList<>();
         if (expression == null) {
@@ -53,6 +56,14 @@ public class ConvertStack {
 
         if (expression instanceof StructValue) {
             statements.addAll(pushStructValue((StructValue) expression, table));
+            return statements;
+        }
+
+        if (expression instanceof VariableReference) {
+            List<VariableReference> references = getReferences((VariableReference) expression).reversed();
+            for (VariableReference reference : references) {
+                statements.add(new Push(reference));
+            }
             return statements;
         }
 
@@ -186,6 +197,22 @@ public class ConvertStack {
         }
 
         return statements;
+    }
+
+    private static ArrayList<VariableReference> getReferences(VariableReference variableReference) {
+        ArrayList<VariableReference> references = new ArrayList<>();
+
+        if (variableReference.getType().getType().getType() != VariableType.STRUCT)
+            references.add(variableReference);
+
+        for (TypeField field : variableReference.getType().getType().getFields()) {
+            String name = variableReference.getName() + "." + field.getName();
+            TypeDefinition type = field.getType();
+            VariableReference reference = new VariableReference(name, new Type(type), variableReference.getIndex());
+            references.addAll(getReferences(reference));
+        }
+
+        return references;
     }
 
 }

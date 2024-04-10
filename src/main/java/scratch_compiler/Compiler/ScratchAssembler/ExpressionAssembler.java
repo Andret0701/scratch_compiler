@@ -23,6 +23,7 @@ import scratch_compiler.ValueFields.AdditionField;
 import scratch_compiler.ValueFields.DivisionField;
 import scratch_compiler.ValueFields.JoinField;
 import scratch_compiler.ValueFields.ListElementField;
+import scratch_compiler.ValueFields.ModulusField;
 import scratch_compiler.ValueFields.MultiplicationField;
 import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.StringField;
@@ -104,6 +105,8 @@ public class ExpressionAssembler {
                 return new EqualsField(left, right);
             case AND:
                 return new AndField(left, right);
+            case MODULUS:
+                return new ModulusField(left, right);
             default:
                 return errorField(expression);
         }

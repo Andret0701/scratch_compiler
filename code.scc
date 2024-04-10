@@ -243,38 +243,62 @@
 // }
 
 
-
-int[] array={4,1,3,2,16,9,10,14,8,7};
-
-void max_heapify(int i)
-{
-    int l=2*i+1;
-    int r=2*i+2;
-    int largest=i;
-    int heap_size=#array;
-    if(l<heap_size && array[l]>array[largest])
-        largest=l;
-    if(r<heap_size && array[r]>array[largest])
-        largest=r;
-    if(largest==i)
-        return;
-    int temp=array[i];
-    array[i]=array[largest];
-    array[largest]=temp;
-    max_heapify(largest); 
+struct Vector2{
+    float x;
+    float y;
 }
 
-void build_max_heap()
+
+Vector2 normalize(Vector2 v)
 {
-    for(int i=#array/2-1; i>-1; i--)
-        max_heapify(i);
+    float length=sqrt(v.x*v.x+v.y*v.y);
+    return {v.x/length, v.y/length};
 }
 
-build_max_heap();
-
-string out="";
-for(int i=0; i<#array; i++)
+Vector2 add(Vector2 a, Vector2 b)
 {
-    out+=array[i]+" ";
+    return {a.x+b.x, a.y+b.y};
 }
-say(out);
+
+Vector2 multiply(Vector2 a, float b)
+{
+    return {a.x*b, a.y*b};
+}
+
+
+Vector2 position={0,0};
+
+Vector2 getInput()
+{
+    Vector2 input={0,0};
+    if(getKey("a"))
+        input.x-=1;
+    if(getKey("d"))
+        input.x+=1;
+
+    if(getKey("w"))
+        input.y+=1;
+    if(getKey("s"))
+        input.y-=1;
+
+    return normalize(input);
+}
+
+void update()
+{
+    penClear();
+    penUp();
+    moveTo(position.x, position.y);
+    penDown();
+
+
+    
+    Vector2 input=getInput();
+    position=add(position, multiply(input, 30));
+    
+}
+
+while(true)
+{
+    update();
+}

@@ -37,6 +37,8 @@ public class ScratchCoreAssembler {
                     new ArrayList<>(Arrays.asList(new Variable("x", new Type(VariableType.FLOAT)),
                             new Variable("y", new Type(VariableType.FLOAT)))),
                     SystemCallFlag.ChangesGlobalState),
+            new SystemCall("getKey", new Type(VariableType.BOOLEAN),
+                    new ArrayList<>(Arrays.asList(new Variable("key", new Type(VariableType.STRING))))),
             new SystemCall("sin", new Type(VariableType.FLOAT),
                     new ArrayList<>(Arrays.asList(new Variable("angle", new Type(VariableType.FLOAT))))),
             new SystemCall("cos", new Type(VariableType.FLOAT),

@@ -117,6 +117,7 @@ public class IntermediateValidator {
 
             if (expression instanceof SimpleVariableValue) {
                 SimpleVariableValue value = (SimpleVariableValue) expression;
+                // System.out.println(value);
                 table.validateVariableUsage(value.getName());
             }
 

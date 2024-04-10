@@ -27,39 +27,11 @@ import scratch_compiler.Compiler.parser.statements.Statement;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 
 public class ConvertAssignment {
-    public static ArrayList<Statement> declareVariable(String name, TypeDefinition type) {
-        ArrayList<Statement> statements = new ArrayList<>();
-        if (type.getType() != VariableType.STRUCT) {
-            statements.add(new SimpleVariableDeclaration(name, type.getType()));
-            return statements;
-        }
-
-        for (TypeField field : type.getFields()) {
-            String fieldName = name + "." + field.getName();
-            TypeDefinition fieldType = field.getType();
-            statements.addAll(declareVariable(fieldName, fieldType));
-        }
-
-        return statements;
-    }
-
-    public static ArrayList<Statement> declareArray(String name, String size, TypeDefinition type) {
-        ArrayList<Statement> statements = new ArrayList<>();
-        if (type.getType() != VariableType.STRUCT) {
-            statements.add(
-                    new SimpleArrayDeclaration(name, type.getType(), new SimpleVariableValue(size, VariableType.INT)));
-            return statements;
-        }
-
-        for (TypeField field : type.getFields()) {
-            String fieldName = name + "." + field.getName();
-            statements.addAll(declareArray(fieldName, size, field.getType()));
-        }
-
-        return statements;
-    }
-
     public static ArrayList<Statement> convert(Assignment assignment) {
+        System.out.println(
+                "ConvertAssignment.convert: " + assignment + " " + assignment.getExpression().getClass().getSimpleName()
+                        + " "
+                        + assignment.getVariable().getClass().getSimpleName());
         return convert((VariableReference) assignment.getVariable(), assignment.getExpression());
     }
 

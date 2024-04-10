@@ -9,6 +9,7 @@ import scratch_compiler.Compiler.intermediate.simple_code.Pop;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayDeclaration;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionDeclaration;
+import scratch_compiler.Compiler.intermediate.simple_code.SimpleReturn;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableDeclaration;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableValue;
@@ -25,6 +26,8 @@ import scratch_compiler.Compiler.parser.statements.WhileStatement;
 public class ConvertFunction {
 
     public static SimpleFunctionDeclaration convert(FunctionDeclaration function, IntermediateTable table) {
+        function.setScope(ConvertVariableReference.convert(function.getScope()));
+        System.out.println("Function: " + function.getScope());
         Scope scope = convertFunctionScope(function, table);
         String name = convertFunctionName(function.getFunction());
         return new SimpleFunctionDeclaration(name, scope);
@@ -56,6 +59,10 @@ public class ConvertFunction {
         for (Statement statement : ConvertScope.convert(functionDeclaration.getScope(), table).getStatements()) {
             converted.addStatement(statement);
         }
+
+        if (!(converted.getStatements().get(converted.getStatements().size() - 1) instanceof SimpleReturn))
+            converted
+                    .addStatement(new SimpleReturn());
 
         return converted;
     }

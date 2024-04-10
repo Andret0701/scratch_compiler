@@ -12,16 +12,27 @@ import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
 public class ConvertVariableReference {
-    public static void convert(Statement statement) {
+    public static Scope convert(Scope scope) {
+        Scope converted = new Scope();
+        for (Statement statement : scope.getStatements()) {
+            statement = convert(statement);
+            converted.addStatement(statement);
+        }
+        return converted;
+    }
+
+    private static Statement convert(Statement statement) {
         convert((ExpressionContainer) statement);
+        if (statement instanceof Scope) {
+            return convert((Scope) statement);
+        }
 
         for (int i = 0; i < statement.getScopeCount(); i++) {
             Scope scope = statement.getScope(i);
-            convert((ExpressionContainer) scope);
-            for (Statement scopeStatement : scope.getStatements()) {
-                convert(scopeStatement);
-            }
+            statement.setScope(i, convert(scope));
         }
+
+        return statement;
     }
 
     private static void convert(ExpressionContainer container) {

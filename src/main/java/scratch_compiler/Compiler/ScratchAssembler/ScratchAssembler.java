@@ -61,9 +61,9 @@ import scratch_compiler.ValueFields.LogicFields.LessThanField;
 
 public class ScratchAssembler {
     public static ScratchProgram assemble(String code) {
-        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), false);
+        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
         intermediateCode = ConvertToScratchIntermediate.convert(intermediateCode);
-        // intermediateCode = Optimizer.optimize(intermediateCode);
+        intermediateCode = Optimizer.optimize(intermediateCode);
         System.out.println(intermediateCode);
 
         // ArrayList<FunctionDeclaration> functionDeclarations =
@@ -146,108 +146,11 @@ public class ScratchAssembler {
         return new ScratchVariable(variable.getName(), false);
     }
 
-    public static BlockStack assembleAssignment(Assignment assignment, VariableStackReference stack,
-            boolean isFunction) {
-        String name = assignment.getName();
-        if (ScratchCoreAssembler.isVariable(name))
-            return ScratchCoreAssembler.assembleAssignment(name,
-                    assembleExpression(assignment.getExpression(), stack, isFunction));
-
-        return StackAssembler.assignValueToStack(assembleExpression(assignment.getExpression(), stack, isFunction),
-                new NumberField(stack.getVariableIndex(getVariable(assignment))));
-    }
-
     static ArrayList<ValueField> toArray(ValueField... fields) {
         ArrayList<ValueField> list = new ArrayList<>();
         for (ValueField field : fields)
             list.add(field);
         return list;
-    }
-
-    static ValueField assembleExpression(Expression expression, VariableStackReference stack,
-            boolean isFunction) {
-        if (expression instanceof IntValue)
-            return new NumberField(((IntValue) expression).getValue());
-        if (expression instanceof FloatValue)
-            return new NumberField(((FloatValue) expression).getValue());
-        if (expression instanceof BooleanValue)
-            return new NumberField(((BooleanValue) expression).getValue() ? 1 : 0);
-        if (expression instanceof StringValue)
-            return new StringField(((StringValue) expression).getString());
-        if (expression instanceof VariableValue) {
-            String name = ((VariableValue) expression).getName();
-            // if (ScratchCoreAssembler.isVariable(name))
-            // return ScratchCoreAssembler.assembleExpression(name);
-
-            int stackIndex = stack.getVariableIndex(getVariable((VariableValue) expression));
-            if (isFunction)
-                return StackAssembler.getElementOfStack(
-                        new AdditionField(FunctionAssembler.getStackOffset(), new NumberField(stackIndex)));
-            return StackAssembler.getElementOfStack(new NumberField(stackIndex));
-        }
-        if (expression instanceof BinaryOperator)
-            return assembleBinaryExpression((BinaryOperator) expression, stack, isFunction);
-        if (expression instanceof UnaryOperator)
-            return assembleUnaryExpression((UnaryOperator) expression, stack, isFunction);
-
-        return defaultField();
-    }
-
-    private static ValueField assembleBinaryExpression(BinaryOperator expression,
-            VariableStackReference stack, boolean isFunction) {
-        ValueField left = assembleExpression(expression.getLeft(), stack, isFunction);
-        ValueField right = assembleExpression(expression.getRight(), stack, isFunction);
-
-        OperatorType operator = expression.getOperatorType();
-
-        // add the rest of the operators
-        switch (operator) {
-            case ADDITION:
-                return new AdditionField(left, right);
-            default:
-                return defaultField();
-        }
-
-        // switch (expression.getOperatorType()) {
-        // case ADD:
-        // out = new AdditionField(left, right);
-        // break;
-        // case SUB:
-
-        // if (expression instanceof AdditionExpression) {
-        // if (expression.getType() == VariableType.STRING)
-        // out = new JoinField(left, right);
-        // else
-        // out = new AdditionField(left, right);
-        // } else if (expression instanceof SubtractionExpression)
-        // out = new SubtractionField(left, right);
-        // else if (expression instanceof MultiplicationExpression)
-        // out = new MultiplicationField(left, right);
-        // else if (expression instanceof DivisionExpression)
-        // out = new DivisionField(left, right);
-        // else if (expression instanceof ModulusExpression)
-        // out = new ModulusField(left, right);
-        // else if (expression instanceof EqualsExpression)
-        // out = new EqualsField(left, right);
-        // else if (expression instanceof GreaterThanExpression)
-        // out = new GreaterThanField(left, right);
-        // else if (expression instanceof LessThanExpression)
-        // out = new LessThanField(left, right);
-
-        // if (expression.getType() == VariableType.BOOLEAN)
-        // out = new AdditionField(out, new NumberField(0));
-    }
-
-    private static ValueField assembleUnaryExpression(UnaryOperator expression,
-            VariableStackReference stack, boolean isFunction) {
-        ValueField value = assembleExpression(expression.getOperand(), stack, isFunction);
-
-        switch (expression.getOperatorType()) {
-            case SUBTRACTION:
-                return new SubtractionField(new NumberField(0), value);
-            default:
-                return defaultField();
-        }
     }
 
     static StackBlock defaultBlock() {

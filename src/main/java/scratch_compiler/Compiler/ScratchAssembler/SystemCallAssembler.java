@@ -16,6 +16,7 @@ import scratch_compiler.ValueFields.SinField;
 import scratch_compiler.ValueFields.SqrtField;
 import scratch_compiler.ValueFields.StringField;
 import scratch_compiler.ValueFields.ValueField;
+import scratch_compiler.ValueFields.LogicFields.GetKetField;
 
 public class SystemCallAssembler {
 
@@ -36,7 +37,6 @@ public class SystemCallAssembler {
         else if (name.equals("moveTo"))
             stackBlock.push(new SetPositionBlock(ExpressionAssembler.assemble(systemCall.getArguments().get(0)),
                     ExpressionAssembler.assemble(systemCall.getArguments().get(1))));
-
         else
             stackBlock.push(StatementAssembler.errorBlock(systemCall));
 
@@ -51,6 +51,8 @@ public class SystemCallAssembler {
             return new CosField(ExpressionAssembler.assemble(expression.getArguments().get(0)));
         if (name.equals("sqrt"))
             return new SqrtField(ExpressionAssembler.assemble(expression.getArguments().get(0)));
+        if (name.equals("getKey"))
+            return new GetKetField(ExpressionAssembler.assemble(expression.getArguments().get(0)));
 
         return ExpressionAssembler.errorField(expression);
     }

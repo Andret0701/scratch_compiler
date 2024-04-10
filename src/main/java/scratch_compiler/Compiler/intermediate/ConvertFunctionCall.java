@@ -69,7 +69,8 @@ public class ConvertFunctionCall {
 
                 String name = table.getUniqueTemp(functionCall.getFunction().getName());
                 statements.addAll(convert(name, functionCall, table));
-                container.setExpression(i, new VariableValue(name, functionCall.getFunction().getReturnType()));
+                container.setExpression(i,
+                        new VariableReference(name, functionCall.getFunction().getReturnType(), null));
             }
 
         }
