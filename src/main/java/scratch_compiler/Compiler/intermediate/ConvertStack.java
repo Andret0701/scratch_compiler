@@ -18,6 +18,8 @@ import scratch_compiler.Compiler.intermediate.simple_code.VariableReference;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
 import scratch_compiler.Compiler.parser.expressions.Expression;
+import scratch_compiler.Compiler.parser.expressions.IndexExpression;
+import scratch_compiler.Compiler.parser.expressions.ReferenceExpression;
 import scratch_compiler.Compiler.parser.expressions.types.OperatorType;
 import scratch_compiler.Compiler.parser.expressions.values.ArrayValue;
 import scratch_compiler.Compiler.parser.expressions.values.IntValue;
@@ -30,7 +32,11 @@ import scratch_compiler.Compiler.parser.statements.WhileStatement;
 public class ConvertStack {
 
     public static ArrayList<Statement> push(Expression expression, IntermediateTable table) {
-
+        if (expression instanceof VariableValue || expression instanceof ReferenceExpression
+                || expression instanceof IndexExpression)
+            throw new RuntimeException(
+                    "VariableValue, ReferenceExpression, and IndexExpression are not allowed in intermediate code. Use VariableReference instead: "
+                            + expression);
         // if array then its either a arrayValue or a variableValue
         ArrayList<Statement> statements = new ArrayList<>();
         if (expression == null) {

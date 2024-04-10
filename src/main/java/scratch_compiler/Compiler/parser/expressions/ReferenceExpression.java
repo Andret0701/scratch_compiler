@@ -33,6 +33,6 @@ public class ReferenceExpression extends Expression {
 
     @Override
     public String toString() {
-        return getExpression().toString() + "." + reference;
+        return getExpression().toString() + ". " + reference;
     }
 }

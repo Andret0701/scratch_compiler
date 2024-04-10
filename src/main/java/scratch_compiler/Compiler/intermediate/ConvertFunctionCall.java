@@ -26,7 +26,7 @@ public class ConvertFunctionCall {
     public static ArrayList<Statement> convert(FunctionCall functionCall, IntermediateTable table) {
         ArrayList<Statement> statements = new ArrayList<>();
         for (Expression argument : functionCall.getArguments().reversed()) {
-            argument = ConvertExpression.convert(argument, table);
+            argument = ConvertVariableReference.convert(argument);
             statements.addAll(ConvertStack.push(argument, table));
         }
 
@@ -80,7 +80,7 @@ public class ConvertFunctionCall {
                 String name = table.getUniqueTemp(functionCall.getFunction().getName());
                 statements.addAll(convert(name, functionCall, table));
                 container.setExpression(i,
-                        new VariableValue(name, functionCall.getFunction().getReturnType()));
+                        new VariableReference(name, functionCall.getFunction().getReturnType(), null));
             }
 
         }
@@ -94,6 +94,11 @@ public class ConvertFunctionCall {
         ArrayList<Statement> statements = new ArrayList<>();
         for (Expression argument : functionCall.getArguments().reversed()) {
             argument = ConvertVariableReference.convert(argument);
+            if (argument instanceof VariableValue || argument instanceof ReferenceExpression
+                    || argument instanceof IndexExpression
+                    || argument instanceof SizeOfExpression)
+                throw new IllegalArgumentException("Function call is not allowed in intermediate code: " + argument);
+            System.out.println("Function call is not allowed in intermediate code: " + argument);
             statements.addAll(ConvertStack.push(argument, table));
         }
 
