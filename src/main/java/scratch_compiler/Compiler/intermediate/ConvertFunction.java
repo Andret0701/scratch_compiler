@@ -26,8 +26,8 @@ import scratch_compiler.Compiler.parser.statements.WhileStatement;
 public class ConvertFunction {
 
     public static SimpleFunctionDeclaration convert(FunctionDeclaration function, IntermediateTable table) {
+        function.setScope(ConvertFunctionCall.convert(function.getScope(), table));
         function.setScope(ConvertVariableReference.convert(function.getScope()));
-        System.out.println("Function: " + function.getScope());
         Scope scope = convertFunctionScope(function, table);
         String name = convertFunctionName(function.getFunction());
         return new SimpleFunctionDeclaration(name, scope);

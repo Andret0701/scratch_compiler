@@ -20,7 +20,7 @@ public class ConvertScope {
     // }
 
     public static Scope convert(Scope scope, IntermediateTable table) {
-        scope = ConvertFunctionCall.convert(scope, table);
+        // scope = ConvertFunctionCall.convert(scope, table);
         Scope convertedScope = new Scope();
         for (Statement statement : scope.getStatements()) {
             ArrayList<Statement> convertedStatements = ConvertStatement.convert(statement, table);

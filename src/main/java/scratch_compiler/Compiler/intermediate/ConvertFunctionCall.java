@@ -48,9 +48,19 @@ public class ConvertFunctionCall {
 
     private static ArrayList<Statement> convert(Statement statement, IntermediateTable table) {
         ArrayList<Statement> statements = new ArrayList<>();
+        if (statement instanceof Scope) {
+            statements.add(convert((Scope) statement, table));
+            return statements;
+        }
 
         statements.addAll(convert((ExpressionContainer) statement, table));
         statements.add(statement);
+
+        for (int i = 0; i < statement.getScopeCount(); i++) {
+            Scope scope = statement.getScope(i);
+            statement.setScope(i, convert(scope, table));
+        }
+
         return statements;
     }
 
@@ -70,7 +80,7 @@ public class ConvertFunctionCall {
                 String name = table.getUniqueTemp(functionCall.getFunction().getName());
                 statements.addAll(convert(name, functionCall, table));
                 container.setExpression(i,
-                        new VariableReference(name, functionCall.getFunction().getReturnType(), null));
+                        new VariableValue(name, functionCall.getFunction().getReturnType()));
             }
 
         }
@@ -83,7 +93,7 @@ public class ConvertFunctionCall {
             IntermediateTable table) {
         ArrayList<Statement> statements = new ArrayList<>();
         for (Expression argument : functionCall.getArguments().reversed()) {
-            // argument = ConvertExpression.convert(argument, table);
+            argument = ConvertVariableReference.convert(argument);
             statements.addAll(ConvertStack.push(argument, table));
         }
 

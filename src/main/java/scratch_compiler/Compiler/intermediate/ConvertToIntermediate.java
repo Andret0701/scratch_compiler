@@ -25,6 +25,7 @@ public class ConvertToIntermediate {
     public static IntermediateCode convert(CompiledCode code) {
         IntermediateTable table = new IntermediateTable();
 
+        code.setGlobalScope(ConvertFunctionCall.convert(code.getGlobalScope(), table));
         code.setGlobalScope(ConvertVariableReference.convert(code.getGlobalScope()));
         Scope globalScope = ConvertScope.convert(code.getGlobalScope(), table);
         ArrayList<SimpleFunctionDeclaration> convertedFunctions = new ArrayList<>();
@@ -36,7 +37,7 @@ public class ConvertToIntermediate {
         // convertedFunctions, code.getStructs());
 
         IntermediateCode convertedCode = new IntermediateCode(globalScope, convertedFunctions);
-        // System.out.println("Converted code: " + convertedCode);
+        System.out.println("Converted code: " + convertedCode);
         IntermediateValidator.validateIntermediateCode(convertedCode);
         return convertedCode;
     }

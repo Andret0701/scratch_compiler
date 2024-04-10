@@ -44,14 +44,13 @@ public class ConvertStack {
                 return statements;
             }
 
-            if (expression instanceof VariableValue) {
-                VariableValue variableValue = (VariableValue) expression;
+            if (expression instanceof VariableReference) {
+                VariableReference variableValue = (VariableReference) expression;
                 statements.addAll(pushArray(variableValue.getName(), variableValue.getType().getType(),
                         table));
                 return statements;
             }
 
-            throw new RuntimeException("Unsupported expression type: " + expression.getClass().getName());
         }
 
         if (expression instanceof StructValue) {
