@@ -48,7 +48,7 @@ Player randomPlayer()
 player=randomPlayer();
 
 
-Player[] balls=Player[100];
+Player[] balls=Player[1000];
 for(int i=0;i<#balls;i++)
 {
     balls[i]=randomPlayer();
@@ -112,7 +112,20 @@ void update()
 
 
  
-
+//    float input.x_
+//    float input.y_
+//    input.x_ = (float) 0
+//    input.y_ = (float) 0
+//    if (getKey*("a"))
+//       input.x_ = (input.x_ - (float) 1)
+//    if (getKey*("d"))
+//       input.x_ = (input.x_ + (float) 1)
+//    if (getKey*("w"))
+//       input.y_ = (input.y_ + (float) 1)
+//    if (getKey*("s"))
+//       input.y_ = (input.y_ - (float) 1)
+//    push input.y_
+//    push input.x_
     
     Vector2 input=getInput();
     player.body.velocity=add(player.body.velocity, multiply(input, 20));
@@ -134,10 +147,10 @@ void update()
     drawPlayer(player);
     for(int i=0;i<#balls;i++)
     {
-        balls[i].body.velocity=add(balls[i].body.velocity, multiply(normalize(add(player.body.position, multiply(balls[i].body.position, -1))), 10));
+        balls[i].body.velocity=add(balls[i].body.velocity, multiply(normalize(add(player.body.position, multiply(balls[i].body.position, -1))), player.size));
         balls[i].body.position=add(balls[i].body.position, multiply(balls[i].body.velocity, 1/balls[i].size));
         //damping
-        balls[i].body.velocity=multiply(balls[i].body.velocity, 0.9);
+        balls[i].body.velocity=multiply(balls[i].body.velocity, 0.99);
         balls[i].body.position= loopScreen(balls[i].body.position);
         drawPlayer(balls[i]);
     }
@@ -159,3 +172,4 @@ while(true)
 {
     update();
 }
+

@@ -3,9 +3,11 @@ package scratch_compiler.Compiler.scratchIntermediate;
 import java.util.ArrayList;
 
 import scratch_compiler.Compiler.Type;
+import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayDeclaration;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayValue;
+import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionCall;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionDeclaration;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleReturn;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableAssignment;
@@ -27,20 +29,25 @@ public class ConvertFunction {
 
     private static Scope convertFunctionScope(Scope scope, SimpleFunctionDeclaration function) {
         Scope converted = new Scope();
-        String pointerName = "functionstack:pointer:" + function.getName();
         // converted.addStatement(new SimpleVariableDeclaration(pointerName,
         // VariableType.INT));
-        converted.addStatement(new SimpleVariableAssignment(pointerName, new BinaryOperator(OperatorType.ADDITION,
-                new SimpleVariableValue(pointerName, VariableType.INT), new IntValue(1), new Type(VariableType.INT))));
 
-        ArrayList<String> declaredVariables = getDeclaredVariables(function.getScope());
+        if (isFunctionRecursive(function)) {
+            String pointerName = getPointerName(function);
+            converted.addStatement(new SimpleVariableAssignment(pointerName, new BinaryOperator(OperatorType.ADDITION,
+                    new SimpleVariableValue(pointerName, VariableType.INT), new IntValue(1),
+                    new Type(VariableType.INT))));
+
+        }
+        ArrayList<Variable> declaredVariables = getDeclaredVariables(function.getScope());
         for (Statement statement : scope.getStatements()) {
             converted.addAllStatements(convert(statement, function, declaredVariables));
         }
         return converted;
     }
 
-    private static Scope convert(Scope scope, SimpleFunctionDeclaration function, ArrayList<String> declaredVariables) {
+    private static Scope convert(Scope scope, SimpleFunctionDeclaration function,
+            ArrayList<Variable> declaredVariables) {
         Scope converted = new Scope();
         for (Statement statement : scope.getStatements()) {
             converted.addAllStatements(convert(statement, function, declaredVariables));
@@ -49,35 +56,37 @@ public class ConvertFunction {
     }
 
     private static ArrayList<Statement> convert(Statement statement, SimpleFunctionDeclaration function,
-            ArrayList<String> declaredVariables) {
+            ArrayList<Variable> declaredVariables) {
         ArrayList<Statement> converted = new ArrayList<>();
         if (statement instanceof Scope)
             converted.add(convert((Scope) statement, function, declaredVariables));
-        else if (statement instanceof SimpleReturn) {
-            converted.add(new SimpleVariableAssignment(getPointerName(function),
-                    new BinaryOperator(OperatorType.SUBTRACTION,
-                            new SimpleVariableValue(
-                                    getPointerName(function), VariableType.INT),
-                            new IntValue(1), new Type(VariableType.INT))));
-            converted.add(new SimpleReturn());
-        } else if (statement instanceof SimpleVariableDeclaration) {
+        else if (statement instanceof SimpleVariableDeclaration) {
             // remove the declaration
         } else if (statement instanceof SimpleVariableAssignment) {
             SimpleVariableAssignment assignment = (SimpleVariableAssignment) statement;
-            if (declaredVariables.contains(assignment.getName())) {
-                converted.add(new SimpleArrayAssignment(getStackName(function, assignment.getName()),
-                        new SimpleVariableValue(getPointerName(function), VariableType.INT),
-                        convert(assignment.getValue(),
-                                function, declaredVariables)));
+            if (containsVariable(declaredVariables, assignment.getName())) {
+
+                if (isFunctionRecursive(function)) {
+                    converted.add(new SimpleArrayAssignment(getStackName(function, assignment.getName()),
+                            new SimpleVariableValue(getPointerName(function), VariableType.INT),
+                            convert(assignment.getValue(),
+                                    function, declaredVariables)));
+                } else {
+                    converted.add(new SimpleVariableAssignment(getVariableName(function, assignment.getName()),
+                            convert(assignment.getValue(),
+                                    function, declaredVariables)));
+                }
             } else {
                 converted.add(statement);
             }
         } else if (statement instanceof SimpleReturn) {
-            converted.add(new SimpleVariableAssignment(getPointerName(function),
-                    new BinaryOperator(OperatorType.SUBTRACTION,
-                            new SimpleVariableValue(
-                                    getPointerName(function), VariableType.INT),
-                            new IntValue(1), new Type(VariableType.INT))));
+            if (isFunctionRecursive(function)) {
+                converted.add(new SimpleVariableAssignment(getPointerName(function),
+                        new BinaryOperator(OperatorType.SUBTRACTION,
+                                new SimpleVariableValue(
+                                        getPointerName(function), VariableType.INT),
+                                new IntValue(1), new Type(VariableType.INT))));
+            }
             converted.add(new SimpleReturn());
         } else {
             converted.add(statement);
@@ -102,23 +111,61 @@ public class ConvertFunction {
         return "functionstack:stack:" + function.getName() + ":" + variableName;
     }
 
-    public static ArrayList<Statement> declareFunctionStacks(SimpleFunctionDeclaration function) {
+    private static String getVariableName(SimpleFunctionDeclaration function, String variableName) {
+        return "functionvar:" + function.getName() + ":" + variableName;
+    }
+
+    public static ArrayList<Statement> declareFunctionVariables(SimpleFunctionDeclaration function) {
         ArrayList<Statement> statements = new ArrayList<>();
-        statements.add(new SimpleVariableDeclaration(getPointerName(function), VariableType.INT));
-        statements.add(new SimpleVariableAssignment(getPointerName(function), new IntValue(0)));
-        for (String variable : getDeclaredVariables(function.getScope())) {
-            statements.add(new SimpleArrayDeclaration(getStackName(function, variable), VariableType.INT,
-                    new IntValue(200000)));
+        if (isFunctionRecursive(function)) {
+            statements.add(new SimpleVariableDeclaration(getPointerName(function), VariableType.INT));
+            statements.add(new SimpleVariableAssignment(getPointerName(function), new IntValue(0)));
+            for (Variable variable : getDeclaredVariables(function.getScope())) {
+                statements.add(new SimpleArrayDeclaration(getStackName(function, variable.getName()),
+                        variable.getType().getType().getType(),
+                        new IntValue(200000)));
+            }
+            return statements;
+        }
+
+        for (Variable variable : getDeclaredVariables(function.getScope())) {
+            statements.add(new SimpleVariableDeclaration(getVariableName(function, variable.getName()),
+                    variable.getType().getType().getType()));
         }
         return statements;
     }
 
-    private static ArrayList<String> getDeclaredVariables(Scope scope) {
-        ArrayList<String> variables = new ArrayList<>();
+    private static boolean isFunctionRecursive(SimpleFunctionDeclaration function) {
+        return isFunctionRecursive(function.getScope(), function.getName());
+    }
+
+    private static boolean isFunctionRecursive(Scope scope, String functionName) {
+        for (Statement statement : scope.getStatements()) {
+            if (statement instanceof SimpleFunctionCall) {
+                SimpleFunctionCall functionCall = (SimpleFunctionCall) statement;
+                if (functionCall.getName().equals(functionName))
+                    return true;
+            }
+
+            if (statement instanceof Scope) {
+                if (isFunctionRecursive((Scope) statement, functionName))
+                    return true;
+            }
+
+            for (int i = 0; i < statement.getScopeCount(); i++) {
+                if (isFunctionRecursive(statement.getScope(i), functionName))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private static ArrayList<Variable> getDeclaredVariables(Scope scope) {
+        ArrayList<Variable> variables = new ArrayList<>();
         for (Statement statement : scope.getStatements()) {
             if (statement instanceof SimpleVariableDeclaration) {
                 SimpleVariableDeclaration declaration = (SimpleVariableDeclaration) statement;
-                variables.add(declaration.getName());
+                variables.add(new Variable(declaration.getName(), new Type(declaration.getType())));
             }
 
             if (statement instanceof Scope)
@@ -133,13 +180,26 @@ public class ConvertFunction {
         return variables;
     }
 
+    private static boolean containsVariable(ArrayList<Variable> variables, String variable) {
+        for (Variable var : variables) {
+            if (var.getName().equals(variable))
+                return true;
+        }
+        return false;
+    }
+
     private static Expression convert(Expression expression, SimpleFunctionDeclaration function,
-            ArrayList<String> declaredVariables) {
+            ArrayList<Variable> declaredVariables) {
         if (expression instanceof SimpleVariableValue) {
             SimpleVariableValue variable = (SimpleVariableValue) expression;
-            if (declaredVariables.contains(variable.getName())) {
-                return new SimpleArrayValue(getStackName(function, variable.getName()), VariableType.INT,
-                        new SimpleVariableValue(getPointerName(function), VariableType.INT));
+            if (containsVariable(declaredVariables, variable.getName())) {
+                if (isFunctionRecursive(function)) {
+                    return new SimpleArrayValue(getStackName(function, variable.getName()), VariableType.INT,
+                            new SimpleVariableValue(getPointerName(function), variable.getType().getType().getType()));
+                } else {
+                    return new SimpleVariableValue(getVariableName(function, variable.getName()),
+                            variable.getType().getType().getType());
+                }
             }
         }
 

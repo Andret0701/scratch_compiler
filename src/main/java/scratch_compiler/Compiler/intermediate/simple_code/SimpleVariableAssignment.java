@@ -1,5 +1,6 @@
 package scratch_compiler.Compiler.intermediate.simple_code;
 
+import scratch_compiler.Compiler.Type;
 import scratch_compiler.Compiler.parser.expressions.Expression;
 import scratch_compiler.Compiler.parser.statements.Statement;
 
@@ -18,6 +19,10 @@ public class SimpleVariableAssignment extends Statement {
 
     public Expression getValue() {
         return getExpression(0);
+    }
+
+    public Type getType() {
+        return getValue().getType();
     }
 
     @Override

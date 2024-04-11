@@ -5,7 +5,9 @@ import scratch_compiler.Compiler.intermediate.IntermediateCode;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionDeclaration;
 import scratch_compiler.Compiler.optimiser.constant_folding.ConstantFolding;
 import scratch_compiler.Compiler.optimiser.constant_folding.CopyConstants;
+import scratch_compiler.Compiler.optimiser.function_inlining.FunctionInlining;
 import scratch_compiler.Compiler.optimiser.optimisation_evaluator.OptimisationEvaluator;
+import scratch_compiler.Compiler.optimiser.stack_optimizer.StackOptimizer;
 import scratch_compiler.Compiler.optimiser.unreachable_code.UnreachableCode;
 import scratch_compiler.Compiler.parser.statements.Scope;
 import scratch_compiler.Compiler.parser.statements.Statement;
@@ -16,6 +18,8 @@ public class Optimizer {
             add(new UnreachableCode());
             add(new ConstantFolding());
             add(new CopyConstants());
+            add(new FunctionInlining());
+            add(new StackOptimizer());
         }
     };
 
@@ -41,6 +45,8 @@ public class Optimizer {
             }
         }
 
+        System.out.println("Optimisation complete");
+        optimisationEvaluator.totalEvaluate(3);
         return code;
     }
 

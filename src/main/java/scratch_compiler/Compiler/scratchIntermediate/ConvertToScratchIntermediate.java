@@ -31,7 +31,7 @@ public class ConvertToScratchIntermediate {
         converted.addAllStatements(declareStack("stack:stack", "stack:pointer"));
 
         for (SimpleFunctionDeclaration function : functions) {
-            converted.addAllStatements(ConvertFunction.declareFunctionStacks(function));
+            converted.addAllStatements(ConvertFunction.declareFunctionVariables(function));
         }
 
         converted.addAllStatements(temp.getStatements());

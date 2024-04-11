@@ -4,6 +4,11 @@ import scratch_compiler.Compiler.intermediate.IntermediateCode;
 
 public class OptimisationEvaluator {
 
+    private int initialLines;
+    private int initialOperations;
+    private int initialVariables;
+    private int initialFunctions;
+
     private int lines;
     private int operations;
     private int variables;
@@ -14,6 +19,11 @@ public class OptimisationEvaluator {
         this.operations = OperationCounter.countOperations(code);
         this.variables = VariableCounter.countVariables(code);
         this.functions = code.getFunctions().size();
+
+        this.initialLines = lines;
+        this.initialOperations = operations;
+        this.initialVariables = variables;
+        this.initialFunctions = functions;
     }
 
     public void evaluate(IntermediateCode optimized) {
@@ -26,19 +36,22 @@ public class OptimisationEvaluator {
         int optimizedVariables = VariableCounter.countVariables(optimized);
         int optimizedFunctions = optimized.getFunctions().size();
 
-        if (lines != optimizedLines)
-            printStatus("lines", lines, optimizedLines, padding);
-        if (operations != optimizedOperations)
-            printStatus("operations", operations, optimizedOperations, padding);
-        if (variables != optimizedVariables)
-            printStatus("variables", variables, optimizedVariables, padding);
-        if (functions != optimizedFunctions)
-            printStatus(null, optimizedVariables, optimizedFunctions, padding);
+        printStatus("lines", lines, optimizedLines, padding);
+        printStatus("operations", operations, optimizedOperations, padding);
+        printStatus("variables", variables, optimizedVariables, padding);
+        printStatus("functions", functions, optimizedFunctions, padding);
 
         lines = optimizedLines;
         operations = optimizedOperations;
         variables = optimizedVariables;
         functions = optimizedFunctions;
+    }
+
+    public void totalEvaluate(int padding) {
+        printStatus("lines", initialLines, lines, padding);
+        printStatus("operations", initialOperations, operations, padding);
+        printStatus("variables", initialVariables, variables, padding);
+        printStatus("functions", initialFunctions, functions, padding);
     }
 
     private static void printStatus(String feature, int old, int optimized, int padding) {
@@ -49,10 +62,11 @@ public class OptimisationEvaluator {
         }
 
         if (old > optimized)
-            System.out.println(" ".repeat(padding) + old + " " + feature + " -> " + optimized + " " + feature + ": "
+            System.out.println(old + " " + feature + " -> " + optimized + " " + feature + ": "
                     + (old - optimized) + " " + feature + " removed");
         else
-            System.out.println(" ".repeat(padding) + old + " " + feature + " -> " + optimized + " " + feature + ": "
+            System.out.println(old + " " + feature + " -> " + optimized + " " + feature + ": "
                     + (optimized - old) + " " + feature + " added");
     }
+
 }

@@ -22,13 +22,13 @@ public class Compiler {
         TokenReader reader = new TokenReader(tokens);
         DeclarationTable declarationTable = createDeclarationTable(systemCalls);
         CompiledCode compiledCode = GlobalParser.parse(reader, declarationTable);
-        System.out.println("Parsed code:");
-        System.out.println(compiledCode);
-        System.out.println();
+        // System.out.println("Parsed code:");
+        // System.out.println(compiledCode);
+        // System.out.println();
         IntermediateCode intermediateCode = ConvertToIntermediate.convert(compiledCode);
-        System.out.println("Intermediate code:");
-        System.out.println(intermediateCode);
-        System.out.println();
+        // System.out.println("Intermediate code:");
+        // System.out.println(intermediateCode);
+        // System.out.println();
         if (optimise)
             intermediateCode = Optimizer.optimize(intermediateCode);
 

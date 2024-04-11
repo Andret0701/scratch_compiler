@@ -39,6 +39,6 @@ public class SimpleArrayValue extends Expression {
 
     @Override
     public boolean isConstant() {
-        return true;
+        return getIndex().isConstant();
     }
 }
