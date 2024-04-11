@@ -61,9 +61,10 @@ import scratch_compiler.ValueFields.LogicFields.LessThanField;
 
 public class ScratchAssembler {
     public static ScratchProgram assemble(String code) {
-        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
+        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), false);
         intermediateCode = ConvertToScratchIntermediate.convert(intermediateCode);
-        intermediateCode = Optimizer.optimize(intermediateCode);
+        System.out.println(intermediateCode);
+        // intermediateCode = Optimizer.optimize(intermediateCode);
         // System.out.println(intermediateCode);
 
         // ArrayList<FunctionDeclaration> functionDeclarations =

@@ -64,7 +64,13 @@ public class IntermediateValidator {
                 table.validateArrayUsage(assignment.getName());
             }
 
-            validateExpressionContainer(statement, table, scope.toString());
+            if (statement instanceof Scope) {
+                validateConvertedScope((Scope) statement, table);
+                continue;
+            }
+
+            validateExpressionContainer(statement, table,
+                    statement.toString() + " " + statement.getClass().getSimpleName());
             for (int i = 0; i < statement.getScopeCount(); i++) {
                 Scope innerScope = statement.getScope(i);
                 if (innerScope == null)

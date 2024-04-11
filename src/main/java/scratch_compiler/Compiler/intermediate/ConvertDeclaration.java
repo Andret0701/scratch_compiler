@@ -121,6 +121,20 @@ public class ConvertDeclaration {
             return statements;
         }
 
+        if (value instanceof VariableReference) {
+            VariableReference variableReference = (VariableReference) value;
+            if (variableReference.getType().getType().getType() == VariableType.STRUCT) {
+                for (TypeField field : variableReference.getType().getType().getFields()) {
+                    String fieldName = name + "." + field.getName();
+                    TypeDefinition fieldType = field.getType();
+                    statements.addAll(convertArrayValue(fieldName, fieldType, index,
+                            new VariableReference(variableReference.getName() + "." + field.getName(),
+                                    new Type(fieldType), variableReference.getIndex())));
+                }
+                return statements;
+            }
+        }
+
         StructValue structValue = (StructValue) value;
         ArrayList<TypeField> fields = type.getFields();
         for (TypeField field : fields) {

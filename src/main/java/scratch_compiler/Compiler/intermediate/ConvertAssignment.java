@@ -21,7 +21,6 @@ import scratch_compiler.Compiler.parser.expressions.values.ArrayDeclarationValue
 import scratch_compiler.Compiler.parser.expressions.values.ArrayValue;
 import scratch_compiler.Compiler.parser.expressions.values.IntValue;
 import scratch_compiler.Compiler.parser.expressions.values.StructValue;
-import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.parser.statements.Assignment;
 import scratch_compiler.Compiler.parser.statements.Statement;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
@@ -103,8 +102,10 @@ public class ConvertAssignment {
                 continue;
             }
 
-            statements.addAll(convert(new VariableReference(name, variable.getType(), variable.getIndex()),
-                    (StructValue) value.getField(field.getName())));
+            statements.addAll(convert(
+                    new VariableReference(name, new Type(variable.getType().getType().reference(field.getName())),
+                            variable.getIndex()),
+                    value.getField(field.getName())));
         }
         return statements;
     }

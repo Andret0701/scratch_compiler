@@ -67,7 +67,7 @@ public class ConvertVariableReference {
 
         if (expression instanceof IndexExpression) {
             IndexExpression indexExpression = (IndexExpression) expression;
-            index = indexExpression.getIndex();
+            index = convert(indexExpression.getIndex());
             expression = indexExpression.getArray();
         }
 
@@ -76,6 +76,7 @@ public class ConvertVariableReference {
             return new VariableReference(variableValue.getName() + reference, type, index);
         }
 
-        throw new RuntimeException("Invalid variable reference: " + expression);
+        throw new RuntimeException(
+                "Invalid variable reference: " + expression + " " + expression.getClass().getSimpleName());
     }
 }

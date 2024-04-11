@@ -1,4 +1,8 @@
-
+struct Color{
+    float r;
+    float g;
+    float b;
+}
 
 struct Vector2{
     float x;
@@ -8,11 +12,11 @@ struct Vector2{
 struct Body{
     Vector2 position;
     Vector2 velocity;
-    float mass;
 }
 
 struct Player{
     Body body;
+    Color color;
     float size;
 }
 
@@ -34,7 +38,31 @@ Vector2 multiply(Vector2 a, float b)
 }
 
 
-Player player={{{0,0}, {0,0}, 1}, 10};
+Player player={{{0,0}, {0,0}},{100,120,100}, 10};
+
+Player randomPlayer()
+{
+    return {{{random(-240,240), random(-180,180)}, {random(-2,2), random(-2,2)}},{random(100,255), random(100,255), random(100,255)}, random(5,20)};
+}
+
+player=randomPlayer();
+
+
+Player[] balls=Player[100];
+for(int i=0;i<#balls;i++)
+{
+    balls[i]=randomPlayer();
+}
+
+void drawPlayer(Player p)
+{
+    penSize(p.size);
+    penColor(p.color.r, p.color.g, p.color.b);
+    moveTo(p.body.position.x, p.body.position.y);
+    penDown();
+    penUp();
+}
+
 
 Vector2 getInput()
 {
@@ -65,10 +93,25 @@ Vector2 loopScreen(Vector2 position)
     return position;
 }
 
+
+
+void drawBackground(Color color)
+{
+    penColor(color.r, color.g, color.b);
+    penSize(1000);
+    moveTo(0,0);
+    penDown();
+    penUp();
+}
+
+
+
 void update()
 {
-    penSize(player.size);
+    drawBackground({0,0,0});
 
+
+ 
 
     
     Vector2 input=getInput();
@@ -79,14 +122,25 @@ void update()
 
     if(getKey("space"))
     {
-        penColor(random(100,255), random(100,255), random(100,255));
+        player.color={random(100,255), random(100,255), random(100,255)};
     }
 
-    moveTo(player.body.position.x, player.body.position.y);
-    penUp();
     player.body.position= loopScreen(player.body.position);
-    moveTo(player.body.position.x, player.body.position.y);
-    penDown();
+    
+
+
+
+
+    drawPlayer(player);
+    for(int i=0;i<#balls;i++)
+    {
+        balls[i].body.velocity=add(balls[i].body.velocity, multiply(normalize(add(player.body.position, multiply(balls[i].body.position, -1))), 10));
+        balls[i].body.position=add(balls[i].body.position, multiply(balls[i].body.velocity, 1/balls[i].size));
+        //damping
+        balls[i].body.velocity=multiply(balls[i].body.velocity, 0.9);
+        balls[i].body.position= loopScreen(balls[i].body.position);
+        drawPlayer(balls[i]);
+    }
 
 
     if(getKey("c"))

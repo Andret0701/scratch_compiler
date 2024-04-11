@@ -49,13 +49,6 @@ public class ConvertStatement {
                     new SimpleVariableValue("stack:pointer", VariableType.INT), arrayPop.getIndex()));
         } else if (statement instanceof Scope)
             statements.add(ConvertScope.convert((Scope) statement));
-        else if (statement instanceof SimpleArrayAssignment) {
-            SimpleArrayAssignment arrayAssignment = (SimpleArrayAssignment) statement;
-            arrayAssignment.setIndex(new BinaryOperator(OperatorType.ADDITION, arrayAssignment.getIndex(),
-                    new IntValue(1), new Type(VariableType.INT)));
-            statements.add(arrayAssignment);
-        }
-
         else {
             for (int i = 0; i < statement.getScopeCount(); i++) {
                 statement.setScope(i, ConvertScope.convert(statement.getScope(i)));
