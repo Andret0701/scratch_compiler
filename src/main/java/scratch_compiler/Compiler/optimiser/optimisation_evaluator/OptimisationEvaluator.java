@@ -27,29 +27,32 @@ public class OptimisationEvaluator {
         int optimizedFunctions = optimized.getFunctions().size();
 
         if (lines != optimizedLines)
-            System.out.println(" ".repeat(padding) +
-                    lines + " lines -> " + optimizedLines + " lines: " + (lines - optimizedLines) + " lines " +
-                    (lines - optimizedLines > 0 ? "removed" : "added"));
+            printStatus("lines", lines, optimizedLines, padding);
         if (operations != optimizedOperations)
-            System.out.println(
-                    " ".repeat(padding) + operations + " operations -> " + optimizedOperations + " operations: "
-                            + (operations - optimizedOperations) + " operations "
-                            + (operations - optimizedOperations > 0
-                                    ? "removed"
-                                    : "added"));
+            printStatus("operations", operations, optimizedOperations, padding);
         if (variables != optimizedVariables)
-            System.out.println(" ".repeat(padding) + variables + " variables -> " + optimizedVariables + " variables: "
-                    + (variables - optimizedVariables) + " variables "
-                    + (variables - optimizedVariables > 0 ? "removed" : "added"));
+            printStatus("variables", variables, optimizedVariables, padding);
         if (functions != optimizedFunctions)
-            System.out.println(" ".repeat(padding) + functions + " functions -> " + optimizedFunctions + " functions: "
-                    + (functions - optimizedFunctions) + " functions " + (functions - optimizedFunctions > 0
-                            ? "removed"
-                            : "added"));
+            printStatus(null, optimizedVariables, optimizedFunctions, padding);
 
         lines = optimizedLines;
         operations = optimizedOperations;
         variables = optimizedVariables;
         functions = optimizedFunctions;
+    }
+
+    private static void printStatus(String feature, int old, int optimized, int padding) {
+        System.out.print(" ".repeat(padding));
+        if (old == optimized) {
+            System.out.println(old + " " + feature + " unchanged");
+            return;
+        }
+
+        if (old > optimized)
+            System.out.println(" ".repeat(padding) + old + " " + feature + " -> " + optimized + " " + feature + ": "
+                    + (old - optimized) + " " + feature + " removed");
+        else
+            System.out.println(" ".repeat(padding) + old + " " + feature + " -> " + optimized + " " + feature + ": "
+                    + (optimized - old) + " " + feature + " added");
     }
 }

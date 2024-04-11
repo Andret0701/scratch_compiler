@@ -5,6 +5,7 @@ import java.util.HashMap;
 import scratch_compiler.Compiler.CompiledCode;
 import scratch_compiler.Compiler.Variable;
 import scratch_compiler.Compiler.intermediate.IntermediateCode;
+import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionCall;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionDeclaration;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableValue;
@@ -49,11 +50,14 @@ public class CopyConstants implements Optimization {
 
             if (statement instanceof SimpleVariableAssignment) {
                 SimpleVariableAssignment assignment = (SimpleVariableAssignment) statement;
-                if (assignment.getValue().isConstant() & add)
+                if (assignment.getValue().isConstant() & add) {
                     constants.put(assignment.getName(), assignment.getValue());
-                else if (!add)
+                } else
                     constants.remove(assignment.getName());
             }
+
+            if (statement instanceof SimpleFunctionCall)
+                constants.clear(); // fix this later
 
             boolean remove = (statement instanceof IfStatement) || (statement instanceof WhileStatement);
             for (int j = 0; j < statement.getScopeCount(); j++) {

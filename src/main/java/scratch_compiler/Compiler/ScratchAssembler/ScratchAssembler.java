@@ -61,10 +61,10 @@ import scratch_compiler.ValueFields.LogicFields.LessThanField;
 
 public class ScratchAssembler {
     public static ScratchProgram assemble(String code) {
-        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), false);
+        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
         intermediateCode = ConvertToScratchIntermediate.convert(intermediateCode);
-        System.out.println(intermediateCode);
-        // intermediateCode = Optimizer.optimize(intermediateCode);
+        // System.out.println(intermediateCode);
+        intermediateCode = Optimizer.optimize(intermediateCode);
         // System.out.println(intermediateCode);
 
         // ArrayList<FunctionDeclaration> functionDeclarations =
@@ -81,85 +81,6 @@ public class ScratchAssembler {
         }
 
         return new ScratchProgram(blockStack, functionDefinitionBlocks);
-    }
-
-    public static BlockStack compileScope(Scope scope, VariableStackReference stack, boolean isFunction) {
-        stack.addScope();
-        ArrayList<Statement> statements = scope.getStatements();
-        if (statements.size() == 0)
-            return new BlockStack();
-
-        BlockStack blockStack = assembleStatement(statements.get(0), stack, isFunction);
-
-        for (int i = 1; i < statements.size(); i++)
-            blockStack.push(assembleStatement(statements.get(i), stack, isFunction));
-
-        int numRemoved = stack.removeScope();
-        if (numRemoved > 0)
-            blockStack.push(StackAssembler.offsetPointer(-numRemoved));
-
-        return blockStack;
-    }
-
-    static BlockStack assembleStatement(Statement statement, VariableStackReference stack, boolean isFunction) {
-        if (statement instanceof Scope)
-            return compileScope((Scope) statement, stack, isFunction);
-
-        if (statement instanceof ForStatement)
-            return ForAssembler.assemble((ForStatement) statement, stack, isFunction);
-        if (statement instanceof FunctionCall)
-            return FunctionCallAssembler.assemble((FunctionCall) statement, stack, isFunction);
-        if (statement instanceof Assignment)
-            return assembleAssignment((Assignment) statement, stack, isFunction);
-        if (statement instanceof ReturnStatement)
-            return FunctionAssembler.assembleReturnStatement((ReturnStatement) statement, stack);
-        if (statement instanceof VariableDeclaration)
-            return assembleDeclaration((VariableDeclaration) statement, stack, isFunction);
-
-        StackBlock block = defaultBlock();
-        if (statement instanceof IfStatement)
-            block = IfAssembler.assemble((IfStatement) statement, stack, isFunction);
-        if (statement instanceof WhileStatement)
-            block = WhileAssembler.assemble((WhileStatement) statement, stack, isFunction);
-
-        return new BlockStack(block);
-    }
-
-    static BlockStack assembleDeclaration(VariableDeclaration declaration, VariableStackReference stack,
-            boolean isFunction) {
-        stack.addVariable(getVariable(declaration));
-        BlockStack blockStack = new BlockStack();
-        // StackAssembler.addExpressionToStack(bl
-        for (Expression argument : declaration.getValue().getArguments())
-            blockStack.push(StackAssembler.addValueToStack(assembleExpression(argument, stack, isFunction)));
-        return blockStack;
-    }
-
-    private static ScratchVariable getVariable(VariableDeclaration declaration) {
-        return new ScratchVariable(declaration.getName(), false);
-    }
-
-    private static ScratchVariable getVariable(Assignment assignment) {
-        return new ScratchVariable(assignment.getName(), false);
-    }
-
-    private static ScratchVariable getVariable(VariableValue variable) {
-        return new ScratchVariable(variable.getName(), false);
-    }
-
-    static ArrayList<ValueField> toArray(ValueField... fields) {
-        ArrayList<ValueField> list = new ArrayList<>();
-        for (ValueField field : fields)
-            list.add(field);
-        return list;
-    }
-
-    static StackBlock defaultBlock() {
-        return new SayBlock(defaultField());
-    }
-
-    static ValueField defaultField() {
-        return new StringField("Compile Error");
     }
 
 }
