@@ -66,6 +66,7 @@ void drawPlayer(Player p)
 
 Vector2 getInput()
 {
+    sin(1);
     Vector2 input={0,0};
     if(getKey("a"))
         input.x-=1;
@@ -148,7 +149,7 @@ void update()
     for(int i=0;i<#balls;i++)
     {
         balls[i].body.velocity=add(balls[i].body.velocity, multiply(normalize(add(player.body.position, multiply(balls[i].body.position, -1))), player.size));
-        balls[i].body.position=add(balls[i].body.position, multiply(balls[i].body.velocity, 1/balls[i].size));
+        balls[i].body.position=add(balls[i].body.position, multiply(balls[i].body.velocity, 0.1/balls[i].size));
         //damping
         balls[i].body.velocity=multiply(balls[i].body.velocity, 0.99);
         balls[i].body.position= loopScreen(balls[i].body.position);

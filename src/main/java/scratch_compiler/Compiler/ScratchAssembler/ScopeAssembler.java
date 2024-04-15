@@ -9,6 +9,8 @@ public class ScopeAssembler {
         BlockStack stackBlock = new BlockStack();
         for (Statement statement : scope.getStatements()) {
             stackBlock.push(StatementAssembler.assemble(statement));
+            if (stackBlock.isFinished())
+                break;
         }
         return stackBlock;
     }

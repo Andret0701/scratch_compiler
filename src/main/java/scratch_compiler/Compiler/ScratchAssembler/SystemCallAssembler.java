@@ -57,8 +57,8 @@ public class SystemCallAssembler {
         } else if (name.equals("moveTo"))
             stackBlock.push(new SetPositionBlock(ExpressionAssembler.assemble(systemCall.getArguments().get(0)),
                     ExpressionAssembler.assemble(systemCall.getArguments().get(1))));
-        else
-            stackBlock.push(StatementAssembler.errorBlock(systemCall));
+        // else
+        // stackBlock.push(StatementAssembler.errorBlock(systemCall));
 
         return stackBlock;
     }
