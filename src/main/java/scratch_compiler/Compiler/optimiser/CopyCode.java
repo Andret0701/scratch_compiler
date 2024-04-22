@@ -6,6 +6,7 @@ import scratch_compiler.Compiler.intermediate.simple_code.Push;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayDeclaration;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayValue;
+import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionCall;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionDeclaration;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleReturn;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleVariableAssignment;
@@ -59,8 +60,11 @@ public class CopyCode {
             statement = new SimpleVariableDeclaration(variableDeclaration.getName(), variableDeclaration.getType());
         } else if (statement instanceof IfStatement) {
             IfStatement ifStatement = (IfStatement) statement;
-            statement = new IfStatement(ifStatement.getExpression(), copy(ifStatement.getIfScope()),
-                    copy(ifStatement.getElseScope()));
+            if (ifStatement.getElseScope() != null)
+                statement = new IfStatement(ifStatement.getExpression(), copy(ifStatement.getIfScope()),
+                        copy(ifStatement.getElseScope()));
+            else
+                statement = new IfStatement(ifStatement.getExpression(), copy(ifStatement.getIfScope()));
         } else if (statement instanceof WhileStatement) {
             WhileStatement whileStatement = (WhileStatement) statement;
             statement = new WhileStatement(whileStatement.getExpression(), copy(whileStatement.getScope()));
@@ -74,12 +78,14 @@ public class CopyCode {
             Push push = (Push) statement;
             statement = new Push(push.getExpression());
         } else if (statement instanceof SimpleReturn) {
-            SimpleReturn simpleReturn = (SimpleReturn) statement;
             statement = new SimpleReturn();
         } else if (statement instanceof SystemCallStatement) {
             SystemCallStatement systemCallStatement = (SystemCallStatement) statement;
             statement = new SystemCallStatement(systemCallStatement.getSystemCall(),
                     systemCallStatement.getArguments());
+        } else if (statement instanceof SimpleFunctionCall) {
+            SimpleFunctionCall simpleFunctionCall = (SimpleFunctionCall) statement;
+            statement = new SimpleFunctionCall(simpleFunctionCall.getName());
         } else {
             throw new IllegalArgumentException("Unknown statement type: " + statement.getClass());
         }

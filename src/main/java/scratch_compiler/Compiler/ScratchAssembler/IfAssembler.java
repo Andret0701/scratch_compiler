@@ -15,7 +15,7 @@ import scratch_compiler.ValueFields.LogicFields.LogicField;
 
 public class IfAssembler {
     public static StackBlock assemble(IfStatement ifStatement) {
-        if (ifStatement.getElseScope() == null || ifStatement.getElseScope().getStatements().isEmpty())
+        if (ifStatement.getElseScope() == null)
             return IfAssembler.assembleIf(ifStatement);
         else
             return IfAssembler.assembleIfElse(ifStatement);
@@ -33,15 +33,20 @@ public class IfAssembler {
     }
 
     private static StackBlock assembleIfElse(IfStatement ifStatement) {
+        System.out.println(ifStatement);
         ValueField expression = ExpressionAssembler.assemble(ifStatement.getExpression());
         if (!(expression instanceof LogicField))
             expression = new EqualsField(expression, new NumberField(1));
 
         IfElseBlock ifBlock = new IfElseBlock((LogicField) expression);
         BlockStack ifBody = ScopeAssembler.assemble(ifStatement.getIfScope());
-        BlockStack elseBody = ScopeAssembler.assemble(ifStatement.getElseScope());
         ifBlock.pushIf(ifBody);
+        BlockStack elseBody = ScopeAssembler.assemble(ifStatement.getElseScope());
+        System.out.println("Else: " + ifStatement.getElseScope());
+        System.out.println("Else: " + elseBody);
         ifBlock.pushElse(elseBody);
+
+        System.out.println(ifBlock);
         return ifBlock;
 
     }

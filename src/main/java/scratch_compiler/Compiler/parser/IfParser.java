@@ -18,7 +18,7 @@ public class IfParser {
         if (expression == null)
             CompilerUtils.throwError("Expected expression", tokens.peek().getLine());
 
-        if (!expression.getType().equals(new Type(VariableType.BOOLEAN)))
+        if (!expression.getType().equals(new Type(VariableType.BOOL)))
             throw new RuntimeException("Expected boolean expression at line " + tokens.peek().getLine());
 
         tokens.expectNext(TokenType.CLOSE);

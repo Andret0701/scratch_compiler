@@ -4,7 +4,7 @@ public enum VariableType {
     STRING,
     FLOAT,
     INT,
-    BOOLEAN,
+    BOOL,
     STRUCT,
     VOID;
 
@@ -17,8 +17,8 @@ public enum VariableType {
                 return "float";
             case INT:
                 return "int";
-            case BOOLEAN:
-                return "boolean";
+            case BOOL:
+                return "bool";
             case STRUCT:
                 return "struct";
             case VOID:

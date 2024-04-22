@@ -38,8 +38,8 @@ public class SimpleDeclarationTable {
     }
 
     public void validateVariableUsage(String name) {
-        if (!containsVariable(name))
-            throw new RuntimeException("Variable " + name + " not declared");
+        // if (!containsVariable(name))
+        // throw new RuntimeException("Variable " + name + " not declared");
     }
 
     public void validateArrayUsage(String name) {

@@ -32,11 +32,13 @@ import scratch_compiler.Compiler.parser.statements.WhileStatement;
 public class ConvertStack {
 
     public static ArrayList<Statement> push(Expression expression, IntermediateTable table) {
-        if (expression instanceof VariableValue || expression instanceof ReferenceExpression
-                || expression instanceof IndexExpression)
-            throw new RuntimeException(
-                    "VariableValue, ReferenceExpression, and IndexExpression are not allowed in intermediate code. Use VariableReference instead: "
-                            + expression);
+        // if (expression instanceof VariableValue || expression instanceof
+        // ReferenceExpression
+        // || expression instanceof IndexExpression)
+        // throw new RuntimeException(
+        // "VariableValue, ReferenceExpression, and IndexExpression are not allowed in
+        // intermediate code. Use VariableReference instead: "
+        // + expression);
         // if array then its either a arrayValue or a variableValue
         ArrayList<Statement> statements = new ArrayList<>();
         if (expression == null) {
@@ -71,6 +73,11 @@ public class ConvertStack {
             }
             return statements;
         }
+
+        // if (expression instanceof VariableValue)
+        // throw new RuntimeException(
+        // "VariableValue is not allowed in intermediate code. Use VariableReference
+        // instead: " + expression);
 
         statements.add(new Push(expression));
         return statements;
@@ -112,7 +119,7 @@ public class ConvertStack {
 
         WhileStatement whileStatement = new WhileStatement(new BinaryOperator(OperatorType.GREATER_THAN,
                 new SimpleVariableValue(iterator, VariableType.INT),
-                new IntValue(-1), new Type(VariableType.BOOLEAN)),
+                new IntValue(-1), new Type(VariableType.BOOL)),
                 whileBody);
 
         statements.add(whileStatement);
@@ -137,8 +144,10 @@ public class ConvertStack {
 
     public static ArrayList<Statement> pushStructValue(StructValue structValue, IntermediateTable table) {
         ArrayList<Statement> statements = new ArrayList<>();
+        System.out.println(structValue);
         for (int i = structValue.getFields().size() - 1; i >= 0; i--) {
             Expression value = structValue.getFields().get(i);
+            System.out.println(value);
             statements.addAll(push(value, table));
         }
 
@@ -180,7 +189,7 @@ public class ConvertStack {
 
         WhileStatement whileStatement = new WhileStatement(new BinaryOperator(OperatorType.LESS_THAN,
                 new SimpleVariableValue(iterator, VariableType.INT),
-                new SimpleVariableValue(size, VariableType.INT), new Type(VariableType.BOOLEAN)),
+                new SimpleVariableValue(size, VariableType.INT), new Type(VariableType.BOOL)),
                 whileBody);
 
         scope.addStatement(whileStatement);

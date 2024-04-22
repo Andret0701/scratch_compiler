@@ -41,7 +41,7 @@ public class Compiler {
         DeclarationTable declarationTable = new DeclarationTable();
 
         // Declare primitive types
-        declarationTable.declareType(new TypeDefinition(VariableType.BOOLEAN));
+        declarationTable.declareType(new TypeDefinition(VariableType.BOOL));
         declarationTable.declareType(new TypeDefinition(VariableType.INT));
         declarationTable.declareType(new TypeDefinition(VariableType.FLOAT));
         declarationTable.declareType(new TypeDefinition(VariableType.STRING));
@@ -62,7 +62,7 @@ public class Compiler {
         }
 
         // Declare type conversions
-        declarationTable.declareConversion(new Type(VariableType.BOOLEAN),
+        declarationTable.declareConversion(new Type(VariableType.BOOL),
                 new Type(VariableType.INT));
         declarationTable.declareConversion(new Type(VariableType.INT),
                 new Type(VariableType.FLOAT));

@@ -18,7 +18,7 @@ public class BooleanValue extends Expression {
 
     @Override
     public Type getType() {
-        return new Type(TypeDefinition.BOOLEAN);
+        return new Type(TypeDefinition.BOOL);
     }
 
     @Override

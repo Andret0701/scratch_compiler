@@ -159,18 +159,29 @@ public class ExpressionParser {
 
         String functionName = functionToken.getValue();
         declarationTable.validateFunctionUsage(functionName, tokens.peek().getLine());
+        Function function = declarationTable.getFunction(functionName);
+
         tokens.expectNext(TokenType.OPEN);
         ArrayList<Expression> arguments = new ArrayList<Expression>();
-        while (tokens.peek().getType() != TokenType.CLOSE) {
-            arguments.add(parse(tokens, declarationTable));
-            if (tokens.peek().getType() == TokenType.COMMA)
+        for (int i = 0; i < function.getArguments().size(); i++) {
+            Variable argument = function.getArguments().get(i);
+            if (tokens.peek().getType() == TokenType.CLOSE)
+                CompilerUtils.throwError("Expected " + argument.getName() + " argument", tokens.peek().getLine());
+
+            Expression argumentExpression = parse(argument.getType(), tokens, declarationTable);
+            if (argumentExpression == null)
+                CompilerUtils.throwError("Expected " + argument.getName() + " argument", tokens.peek().getLine());
+
+            arguments.add(argumentExpression);
+            if (i < function.getArguments().size() - 1) {
+                if (tokens.peek().getType() != TokenType.COMMA)
+                    CompilerUtils.throwError("Too few arguments for function " + functionName, tokens.peek().getLine());
                 tokens.pop();
-            else if (tokens.peek().getType() != TokenType.CLOSE)
-                CompilerUtils.throwExpected("comma or close parenthesis", tokens.peek().getLine(), tokens.peek());
+            }
         }
+
         tokens.expectNext(TokenType.CLOSE);
 
-        Function function = declarationTable.getFunction(functionName);
         FunctionCallExpression functionCall = new FunctionCallExpression(function, arguments);
 
         return new ParsedExpression(functionCall, functionToken, ExpressionType.VALUE);

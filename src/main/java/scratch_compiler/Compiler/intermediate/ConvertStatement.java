@@ -74,7 +74,7 @@ public class ConvertStatement {
         Expression check = getIndexCheck(indexed.get(0));
         for (int i = 1; i < indexed.size(); i++) {
             check = new BinaryOperator(OperatorType.OR, check, getIndexCheck(indexed.get(i)),
-                    new Type(VariableType.BOOLEAN));
+                    new Type(VariableType.BOOL));
         }
 
         ErrorStatement error = new ErrorStatement("Index out of bounds");
@@ -87,11 +87,11 @@ public class ConvertStatement {
     private static Expression getIndexCheck(IndexExpression index) {
         BinaryOperator bottomCheck = new BinaryOperator(OperatorType.GREATER_THAN, new IntValue(0),
                 index,
-                new Type(VariableType.BOOLEAN));
+                new Type(VariableType.BOOL));
         BinaryOperator topCheck = new BinaryOperator(OperatorType.LESS_EQUALS,
                 index,
                 ConvertExpression.convertSize(new SizeOfExpression(index.getArray())),
-                new Type(VariableType.BOOLEAN));
-        return new BinaryOperator(OperatorType.OR, bottomCheck, topCheck, new Type(VariableType.BOOLEAN));
+                new Type(VariableType.BOOL));
+        return new BinaryOperator(OperatorType.OR, bottomCheck, topCheck, new Type(VariableType.BOOL));
     }
 }

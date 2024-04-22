@@ -7,11 +7,13 @@ import scratch_compiler.Compiler.parser.expressions.Expression;
 
 public class FunctionCall extends Statement {
     private Function function;
-    private ArrayList<Expression> arguments;
 
     public FunctionCall(Function function, ArrayList<Expression> arguments) {
+        super(arguments.size());
         this.function = function;
-        this.arguments = new ArrayList<Expression>(arguments);
+        for (int i = 0; i < arguments.size(); i++)
+            setExpression(i, arguments.get(i));
+
     }
 
     public Function getFunction() {
@@ -19,22 +21,23 @@ public class FunctionCall extends Statement {
     }
 
     public ArrayList<Expression> getArguments() {
-        return new ArrayList<Expression>(arguments);
+        ArrayList<Expression> arguments = new ArrayList<>();
+        for (int i = 0; i < getExpressionCount(); i++)
+            arguments.add(getExpression(i));
+        return arguments;
     }
 
     @Override
     public String toString() {
         String args = "";
-        for (int i = 0; i < this.arguments.size(); i++) {
-            args += this.arguments.get(i).toString();
-            if (i < this.arguments.size() - 1)
+        ArrayList<Expression> arguments = getArguments();
+        for (int i = 0; i < arguments.size(); i++) {
+            args += arguments.get(i).toString();
+            if (i < arguments.size() - 1)
                 args += ", ";
         }
         args = "(" + args + ")";
         return function.getName() + args;
     }
 
-    public ArrayList<Statement> getStatements() {
-        return new ArrayList<Statement>();
-    }
 }

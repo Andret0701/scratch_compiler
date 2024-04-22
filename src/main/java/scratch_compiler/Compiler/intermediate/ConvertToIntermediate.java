@@ -37,6 +37,7 @@ public class ConvertToIntermediate {
         // convertedFunctions, code.getStructs());
 
         IntermediateCode convertedCode = new IntermediateCode(globalScope, convertedFunctions);
+        System.out.println(convertedCode);
         IntermediateValidator.validateIntermediateCode(convertedCode);
         return convertedCode;
     }

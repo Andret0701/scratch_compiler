@@ -32,7 +32,7 @@ public class ConvertFunction {
         // converted.addStatement(new SimpleVariableDeclaration(pointerName,
         // VariableType.INT));
 
-        if (isFunctionRecursive(function)) {
+        if (needsStackPointer(function)) {
             String pointerName = getPointerName(function);
             converted.addStatement(new SimpleVariableAssignment(pointerName, new BinaryOperator(OperatorType.ADDITION,
                     new SimpleVariableValue(pointerName, VariableType.INT), new IntValue(1),
@@ -80,7 +80,7 @@ public class ConvertFunction {
                 converted.add(statement);
             }
         } else if (statement instanceof SimpleReturn) {
-            if (isFunctionRecursive(function)) {
+            if (needsStackPointer(function)) {
                 converted.add(new SimpleVariableAssignment(getPointerName(function),
                         new BinaryOperator(OperatorType.SUBTRACTION,
                                 new SimpleVariableValue(
@@ -117,10 +117,15 @@ public class ConvertFunction {
 
     public static ArrayList<Statement> declareFunctionVariables(SimpleFunctionDeclaration function) {
         ArrayList<Statement> statements = new ArrayList<>();
-        if (isFunctionRecursive(function)) {
+
+        if (needsStackPointer(function)) {
             statements.add(new SimpleVariableDeclaration(getPointerName(function), VariableType.INT));
             statements.add(new SimpleVariableAssignment(getPointerName(function), new IntValue(0)));
+        }
+
+        if (isFunctionRecursive(function)) {
             for (Variable variable : getDeclaredVariables(function.getScope())) {
+                // if (!variable.getType().isArray())
                 statements.add(new SimpleArrayDeclaration(getStackName(function, variable.getName()),
                         variable.getType().getType().getType(),
                         new IntValue(200000)));
@@ -129,10 +134,19 @@ public class ConvertFunction {
         }
 
         for (Variable variable : getDeclaredVariables(function.getScope())) {
-            statements.add(new SimpleVariableDeclaration(getVariableName(function, variable.getName()),
-                    variable.getType().getType().getType()));
+            if (!variable.getType().isArray())
+                statements.add(new SimpleVariableDeclaration(getVariableName(function, variable.getName()),
+                        variable.getType().getType().getType()));
+            else
+                statements.add(new SimpleArrayDeclaration(getStackName(function, variable.getName()),
+                        variable.getType().getType().getType(),
+                        new IntValue(200000)));
         }
         return statements;
+    }
+
+    private static boolean needsStackPointer(SimpleFunctionDeclaration function) {
+        return isFunctionRecursive(function);
     }
 
     private static boolean isFunctionRecursive(SimpleFunctionDeclaration function) {

@@ -1,6 +1,7 @@
 package scratch_compiler.Compiler.intermediate;
 
 import scratch_compiler.Compiler.Type;
+import scratch_compiler.Compiler.intermediate.simple_code.Push;
 import scratch_compiler.Compiler.intermediate.simple_code.VariableReference;
 import scratch_compiler.Compiler.parser.ExpressionContainer;
 import scratch_compiler.Compiler.parser.ScopeContainer;
@@ -14,9 +15,9 @@ import scratch_compiler.Compiler.parser.statements.Statement;
 public class ConvertVariableReference {
     public static Scope convert(Scope scope) {
         Scope converted = new Scope();
+        System.out.println("Converting scope: " + scope);
         for (Statement statement : scope.getStatements()) {
-            statement = convert(statement);
-            converted.addStatement(statement);
+            converted.addStatement(convert(statement));
         }
         return converted;
     }
@@ -38,6 +39,9 @@ public class ConvertVariableReference {
     private static void convert(ExpressionContainer container) {
         if (container == null)
             return;
+
+        if (container instanceof Push)
+            System.out.println("Trying to convert Push: " + container);
 
         for (int i = 0; i < container.getExpressionCount(); i++) {
             Expression expression = container.getExpression(i);

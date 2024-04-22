@@ -55,8 +55,8 @@ public class ConvertExpression {
     }
 
     private static Expression convertVariableValue(VariableValue variableValue) {
-        String name = variableValue.getName();
 
+        String name = variableValue.getName();
         if (variableValue.getType().isArray() || variableValue.getType().getType().getType() == VariableType.STRUCT)
             throw new IllegalArgumentException("Cannot convert array or struct to variable value: " + variableValue);
         return new SimpleVariableValue(name, variableValue.getType().getType().getType());

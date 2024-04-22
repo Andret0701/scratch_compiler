@@ -57,15 +57,26 @@ public class ConstantFolding implements Optimization {
     }
 
     private static Optimized optimizeExpression(Expression expression) {
+        boolean changed = false;
         if (expression instanceof BinaryOperator) {
-            return optimizeBinary((BinaryOperator) expression);
+            Optimized optimized = optimizeBinary((BinaryOperator) expression);
+            changed = optimized.isOptimized();
+            expression = (Expression) optimized.getObject();
         }
 
         if (expression instanceof UnaryOperator) {
-            return optimizeUnary((UnaryOperator) expression);
+            Optimized optimized = optimizeUnary((UnaryOperator) expression);
+            changed = optimized.isOptimized();
+            expression = (Expression) optimized.getObject();
         }
 
-        return new Optimized(expression, false);
+        for (int i = 0; i < expression.getExpressionCount(); i++) {
+            Optimized optimized = optimizeExpression(expression.getExpression(i));
+            changed = changed || optimized.isOptimized();
+            expression.setExpression(i, (Expression) optimized.getObject());
+        }
+
+        return new Optimized(expression, changed);
     }
 
     private static Optimized optimizeBinary(BinaryOperator binaryOperator) {

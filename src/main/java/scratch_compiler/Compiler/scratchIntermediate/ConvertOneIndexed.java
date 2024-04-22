@@ -5,6 +5,7 @@ import scratch_compiler.Compiler.intermediate.IntermediateCode;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayAssignment;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleArrayValue;
 import scratch_compiler.Compiler.intermediate.simple_code.SimpleFunctionDeclaration;
+import scratch_compiler.Compiler.optimiser.CopyCode;
 import scratch_compiler.Compiler.parser.ExpressionContainer;
 import scratch_compiler.Compiler.parser.VariableType;
 import scratch_compiler.Compiler.parser.expressions.BinaryOperator;
@@ -19,9 +20,9 @@ public class ConvertOneIndexed {
         if (!code.isZeroIndexed())
             throw new IllegalArgumentException("Code is already one indexed");
 
-        code.setGlobalScope(convert(code.getGlobalScope()));
+        code.setGlobalScope(convert(CopyCode.copy(code.getGlobalScope())));
         for (SimpleFunctionDeclaration function : code.getFunctions()) {
-            function.setScope(convert(function.getScope()));
+            function.setScope(convert(CopyCode.copy(function.getScope())));
         }
 
         code.setZeroIndexed(false);

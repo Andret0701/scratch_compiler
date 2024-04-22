@@ -31,18 +31,17 @@ import scratch_compiler.ValueFields.ValueField;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        ArrayList<Token> tokens = Lexer.lex("2+1.0");
-        // TokenReader tokenReader = new TokenReader(tokens);
-        // System.out.println(ExpressionParser.parse(tokenReader,
-        // DeclarationTable.loadDeclarationTable()));
+        ArrayList<String> flags = getFlags(args);
+        boolean optimise = flags.contains("-o");
+        String fileName = getFileName(args);
 
         ScratchProject project = new ScratchProject();
 
-        Figure figure = new Figure("Cat");
-        figure.setDirection(90);
+        Figure figure = new Figure("Pen");
+        // figure.setDirection(90);
 
         String code = CompilerUtils
-                .readFile("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\code.scc");
+                .readFile("C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler\\snake.scc");
 
         ScratchProgram program = ScratchAssembler.assemble(code);
 
@@ -87,31 +86,22 @@ public class App {
                 "C:\\Users\\andre\\OneDrive\\Dokumenter\\java\\scratch_compiler", project);
 
     }
-}
 
-// "blocks": {
-// "%r4i?rK*i:(G14jBKs{A": {
-// "next": null,
-// "parent": null,
-// "shadow": false,
-// "inputs": {"INDEX": [1.0,[7.0,"1"]]},
-// "topLevel": true,
-// "x": 228.0,
-// "y": 515.0,
-// "opcode": "data_itemoflist",
-// "fields": {"LIST": ["test","cJp$2!hO_b~|S9*,U.a]"]}
-// },
-// "A%aPNEaTv3#GM5^5}$bb": {
-// "next": null,
-// "parent": null,
-// "shadow": false,
-// "inputs": {
-// "ITEM": [1.0,[10.0,"ting"]],
-// "INDEX": [1.0,[7.0,"1"]]
-// },
-// "topLevel": true,
-// "x": 173.0,
-// "y": 420.0,
-// "opcode": "data_replaceitemoflist",
-// "fields": {"LIST": ["test","cJp$2!hO_b~|S9*,U.a]"]}
-// }
+    private static ArrayList<String> getFlags(String[] args) {
+        ArrayList<String> flags = new ArrayList<String>();
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].charAt(0) == '-')
+                flags.add(args[i]);
+
+        }
+        return flags;
+    }
+
+    private static String getFileName(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].charAt(0) != '-')
+                return args[i];
+        }
+        return null;
+    }
+}

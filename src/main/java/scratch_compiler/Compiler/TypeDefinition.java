@@ -95,7 +95,7 @@ public class TypeDefinition {
 
     public static final TypeDefinition INT = new TypeDefinition(VariableType.INT);
     public static final TypeDefinition FLOAT = new TypeDefinition(VariableType.FLOAT);
-    public static final TypeDefinition BOOLEAN = new TypeDefinition(VariableType.BOOLEAN);
+    public static final TypeDefinition BOOL = new TypeDefinition(VariableType.BOOL);
     public static final TypeDefinition VOID = new TypeDefinition(VariableType.VOID);
     public static final TypeDefinition STRING = new TypeDefinition(VariableType.STRING);
 

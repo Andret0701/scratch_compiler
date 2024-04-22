@@ -15,6 +15,7 @@ import scratch_compiler.Blocks.Types.StackBlock;
 import scratch_compiler.JSON.ArrayJSON;
 import scratch_compiler.JSON.ObjectJSON;
 import scratch_compiler.Types.Vector2;
+
 public class BlockToJSON {
     public static ObjectJSON blocksToJSON(ArrayList<HatBlock> blocks) {
         ObjectJSON blocksJSON = new ObjectJSON();
@@ -22,13 +23,13 @@ public class BlockToJSON {
             Vector2 position = getBlockPosition(i);
             BlockJSON hatBlockJSON = hatblockToJSON(blocks.get(i), position);
             blocksJSON.add(hatBlockJSON.getBlocksJSON());
-        }    
+        }
         return blocksJSON;
     }
 
     private static BlockJSON hatblockToJSON(HatBlock hatBlock, Vector2 position) {
         BlockJSON hatBlockJSON;
-        if(hatBlock instanceof FunctionDefinitionBlock)
+        if (hatBlock instanceof FunctionDefinitionBlock)
             hatBlockJSON = FunctionToJSON.functionDefinitionToJSON((FunctionDefinitionBlock) hatBlock);
         else
             hatBlockJSON = blockToJSON(hatBlock);
@@ -38,7 +39,7 @@ public class BlockToJSON {
 
         BlockJSON stackJSON = blockStackToJSON(hatBlock.getStack());
         if (stackJSON != null && stackJSON.getBlock() != null)
-            hatBlockJSON = connectBlocks(hatBlockJSON, stackJSON);        
+            hatBlockJSON = connectBlocks(hatBlockJSON, stackJSON);
         return hatBlockJSON;
     }
 
@@ -46,20 +47,20 @@ public class BlockToJSON {
         if (blockStack.size() == 0)
             return new BlockJSON();
 
-        //convert stack to JSON
-        ArrayList<BlockJSON> stackJSON = new ArrayList<BlockJSON>();        
+        // convert stack to JSON
+        ArrayList<BlockJSON> stackJSON = new ArrayList<BlockJSON>();
         for (StackBlock stackBlock : blockStack) {
             BlockJSON blockJSON = blockToJSON(stackBlock);
             stackJSON.add(blockJSON);
         }
 
-        //connect blocks
+        // connect blocks
         while (stackJSON.size() > 1) {
-            BlockJSON parentJSON = stackJSON.get(stackJSON.size()-2);
-            BlockJSON nextJSON = stackJSON.get(stackJSON.size()-1);
-            stackJSON.remove(stackJSON.size()-1);
-            stackJSON.remove(stackJSON.size()-1);
-            
+            BlockJSON parentJSON = stackJSON.get(stackJSON.size() - 2);
+            BlockJSON nextJSON = stackJSON.get(stackJSON.size() - 1);
+            stackJSON.remove(stackJSON.size() - 1);
+            stackJSON.remove(stackJSON.size() - 1);
+
             stackJSON.add(connectBlocks(parentJSON, nextJSON));
         }
 
@@ -75,16 +76,16 @@ public class BlockToJSON {
 
         if (parentJSON.getBlock().getValue("next") != null)
             throw new IllegalArgumentException("parentJSON already has a next block");
-        
+
         if (nextJSON.getBlock().getValue("parent") != null)
             throw new IllegalArgumentException("nextJSON already has a parent block");
 
-        //connect blocks
+        // connect blocks
         parentJSON.getBlock().setString("next", nextID);
         nextJSON.getBlock().setString("parent", parentID);
         nextJSON.getBlock().setBoolean("topLevel", false);
-        
-        //add nextJSON to parentJSON
+
+        // add nextJSON to parentJSON
         ObjectJSON subBlocks = nextJSON.getSubBlocks();
         subBlocks.setObject(nextID, nextJSON.getBlock());
         parentJSON.addSubBlocks(subBlocks);
@@ -92,9 +93,8 @@ public class BlockToJSON {
         return parentJSON;
     }
 
-
     public static BlockJSON blockToJSON(Block block) {
-        if (block.getOpcode()==null)
+        if (block.getOpcode() == null)
             return null;
 
         ObjectJSON blockJSON = new ObjectJSON();
@@ -106,10 +106,11 @@ public class BlockToJSON {
         blockJSON.setBoolean("shadow", false);
         blockJSON.setBoolean("topLevel", true);
 
-        if (block instanceof FunctionCallBlock)
-        {
-            blockJSON.setObject("mutation", FunctionToJSON.functionCallMutationToJSON(((FunctionCallBlock) block).getFunction()));
-            blockJSON.setObject("inputs", FunctionToJSON.functionCallInputsToJSON(blockJSON.getObject("inputs"), ((FunctionCallBlock) block).getFunction()));
+        if (block instanceof FunctionCallBlock) {
+            blockJSON.setObject("mutation",
+                    FunctionToJSON.functionCallMutationToJSON(((FunctionCallBlock) block).getFunction()));
+            blockJSON.setObject("inputs", FunctionToJSON.functionCallInputsToJSON(blockJSON.getObject("inputs"),
+                    ((FunctionCallBlock) block).getFunction()));
         }
 
         return new BlockJSON(blockJSON, getBlockID(block), subBlocksToJSON(block));
@@ -118,24 +119,23 @@ public class BlockToJSON {
     private static ObjectJSON subBlocksToJSON(Block block) {
         ObjectJSON subBlocksJSON = new ObjectJSON();
 
-        //adding inputblocks
+        // adding inputblocks
         for (Input input : block.getInputs()) {
             Block valueBlock = input.getValueField();
             BlockJSON blockJSON = blockToJSON(valueBlock);
             if (blockJSON == null)
                 continue;
-            
+
             blockJSON.getBlock().setString("parent", getBlockID(block));
             blockJSON.getBlock().setBoolean("topLevel", false);
 
             subBlocksJSON.add(blockJSON.getBlocksJSON());
         }
 
-
-        //adding substacks
+        // adding substacks
         if (block instanceof StackBlock) {
-            for (BlockStack substack : ((StackBlock)block).getSubstacks()) {
-                if (substack==null|| substack.size() == 0)
+            for (BlockStack substack : ((StackBlock) block).getSubstacks()) {
+                if (substack == null || substack.size() == 0)
                     continue;
 
                 BlockJSON stackJSON = blockStackToJSON(substack);
@@ -155,9 +155,11 @@ public class BlockToJSON {
 
         if (block instanceof StackBlock) {
             int stackNumber = 1;
-            for (BlockStack substack : ((StackBlock)block).getSubstacks()) {
-                if (substack==null|| substack.size() == 0)
+            for (BlockStack substack : ((StackBlock) block).getSubstacks()) {
+                if (substack == null || substack.size() == 0) {
+                    stackNumber++;
                     continue;
+                }
 
                 String name = "SUBSTACK";
                 if (stackNumber > 1)
@@ -172,41 +174,36 @@ public class BlockToJSON {
             }
         }
 
-        for(Input input : block.getInputs())
+        for (Input input : block.getInputs())
             inputsJSON.setArray(input.getName(), ValueFieldToJSON.valueFieldToJSON(input.getValueField()));
-        
+
         return inputsJSON;
     }
 
     private static ObjectJSON fieldsToJSON(Block block) {
         ObjectJSON fields = new ObjectJSON();
-        for (Field field : block.getFields())
-        {
+        for (Field field : block.getFields()) {
             ArrayJSON fieldJSON = new ArrayJSON();
-            if (field.getVariable() !=null)
-            {   
+            if (field.getVariable() != null) {
                 ScratchVariable variable = field.getVariable();
                 fieldJSON.addString(VariableToJSON.getVariableName(variable));
                 fieldJSON.addString(VariableToJSON.getVariableId(variable));
                 fields.setArray(field.getName(), fieldJSON);
-            }
-            else if (field.getType() !=null)
-            {
+            } else if (field.getType() != null) {
                 fieldJSON.addString(field.getType());
                 fieldJSON.addValue(null);
                 fields.setArray(field.getName(), fieldJSON);
             }
         }
 
-
         return fields;
     }
 
     static String getBlockID(Block block) {
-       return "id_block_"+block.getOpcode()+"_"+block.hashCode();
+        return "id_block_" + block.getOpcode() + "_" + block.hashCode();
     }
 
     private static Vector2 getBlockPosition(int stackNumber) {
-        return new Vector2(250*stackNumber, 0);
+        return new Vector2(250 * stackNumber, 0);
     }
 }

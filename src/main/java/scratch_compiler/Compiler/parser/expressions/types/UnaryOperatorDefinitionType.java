@@ -5,7 +5,7 @@ import scratch_compiler.Compiler.parser.VariableType;
 public enum UnaryOperatorDefinitionType {
     INT_UNARY_NEGATION(OperatorType.UNARY_NEGATION, VariableType.INT, VariableType.INT),
     FLOAT_UNARY_NEGATION(OperatorType.UNARY_NEGATION, VariableType.FLOAT, VariableType.FLOAT),
-    NOT(OperatorType.NOT, VariableType.BOOLEAN, VariableType.BOOLEAN);
+    NOT(OperatorType.NOT, VariableType.BOOL, VariableType.BOOL);
 
     private OperatorType operatorType;
     private VariableType returnType;

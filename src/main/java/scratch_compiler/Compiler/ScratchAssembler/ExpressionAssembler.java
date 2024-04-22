@@ -32,7 +32,11 @@ import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.VariableField;
 import scratch_compiler.ValueFields.LogicFields.AndField;
 import scratch_compiler.ValueFields.LogicFields.EqualsField;
+import scratch_compiler.ValueFields.LogicFields.GreaterThanField;
 import scratch_compiler.ValueFields.LogicFields.LessThanField;
+import scratch_compiler.ValueFields.LogicFields.LogicField;
+import scratch_compiler.ValueFields.LogicFields.NotField;
+import scratch_compiler.ValueFields.LogicFields.OrField;
 
 public class ExpressionAssembler {
     static ValueField assemble(Expression expression) {
@@ -99,11 +103,19 @@ public class ExpressionAssembler {
             case LESS_THAN:
                 return new LessThanField(left, right);
             case GREATER_THAN:
-                return new LessThanField(right, left);
+                return new GreaterThanField(left, right);
             case EQUALS:
                 return new EqualsField(left, right);
+            case NOT_EQUALS:
+                return new NotField(new EqualsField(left, right));
+            case LESS_EQUALS:
+                return new OrField(new LessThanField(left, right), new EqualsField(left, right));
+            case GREATER_EQUALS:
+                return new OrField(new GreaterThanField(left, right), new EqualsField(left, right));
             case AND:
                 return new AndField(left, right);
+            case OR:
+                return new OrField(left, right);
             case MODULUS:
                 return new ModulusField(left, right);
             default:
@@ -118,6 +130,8 @@ public class ExpressionAssembler {
         switch (expression.getOperatorType()) {
             case UNARY_NEGATION:
                 return new SubtractionField(new NumberField(0), value);
+            case NOT:
+                return new NotField(toLogicField(value));
             default:
                 return errorField(expression);
         }
@@ -125,5 +139,11 @@ public class ExpressionAssembler {
 
     public static ValueField errorField(Expression expression) {
         return new StringField("Compile Error: " + expression);
+    }
+
+    public static LogicField toLogicField(ValueField value) {
+        if (value instanceof LogicField)
+            return (LogicField) value;
+        return new EqualsField(value, new NumberField(1));
     }
 }

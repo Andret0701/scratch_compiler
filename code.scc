@@ -66,7 +66,6 @@ void drawPlayer(Player p)
 
 Vector2 getInput()
 {
-    sin(1);
     Vector2 input={0,0};
     if(getKey("a"))
         input.x-=1;
@@ -112,22 +111,7 @@ void update()
     drawBackground({0,0,0});
 
 
- 
-//    float input.x_
-//    float input.y_
-//    input.x_ = (float) 0
-//    input.y_ = (float) 0
-//    if (getKey*("a"))
-//       input.x_ = (input.x_ - (float) 1)
-//    if (getKey*("d"))
-//       input.x_ = (input.x_ + (float) 1)
-//    if (getKey*("w"))
-//       input.y_ = (input.y_ + (float) 1)
-//    if (getKey*("s"))
-//       input.y_ = (input.y_ - (float) 1)
-//    push input.y_
-//    push input.x_
-    
+
     Vector2 input=getInput();
     player.body.velocity=add(player.body.velocity, multiply(input, 20));
     player.body.velocity=multiply(player.body.velocity, 0.9);
@@ -174,3 +158,20 @@ while(true)
     update();
 }
 
+
+
+// int[] square(int[] a)
+// {
+//     for(int i=0;i<#a;i++)
+//         a[i]=a[i]*a[i];
+//     return a;   
+// }
+
+// int[] a={1,2,3,4,5};
+// int[] b=square(a);
+// string output="";
+// for(int i=0;i<#b;i++)
+// {
+//     output+=b[i]+" ";
+// }
+// say(output);

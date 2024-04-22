@@ -1,0 +1,351 @@
+int height=8;
+int width=11;
+
+
+struct Vector2 {
+    float x;
+    float y;
+}
+
+
+struct Circle {
+    Vector2 position;
+    float radius;
+}
+
+struct Rectangle {
+    Vector2 position;
+    Vector2 size;
+}
+
+
+struct Vector2Int {
+    int x;
+    int y;
+}
+
+
+struct Color {
+    float r;
+    float g;
+    float b;
+}
+
+
+struct SnakePart{
+    Vector2 position;
+    Vector2Int target;
+    float radius;
+    Color color;
+}
+
+Color[] greens={{144, 222, 18},{111,201,20}};
+Vector2Int playerInput = {0,0};
+
+float speed = 0.1;
+float threshold = 0.2;
+
+
+SnakePart[] parts=SnakePart[width*height];
+int partIndex = 3;
+parts[0] = {{floor(width/3),ceil(height/2)},{floor(width/3),ceil(height/2)},18,greens[0]};
+parts[1] = {parts[0].position,parts[0].target,16,greens[0]};
+parts[2] = {parts[1].position,parts[1].target,16,greens[0]};
+
+Vector2 leftEye = parts[0].position;
+Vector2 rightEye = parts[0].position;
+
+bool gameOver = false;
+float gameTime = 0;
+
+Vector2Int apple = {floor(width/3*2),ceil(height/2)};
+float appleSize=1;
+
+Vector2Int getInput()
+{
+    Vector2Int _input={0,0};
+    if(getKey("a")||getKey("left arrow"))
+        _input.x=-1;
+    else if(getKey("d")||getKey("right arrow"))
+        _input.x=1;
+    else if(getKey("w")||getKey("up arrow"))
+        _input.y=1;
+    else if(getKey("s")||getKey("down arrow"))
+        _input.y=-1;
+    return _input;
+}
+
+Vector2Int input = {0,0};
+
+void drawCircle(Circle circle, Color color)
+{
+    penColor(color.r,color.g,color.b);
+    penSize(circle.radius*2);
+    moveTo(circle.position.x,circle.position.y);
+    penDown();
+    penUp();
+}
+
+void drawRectangle(Rectangle rectangle, float thickness, Color color)
+{
+    penColor(color.r,color.g,color.b);
+    penSize(thickness);
+    moveTo(rectangle.position.x-rectangle.size.x/2,rectangle.position.y-rectangle.size.y/2);
+    penDown();
+    moveTo(rectangle.position.x+rectangle.size.x/2,rectangle.position.y-rectangle.size.y/2);
+    moveTo(rectangle.position.x+rectangle.size.x/2,rectangle.position.y+rectangle.size.y/2);
+    moveTo(rectangle.position.x-rectangle.size.x/2,rectangle.position.y+rectangle.size.y/2);
+    moveTo(rectangle.position.x-rectangle.size.x/2,rectangle.position.y-rectangle.size.y/2);
+    penUp();
+}
+
+void drawLine(Vector2 start, Vector2 end, float thickness, Color color)
+{
+    penColor(color.r,color.g,color.b);
+    penSize(thickness);
+    moveTo(start.x,start.y);
+    penDown();
+    moveTo(end.x,end.y);
+    penUp();
+}
+
+
+Vector2 tileToWorld(Vector2 tile)
+{
+    return {tile.x*40-200,tile.y*40-140};
+}
+
+void drawSnakePart(SnakePart part)
+{
+    Vector2 worldPosition = tileToWorld(part.position);
+    drawCircle({worldPosition,part.radius},part.color);
+}
+
+void drawApple(Vector2Int position,float size)
+{
+    Vector2 worldPosition = tileToWorld({position.x,position.y});   
+    worldPosition.y+=sin(gameTime*10)*2*size;
+    drawCircle({{worldPosition.x+2*size,worldPosition.y-2*size},10*size},{200,0,0});
+    drawCircle({{worldPosition.x-2*size,worldPosition.y-2*size},10*size},{255,0,0});
+    drawCircle({{worldPosition.x-5*size,worldPosition.y+3*size},2*size},{255,210,210});
+    drawLine({worldPosition.x,worldPosition.y+7*size},{worldPosition.x+2*size,worldPosition.y+11*size},3*size,{120, 10,23});
+}
+
+void drawBackground()
+{
+    penColor(235, 211, 138);
+    penSize(1000);
+    moveTo(0,0);
+    penDown();
+    penUp();
+
+
+    for (int x=0;x<width;x++)
+    {
+        for(int y=0;y<height;y++)
+        {
+            Vector2 position = tileToWorld({x,y});
+            drawRectangle({position,{40,40}},5,{224, 191, 98});
+        }
+    }
+
+    drawRectangle({{0,0},{480,360}},40,{196, 145, 51});
+    drawRectangle({{0,0},{480,360}},20,{120, 176, 25});
+}
+
+bool overlap(Circle circle1, Circle circle2)
+{
+    float distance = sqrt((circle1.position.x-circle2.position.x)*(circle1.position.x-circle2.position.x)+(circle1.position.y-circle2.position.y)*(circle1.position.y-circle2.position.y));
+    return distance<circle1.radius+circle2.radius;
+}
+
+
+
+
+
+
+bool isOutOfBounds(Vector2 position)
+{
+    return position.x<0 || position.x>=width || position.y<0 || position.y>=height;
+}
+
+// Vector2[] positions = Vector2[2000];
+// int positionIndex = 0;
+
+
+
+void update()
+{
+    Vector2Int _input = getInput();
+    if(_input.x!=0 || _input.y!=0)
+    {
+        if (!(playerInput.x>0 && _input.x<0) && !(playerInput.x<0 && _input.x>0) && !(playerInput.y>0 && _input.y<0) && !(playerInput.y<0 && _input.y>0))
+            input = _input;
+    }
+
+
+    SnakePart head = parts[0];
+    float distance = sqrt((head.target.x-head.position.x)*(head.target.x-head.position.x)+(head.target.y-head.position.y)*(head.target.y-head.position.y));
+    if(distance<=threshold)
+    {
+        playerInput= {input.x,input.y};
+        head.target.x+=playerInput.x;
+        head.target.y+=playerInput.y;
+
+        for (int i=partIndex-1;i>0;i--)
+        {
+            parts[i].position = {parts[i].target.x,parts[i].target.y};
+            parts[i].target = parts[i-1].target;
+        }
+
+        float appleDistance = sqrt((head.position.x-apple.x)*(head.position.x-apple.x)+(head.position.y-apple.y)*(head.position.y-apple.y));
+        if(appleDistance<=0.2)
+        {
+            bool o = true;
+            while(o)
+            {
+                apple = {round(random(0,width-1)),round(random(0,height-1))};
+                appleSize=0;
+                o = false;
+                for (int i=0;i<partIndex;i++)
+                {
+                    if(apple.x==parts[i].target.x && apple.y==parts[i].target.y)
+                        o = true;
+                    
+                }
+            }
+
+            parts[partIndex] = {parts[partIndex-1].position,parts[partIndex-1].target,16,greens[0]};
+            partIndex++;
+        }
+
+    }
+
+
+
+
+
+    parts[0] = head;
+    for (int i=0;i<partIndex;i++)
+    {
+        if (parts[i].position.x<parts[i].target.x)
+       {
+        parts[i].position.x+=speed;
+        if (parts[i].position.x>parts[i].target.x)
+            parts[i].position.x=parts[i].target.x;
+       }
+         else if (parts[i].position.x>parts[i].target.x)
+         {
+          parts[i].position.x-=speed;
+          if (parts[i].position.x<parts[i].target.x)
+                parts[i].position.x=parts[i].target.x;
+         }
+
+        if (parts[i].position.y<parts[i].target.y)
+        {
+            parts[i].position.y+=speed;
+            if (parts[i].position.y>parts[i].target.y)
+                parts[i].position.y=parts[i].target.y;
+        }
+        else if (parts[i].position.y>parts[i].target.y)
+        {
+            parts[i].position.y-=speed;
+            if (parts[i].position.y<parts[i].target.y)
+                parts[i].position.y=parts[i].target.y;
+        }
+    }
+
+
+    if(isOutOfBounds({head.target.x,head.target.y}))
+    {
+        gameOver = true;
+    }
+
+    for (int i=3;i<partIndex;i++)
+    {
+        if(parts[0].target.x==parts[i].target.x && parts[0].target.y==parts[i].target.y)
+            gameOver = true;
+
+    }
+
+
+    float offset = 0.2;
+
+    Vector2 targetLeftEye = {parts[0].position.x+offset,parts[0].position.y+offset};
+    Vector2 targetRightEye = {parts[0].position.x+offset,parts[0].position.y-offset};
+    if(playerInput.x>0.01)
+    {
+        // targetLeftEye = {parts[0].position.x+offset,parts[0].position.y+offset};
+        // targetRightEye = {parts[0].position.x+offset,parts[0].position.y-offset};
+    }
+    else if(playerInput.x<-0.01)
+    {
+        targetLeftEye = {parts[0].position.x-offset,parts[0].position.y-offset};
+        targetRightEye = {parts[0].position.x-offset,parts[0].position.y+offset};
+    }
+
+    else if(playerInput.y>0.01)
+    {
+        targetLeftEye = {parts[0].position.x-offset,parts[0].position.y+offset};
+        targetRightEye = {parts[0].position.x+offset,parts[0].position.y+offset};
+    
+    }
+
+    else if(playerInput.y<-0.01)
+    {
+        targetLeftEye = {parts[0].position.x+offset,parts[0].position.y-offset};
+        targetRightEye = {parts[0].position.x-offset,parts[0].position.y-offset};
+    }
+
+    leftEye.x+= (targetLeftEye.x-leftEye.x)*0.4;
+    leftEye.y+= (targetLeftEye.y-leftEye.y)*0.4;
+    rightEye.x+= (targetRightEye.x-rightEye.x)*0.4;
+    rightEye.y+= (targetRightEye.y-rightEye.y)*0.4;
+
+
+    if(appleSize<1)
+        appleSize+=(1-appleSize)*0.5;
+    else
+        appleSize=1;
+
+}
+
+void drawSnake()
+{
+      for (int i=0;i<partIndex-1;i++)
+    {
+        SnakePart part = {{(parts[i].position.x+parts[i+1].position.x)/2,(parts[i].position.y+parts[i+1].position.y)/2},{0,0},12,greens[1]};
+        drawSnakePart(part);
+    }
+
+    for (int i=0;i<partIndex;i++)
+        drawSnakePart(parts[i]);
+
+
+    drawCircle({tileToWorld(leftEye),3},{0,0,0});
+    drawCircle({tileToWorld(rightEye),3},{0,0,0});
+}
+
+void draw()
+{
+    //penClear();
+    drawBackground();
+
+    drawApple(apple,appleSize);
+    drawSnake();
+  
+
+}
+
+
+
+int stopTimer=5;
+
+while(!gameOver||stopTimer>0)
+{
+    update();
+    draw();
+    gameTime+=1;
+    if(gameOver)
+        stopTimer--;
+}

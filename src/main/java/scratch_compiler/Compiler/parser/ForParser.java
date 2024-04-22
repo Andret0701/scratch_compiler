@@ -22,7 +22,7 @@ public class ForParser {
         tokens.expectNext(TokenType.SEMICOLON);
 
         Expression loopCondition = ExpressionParser.parse(tokens, innerDeclarationTable);
-        if (!loopCondition.getType().equals(new Type(VariableType.BOOLEAN)))
+        if (!loopCondition.getType().equals(new Type(VariableType.BOOL)))
             throw new RuntimeException("Expected boolean expression at line " + tokens.peek().getLine());
 
         tokens.expectNext(TokenType.SEMICOLON);

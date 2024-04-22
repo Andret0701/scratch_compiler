@@ -33,8 +33,6 @@ public class ConvertFunctionCall {
         String name = ConvertFunction.convertFunctionName(functionCall.getFunction());
         statements.add(new SimpleFunctionCall(name));
 
-        // for (functionCall.getFunction().getReturnType())
-
         return statements;
     }
 
