@@ -8,6 +8,8 @@ struct Vector2 {
 }
 
 
+
+
 struct Circle {
     Vector2 position;
     float radius;
@@ -30,6 +32,18 @@ struct Color {
     float g;
     float b;
 }
+
+void drawLine(Vector2 start, Vector2 end, float thickness, Color color)
+{
+    penColor(color.r,color.g,color.b);
+    penSize(thickness);
+    moveTo(start.x,start.y);
+    penDown();
+    moveTo(end.x,end.y);
+    penUp();
+}
+
+
 
 
 struct SnakePart{
@@ -99,15 +113,7 @@ void drawRectangle(Rectangle rectangle, float thickness, Color color)
     penUp();
 }
 
-void drawLine(Vector2 start, Vector2 end, float thickness, Color color)
-{
-    penColor(color.r,color.g,color.b);
-    penSize(thickness);
-    moveTo(start.x,start.y);
-    penDown();
-    moveTo(end.x,end.y);
-    penUp();
-}
+
 
 
 Vector2 tileToWorld(Vector2 tile)

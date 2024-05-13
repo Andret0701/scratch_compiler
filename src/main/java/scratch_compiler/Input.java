@@ -18,4 +18,9 @@ public class Input {
     public ValueField getValueField() {
         return valueField;
     }
+
+    @Override
+    public String toString() {
+        return name + ": " + valueField;
+    }
 }

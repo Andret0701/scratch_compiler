@@ -28,4 +28,9 @@ public abstract class BinaryOperationField extends ValueField {
     public ValueField getRight() {
         return getInput(rightInputName);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s, %s)", getOpcode(), getLeft(), getRight());
+    }
 }

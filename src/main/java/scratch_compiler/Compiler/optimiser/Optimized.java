@@ -16,4 +16,5 @@ public class Optimized {
     public boolean isOptimized() {
         return optimized;
     }
+
 }

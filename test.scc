@@ -1,0 +1,70 @@
+
+
+
+struct Vector2
+{
+    float x;
+    float y;
+}
+
+Vector2 normalize(Vector2 v)
+{
+    float length=sqrt(v.x*v.x+v.y*v.y);
+    return {v.x/length, v.y/length};
+}
+
+Vector2 getInput()
+{
+    Vector2 input={0,0};
+    if(getKey("a"))
+        input.x-=1;
+    if(getKey("d"))
+        input.x+=1;
+
+    if(getKey("w"))
+        input.y+=1;
+    if(getKey("s"))
+        input.y-=1;
+
+    return normalize(input);
+}
+
+
+
+
+penClear();
+moveTo(0,0);
+penSize(10);
+penColor(255,0,0);
+
+
+
+void drawCircle(float x, float y, float r)
+{
+    moveTo(x+r,y);
+    penDown();
+    for (float a =0; a<360; a+=1){
+        float x1 = r*cos(a);
+        float y1 = r*sin(a);
+        moveTo(x+x1,y+y1);
+    }
+    penUp();
+}
+
+
+
+Vector2 position = {0,0};
+
+float speed=10;
+
+while(true)
+{
+    Vector2 input = getInput();
+    position.x+=input.x*speed;
+    position.y+=input.y*speed;
+
+
+    penClear();
+    drawCircle(position.x,position.y,10);
+
+}

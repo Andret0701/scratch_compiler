@@ -12,7 +12,8 @@ public class ReferenceExpression extends Expression {
             throw new IllegalArgumentException("Cannot reference an array");
 
         if (!expression.getType().getType().containsReference(reference))
-            throw new IllegalArgumentException("The reference does not match the type of the expression");
+            throw new IllegalArgumentException("The reference does not match the type of the expression: " + reference
+                    + " in " + expression.getType().getType());
 
         this.reference = reference;
         setExpression(0, expression);

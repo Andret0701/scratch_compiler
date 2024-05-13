@@ -24,6 +24,9 @@ public class VariableDeclarationParser {
         if (tokens.isNext(TokenType.ASSIGN)) {
             tokens.expectNext(TokenType.ASSIGN);
             value = ExpressionParser.parse(type, tokens, declarationTable);
+            if (value == null)
+                CompilerUtils.throwExpected(type + " value after assignment", tokens.peek().getLine(), tokens.peek());
+
         }
 
         declarationTable.declareVariable(name, type);

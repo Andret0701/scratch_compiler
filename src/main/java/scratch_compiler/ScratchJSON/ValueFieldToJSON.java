@@ -2,38 +2,45 @@ package scratch_compiler.ScratchJSON;
 
 import scratch_compiler.Blocks.Types.Block;
 import scratch_compiler.JSON.ArrayJSON;
+import scratch_compiler.ValueFields.AdditionField;
 import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.StringField;
 import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.VariableField;
+import scratch_compiler.ValueFields.LogicFields.AndField;
 
 public class ValueFieldToJSON {
     public static ArrayJSON valueFieldToJSON(ValueField valueField) {
-        if(valueField==null)
+        // if (valueField.getUnique() == 2089) {
+        // AndField and = (AndField) valueField;
+        // System.out.println(and.getUnique());
+        // System.out.println(and.getFields());
+        // System.out.println(and.getInputs());
+        // }
+
+        if (valueField == null)
             return dynamicToJSON(defaultJSON());
 
         if (valueField instanceof NumberField)
             return constantToJSON(numberFieldToJSON((NumberField) valueField));
-        
-        if(valueField instanceof StringField)
+
+        if (valueField instanceof StringField)
             return constantToJSON(stringFieldToJSON((StringField) valueField));
-        
-        if(valueField instanceof VariableField)
+
+        if (valueField instanceof VariableField)
             return dynamicToJSON(variableFieldToJSON((VariableField) valueField));
-        
+
         return blockReferenceToJSON(valueField);
     }
 
-    private static ArrayJSON constantToJSON(ArrayJSON arrayJSON)
-    {
+    private static ArrayJSON constantToJSON(ArrayJSON arrayJSON) {
         ArrayJSON constant = new ArrayJSON();
         constant.addNumber(1);
         constant.addArray(arrayJSON);
         return constant;
     }
 
-    private static ArrayJSON dynamicToJSON(ArrayJSON arrayJSON)
-    {
+    private static ArrayJSON dynamicToJSON(ArrayJSON arrayJSON) {
         ArrayJSON dynamic = new ArrayJSON();
         dynamic.addNumber(3);
         dynamic.addArray(arrayJSON);
@@ -41,8 +48,7 @@ public class ValueFieldToJSON {
         return dynamic;
     }
 
-    private static ArrayJSON blockReferenceToJSON(Block block)
-    {
+    private static ArrayJSON blockReferenceToJSON(Block block) {
         ArrayJSON blockJSON = new ArrayJSON();
         blockJSON.addNumber(3);
         blockJSON.addString(BlockToJSON.getBlockID(block));

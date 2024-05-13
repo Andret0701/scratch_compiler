@@ -1,0 +1,537 @@
+bool isRunning = true;
+
+void gameOver() {
+    isRunning = false;
+}
+
+
+struct Color {
+    float r;
+    float g;
+    float b;
+}
+
+struct Vector2 {
+    float x;
+    float y;
+}
+
+struct Vector2Int {
+    int x;
+    int y;
+}
+
+struct BlockData {
+    int offset;
+    int width;
+    int height;
+    Vector2Int position;
+}
+
+struct TetrisColors {
+    Color outline;
+    Color dark;
+    Color light;
+}
+
+void draw_block(float x, float y,float size, TetrisColors tetriscolor) {
+    // Draw a block at (x, y) with the given color
+    penColor(tetriscolor.dark.r, tetriscolor.dark.g, tetriscolor.dark.b);
+    penSize(size);
+    moveTo(x+size/2, y+size/2);
+    penDown();
+    penUp();
+
+
+    penColor(tetriscolor.outline.r, tetriscolor.outline.g, tetriscolor.outline.b);
+    float edge = size/4;
+    penSize(edge);
+    moveTo(x+edge/2, y+edge/2);
+    penDown();
+    
+    moveTo(x+size-edge/2, y+edge/2);
+    moveTo(x+size-edge/2, y+size-edge/2);
+    moveTo(x+edge/2, y+size-edge/2);
+    moveTo(x+edge/2, y+edge/2);
+    penUp();
+
+    penColor(tetriscolor.light.r, tetriscolor.light.g, tetriscolor.light.b);
+    penSize(size/5);
+    moveTo(x+size/4, y+3*size/4);
+    penDown();
+    moveTo(x+2*size/5,y+3*size/4);
+    penUp();
+
+    // float offset = size/2.5;
+    // penSize(size/10);
+
+    // moveTo(x+offset, y+offset);
+    // moveTo(x+offset, y+size-offset);
+    // moveTo(x+size-offset, y+size-offset);
+    // moveTo(x+size-offset, y+offset);
+    // moveTo(x+offset, y+offset);
+    // penUp();
+
+    // moveTo(x+size-edge/2, y+edge/2);
+    // penDown();
+    // moveTo(x+size-offset, y+offset);
+    // penUp();
+
+    // moveTo(x+edge/2, y+size-edge/2);
+    // penDown();
+    // moveTo(x+offset, y+size-offset);
+    // penUp();
+
+    // moveTo(x+size-edge/2, y+size-edge/2);
+    // penDown();
+    // moveTo(x+size-offset, y+size-offset);
+    // penUp();
+    
+}
+
+
+int WIDTH = 10;
+int HEIGHT = 15;
+int SIZE = 20;
+
+
+
+
+//tetris colors
+TetrisColors[] colors = TetrisColors[8];
+colors[0] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+colors[1] = {{0, 200, 200}, {0,255,255}, {150, 255, 255}}; //cyan
+colors[2] = {{200, 200, 0}, {255,255,0}, {255, 255, 120}}; //yellow
+colors[3] = {{100, 0, 100}, {128,0,128}, {178, 50, 178}}; //purple
+colors[4] = {{0, 200, 0}, {0,255,0}, {140, 255, 140}};    //green
+colors[5] = {{200, 0, 0}, {255,0,0}, {255, 80, 80}};   //red
+colors[6] = {{0, 0, 200}, {0,0,255}, {80, 80, 255}}; //blue
+colors[7] = {{200, 130, 0}, {255,165,0}, {255, 215, 50}}; //orange
+int[] grid = int[WIDTH*HEIGHT];
+for (int i = 0; i < WIDTH*HEIGHT; i++)
+    grid[i] = 0;
+
+
+int[] block_shapes ={
+    // I
+    0, 0, 0, 0,
+    1, 1, 1, 1,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    
+    0, 1, 0, 0,
+    0, 1, 0, 0,
+    0, 1, 0, 0,
+    0, 1, 0, 0,
+    
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    1, 1, 1, 1,
+    0, 0, 0, 0,
+    
+    0, 0, 1, 0,
+    0, 0, 1, 0,
+    0, 0, 1, 0,
+    0, 0, 1, 0, // 64
+
+    // O
+    2, 2,
+    2, 2,
+    
+    2, 2,
+    2, 2,
+    
+    2, 2,
+    2, 2,
+    
+    2, 2,
+    2, 2, // 64 + 16 = 80
+
+    // T
+    0, 0, 0,
+    3, 3, 3,
+    0, 3, 0,
+    
+    0, 3, 0,
+    3, 3, 0,
+    0, 3, 0,
+    
+    0, 3, 0,
+    3, 3, 3,
+    0, 0, 0,
+    
+    0, 3, 0,
+    0, 3, 3,
+    0, 3, 0, // 80 + 36 = 116
+
+    // S
+    0, 0, 0,
+    0, 4, 4,
+    4, 4, 0,
+    
+    4, 0, 0,
+    4, 4, 0,
+    0, 4, 0,
+    
+    0, 0, 0,
+    0, 4, 4,
+    4, 4, 0,
+    
+    4, 0, 0,
+    4, 4, 0,
+    0, 4, 0, // 116 + 36 = 152
+
+    // Z
+    0, 0, 0,
+    5, 5, 0,
+    0, 5, 5,
+    
+    0, 5, 0,
+    5, 5, 0,
+    5, 0, 0,
+    
+    0, 0, 0,
+    5, 5, 0,
+    0, 5, 5,
+    
+    0, 5, 0,
+    5, 5, 0,
+    5, 0, 0, // 152 + 36 = 188
+
+    // J
+    0, 0, 0,
+    6, 6, 6,
+    0, 0, 6,
+    
+    0, 6, 0,
+    0, 6, 0,
+    6, 6, 0,
+    
+    6, 0, 0,
+    6, 6, 6,
+    0, 0, 0,
+    
+    6, 6, 0,
+    0, 6, 0,
+    0, 6, 0, // 188 + 36 = 224
+
+    // L
+    0, 0, 0,
+    7, 7, 7,
+    7, 0, 0,
+    
+    7, 7, 0,
+    0, 7, 0,
+    0, 7, 0,
+    
+    0, 0, 7,
+    7, 7, 7,
+    0, 0, 0,
+    
+    0, 7, 0,
+    0, 7, 0,
+    0, 7, 7  // 224 + 36 = 260
+};
+
+BlockData[] block_data = {
+    {0, 4, 4,{1, 1}},
+    {64, 2, 2,{0, 0}},
+    {80, 3, 3,{1, 1}},
+    {116, 3, 3,{1, 1}},
+    {152, 3, 3,{1, 1}},
+    {188, 3, 3,{1, 1}},
+    {224, 3, 3,{1, 1}}
+};
+
+
+int[] block_queue = int[7];
+int block_index = 0;
+
+
+void generate_block_queue()
+{
+    for (int i = 0; i < 7; i++)
+    {
+        block_queue[i] = i;
+    }
+    for (int i = 0; i < 7; i++)
+    {
+        int j = floor(random(0, 6));
+        int temp = block_queue[i];
+        block_queue[i] = block_queue[j];
+        block_queue[j] = temp;
+    }
+}
+
+int next_block()
+{
+    if (block_index >= 7)
+    {
+        generate_block_queue();
+        block_index = 0;
+    }
+
+    int output = block_queue[block_index];
+    block_index ++;
+    return output;
+}
+generate_block_queue();
+
+
+
+
+void draw_tetris_part(int x, int y, int block_type) {
+    if (block_type != 0)
+            draw_block(x*SIZE+(-WIDTH/2*SIZE), y*SIZE-180+5, SIZE, colors[block_type]);
+}
+
+void draw_tetris_block(int x, int y, int block_type, int rotation) {
+    BlockData data = block_data[block_type];
+    for (int i = 0; i < data.width; i++) {
+        for (int j = 0; j < data.height; j++) {
+            draw_tetris_part(x+i-data.position.x, y+j-data.position.y, block_shapes[data.offset+rotation*data.width*data.height+i+j*data.width]);
+        }
+    }
+}
+
+
+struct InputData{
+    string key;
+    bool key_down;
+    bool key_pressed;
+    bool key_released;
+    int hold_time;
+}
+
+InputData update_input(InputData input) {
+    bool down= getKey(input.key)==true;
+    // input.key_pressed = down && !input.key_down;
+    // input.key_released = !down && input.key_down;
+     input.key_pressed = !input.key_down;
+     input.key_pressed &&= down;
+     input.key_released = input.key_down;
+        input.key_released &&= !down;
+    input.key_down = down;
+    if (input.key_down)
+        input.hold_time += 1;
+    else
+        input.hold_time = 0;
+    return input;
+}
+
+
+InputData w_input = {"W", false, false, false, 0};
+InputData a_input = {"A", false, false, false, 0};
+InputData s_input = {"S", false, false, false, 0};
+InputData d_input = {"D", false, false, false, 0};
+InputData space_input = {"Q", false, false, false, 0};
+
+
+Vector2Int current_position = {WIDTH/2, HEIGHT};
+int current_rotation = 0;
+int current_block = next_block();
+
+
+
+
+bool has_crashed()
+{
+    BlockData data = block_data[current_block];
+    for (int i = 0; i < data.width; i++) {
+        for (int j = 0; j < data.height; j++) {
+            if (block_shapes[data.offset+current_rotation*data.width*data.height+i+j*data.width] != 0)
+            {
+                int px = current_position.x+i-data.position.x;
+                int py = current_position.y+j-data.position.y;
+                if (px < 0 || px >= WIDTH || py < 0)
+                    return true;
+                if (py < HEIGHT)
+                {
+                    if (grid[px+py*WIDTH] != 0)
+                        return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void fasten_current()
+{
+    BlockData data = block_data[current_block];
+    for (int i = 0; i < data.width; i++) {
+        for (int j = 0; j < data.height; j++) {
+            int px = current_position.x+i-data.position.x;
+            int py = current_position.y+j-data.position.y;
+            int block_type = block_shapes[data.offset+current_rotation*data.width*data.height+i+j*data.width];
+            if (block_type != 0 && py < HEIGHT)
+                grid[px+py*WIDTH] = block_type;
+
+            if(py >= HEIGHT)
+                gameOver();
+        }
+    }
+}
+
+void collapse_rows()
+{
+    for (int i = HEIGHT-1; i >= 0; i--)
+    {
+        bool full = true;
+        bool empty = true;
+        for (int j = 0; j < WIDTH; j++)
+        {
+            if (grid[j+i*WIDTH] == 0)
+            {
+                full = false;
+            }
+
+            if (grid[j+i*WIDTH] != 0)
+            {
+                empty = false;
+            }
+        }
+        if (full)
+        {
+            for (int j = 0; j < WIDTH; j++)
+                grid[j+i*WIDTH] = 0;
+                
+            for (int k = i; k < HEIGHT-1; k++)
+            {
+                for (int j = 0; j < WIDTH; j++)
+                {
+                    grid[j+k*WIDTH] = grid[j+(k+1)*WIDTH];
+                }
+            }
+        }
+    }
+}
+
+void draw_background() {
+    penColor(0, 0, 0);
+    penSize(1000);
+    moveTo(0,0);
+    penDown();
+    penUp();    
+
+
+    penSize(SIZE/8);
+    penColor(20,20,20);
+    for (int i = 0; i < WIDTH; i++) {
+        for (int j = 0; j < HEIGHT; j++) {
+            int x = i*SIZE+(-WIDTH/2*SIZE);
+            int y = j*SIZE-180+5;
+            moveTo(x, y);
+            penDown();
+            moveTo(x+SIZE, y);
+            moveTo(x+SIZE, y+SIZE);
+            moveTo(x, y+SIZE);
+            moveTo(x, y);
+            penUp();            
+        }
+    }
+
+    int ox =1;
+    int oy = 1;
+
+    penSize(SIZE/11);
+    penColor(50,50,50);
+    for (int i = 0; i < WIDTH; i++) {
+        for (int j = 0; j < HEIGHT; j++) {
+            int x = i*SIZE+(-WIDTH/2*SIZE)+ox;
+            int y = j*SIZE-180+5+oy;
+            moveTo(x, y);
+            penDown();
+            moveTo(x+SIZE, y);
+            moveTo(x+SIZE, y+SIZE);
+            moveTo(x, y+SIZE);
+            moveTo(x, y);
+            penUp();            
+        }
+    }
+}
+
+void draw_grid() {
+    for (int i = 0; i < WIDTH; i++) {
+        for (int j = 0; j < HEIGHT; j++) {
+            draw_tetris_part(i, j, grid[i+j*WIDTH]);
+        }
+    }
+}
+
+
+bool move_down()
+{
+    current_position.y -= 1;
+    if(has_crashed())
+    {
+        current_position.y += 1;
+        fasten_current();
+        collapse_rows();
+        current_position = {WIDTH/2, HEIGHT};
+        current_rotation = 0;
+        current_block = next_block();
+        return true;
+    }
+
+    return false;
+}
+
+
+
+int timer = 0;
+while(isRunning)
+{
+ w_input = update_input(w_input);
+ a_input = update_input(a_input);
+ s_input = update_input(s_input);
+ d_input = update_input(d_input);
+    space_input = update_input(space_input);
+
+
+    if(space_input.key_pressed)
+    {
+        bool fall=true;
+        while(fall)
+        {
+            fall = !move_down();
+        }
+    }
+    else if(timer % 10 == 0)
+    {
+        move_down();
+    }
+
+    if(a_input.key_pressed)
+    {
+        current_position.x -= 1;
+        if(has_crashed())
+            current_position.x += 1;
+    }
+    if(d_input.key_pressed)
+    {
+        current_position.x += 1;
+        if(has_crashed())
+            current_position.x -= 1;
+    }
+    
+    if(w_input.key_pressed){
+        current_rotation = (current_rotation+1)%4;
+        if(has_crashed())
+            current_rotation = (current_rotation+3)%4;
+    }
+
+    if(s_input.key_pressed)
+    {
+        current_rotation = (current_rotation+3)%4;
+        if(has_crashed())
+            current_rotation = (current_rotation+1)%4;
+    }
+    
+
+    draw_background();
+    draw_grid();
+
+    draw_tetris_block(current_position.x, current_position.y, current_block, current_rotation);    
+    timer += 1;
+}

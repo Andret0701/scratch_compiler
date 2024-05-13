@@ -67,10 +67,9 @@ public abstract class Block {
         return string;
     }
 
-    static int blockCount = 0;
+    private static int blockCount = 0;
 
-    @Override
-    public int hashCode() {
+    public int getUnique() {
         return count;
     }
 

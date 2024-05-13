@@ -144,10 +144,10 @@ public class ConvertStack {
 
     public static ArrayList<Statement> pushStructValue(StructValue structValue, IntermediateTable table) {
         ArrayList<Statement> statements = new ArrayList<>();
-        System.out.println(structValue);
+        // System.out.println(structValue);
         for (int i = structValue.getFields().size() - 1; i >= 0; i--) {
             Expression value = structValue.getFields().get(i);
-            System.out.println(value);
+            // System.out.println(value);
             statements.addAll(push(value, table));
         }
 

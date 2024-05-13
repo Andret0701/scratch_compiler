@@ -111,6 +111,10 @@ public class ConvertFunction {
         return "functionstack:stack:" + function.getName() + ":" + variableName;
     }
 
+    private static String getArrayOffsetName(SimpleFunctionDeclaration function, String variableName) {
+        return "functionstack:offset:" + function.getName() + ":" + variableName;
+    }
+
     private static String getVariableName(SimpleFunctionDeclaration function, String variableName) {
         return "functionvar:" + function.getName() + ":" + variableName;
     }
@@ -123,13 +127,31 @@ public class ConvertFunction {
             statements.add(new SimpleVariableAssignment(getPointerName(function), new IntValue(0)));
         }
 
+        // for (Variable variable : getDeclaredVariables(function.getScope())) {
+        // if (variable.getType().isArray())
+        // statements.add(new SimpleArrayDeclaration(getStackName(function,
+        // variable.getName()),
+        // variable.getType().getType().getType(),
+        // new IntValue(200000)));
+
+        // // think this is only needed when function is recursive
+        // // statements.add(new SimpleArrayDeclaration(getArrayOffsetName(function,
+        // // variable.getName()),
+        // // variable.getType().getType().getType(),
+        // // new IntValue(200000)));
+        // // statements.add(new SimpleArrayAssignment(getArrayOffsetName(function,
+        // // variable.getName()),
+        // // new IntValue(0), new IntValue(0)));
+        // }
+
         if (isFunctionRecursive(function)) {
             for (Variable variable : getDeclaredVariables(function.getScope())) {
-                // if (!variable.getType().isArray())
-                statements.add(new SimpleArrayDeclaration(getStackName(function, variable.getName()),
-                        variable.getType().getType().getType(),
-                        new IntValue(200000)));
+                if (!variable.getType().isArray())
+                    statements.add(new SimpleArrayDeclaration(getStackName(function, variable.getName()),
+                            variable.getType().getType().getType(),
+                            new IntValue(200000)));
             }
+
             return statements;
         }
 
@@ -137,16 +159,18 @@ public class ConvertFunction {
             if (!variable.getType().isArray())
                 statements.add(new SimpleVariableDeclaration(getVariableName(function, variable.getName()),
                         variable.getType().getType().getType()));
-            else
+            else {
+
                 statements.add(new SimpleArrayDeclaration(getStackName(function, variable.getName()),
                         variable.getType().getType().getType(),
                         new IntValue(200000)));
+            }
         }
         return statements;
     }
 
     private static boolean needsStackPointer(SimpleFunctionDeclaration function) {
-        return isFunctionRecursive(function);
+        return isFunctionRecursive(function) || containsArray(function.getScope());
     }
 
     private static boolean isFunctionRecursive(SimpleFunctionDeclaration function) {
@@ -174,11 +198,23 @@ public class ConvertFunction {
         return false;
     }
 
+    private static boolean containsArray(Scope scope) {
+        ArrayList<Variable> variables = getDeclaredVariables(scope);
+        for (Variable variable : variables) {
+            if (variable.getType().isArray())
+                return true;
+        }
+        return false;
+    }
+
     private static ArrayList<Variable> getDeclaredVariables(Scope scope) {
         ArrayList<Variable> variables = new ArrayList<>();
         for (Statement statement : scope.getStatements()) {
             if (statement instanceof SimpleVariableDeclaration) {
                 SimpleVariableDeclaration declaration = (SimpleVariableDeclaration) statement;
+                variables.add(new Variable(declaration.getName(), new Type(declaration.getType())));
+            } else if (statement instanceof SimpleArrayDeclaration) {
+                SimpleArrayDeclaration declaration = (SimpleArrayDeclaration) statement;
                 variables.add(new Variable(declaration.getName(), new Type(declaration.getType())));
             }
 

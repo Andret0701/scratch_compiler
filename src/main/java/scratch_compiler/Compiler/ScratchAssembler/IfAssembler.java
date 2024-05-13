@@ -33,7 +33,6 @@ public class IfAssembler {
     }
 
     private static StackBlock assembleIfElse(IfStatement ifStatement) {
-        System.out.println(ifStatement);
         ValueField expression = ExpressionAssembler.assemble(ifStatement.getExpression());
         if (!(expression instanceof LogicField))
             expression = new EqualsField(expression, new NumberField(1));
@@ -42,11 +41,8 @@ public class IfAssembler {
         BlockStack ifBody = ScopeAssembler.assemble(ifStatement.getIfScope());
         ifBlock.pushIf(ifBody);
         BlockStack elseBody = ScopeAssembler.assemble(ifStatement.getElseScope());
-        System.out.println("Else: " + ifStatement.getElseScope());
-        System.out.println("Else: " + elseBody);
         ifBlock.pushElse(elseBody);
 
-        System.out.println(ifBlock);
         return ifBlock;
 
     }

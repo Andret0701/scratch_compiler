@@ -113,9 +113,9 @@ public class ExpressionAssembler {
             case GREATER_EQUALS:
                 return new OrField(new GreaterThanField(left, right), new EqualsField(left, right));
             case AND:
-                return new AndField(left, right);
+                return new AndField(toLogicField(left), toLogicField(right));
             case OR:
-                return new OrField(left, right);
+                return new OrField(toLogicField(left), toLogicField(right));
             case MODULUS:
                 return new ModulusField(left, right);
             default:

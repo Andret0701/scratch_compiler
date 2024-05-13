@@ -13,25 +13,16 @@ import scratch_compiler.Compiler.Compiler;
 import scratch_compiler.Compiler.scratchIntermediate.ConvertToScratchIntermediate;
 
 public class ScratchAssembler {
-    public static ScratchProgram assemble(String code) {
-        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), true);
-        // System.out.println(intermediateCode);
-        intermediateCode = ConvertToScratchIntermediate.convert(intermediateCode);
-        // System.out.println(intermediateCode);
-        /// throw new UnsupportedOperationException("Not implemented");
-
-        intermediateCode = Optimizer.optimize(intermediateCode);
-        System.out.println(intermediateCode);
-
-        // ArrayList<FunctionDeclaration> functionDeclarations =
-        // compiledCode.getFunctions();
+    public static ScratchProgram assemble(IntermediateCode code, boolean optimize) {
+        code = ConvertToScratchIntermediate.convert(code);
+        if (optimize)
+            code = Optimizer.optimize(code);
 
         BlockStack blockStack = new BlockStack();
-        blockStack.push(ScopeAssembler.assemble(intermediateCode.getGlobalScope()));
-        // blockStack.push(StackAssembler.initializeStack());
+        blockStack.push(ScopeAssembler.assemble(code.getGlobalScope()));
 
         ArrayList<HatBlock> functionDefinitionBlocks = new ArrayList<>();
-        for (SimpleFunctionDeclaration functionDeclaration : intermediateCode.getFunctions()) {
+        for (SimpleFunctionDeclaration functionDeclaration : code.getFunctions()) {
             FunctionDefinitionBlock functionDefinitionBlock = FunctionAssembler.assembleFunction(functionDeclaration);
             functionDefinitionBlocks.add(functionDefinitionBlock);
         }

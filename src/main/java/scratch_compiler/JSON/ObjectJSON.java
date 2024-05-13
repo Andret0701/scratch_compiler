@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 public class ObjectJSON implements ToJSON {
     private HashMap<String, ToJSON> values;
+
     public ObjectJSON() {
         values = new HashMap<>();
     }
@@ -36,7 +37,7 @@ public class ObjectJSON implements ToJSON {
     }
 
     public void setObject(String key, ObjectJSON value) {
-        if (value==this)
+        if (value == this)
             throw new RuntimeException("Cannot add an object to itself");
 
         setValue(key, value);
@@ -89,14 +90,18 @@ public class ObjectJSON implements ToJSON {
 
     public void add(ObjectJSON object) {
         ArrayList<String> keys = new ArrayList<>(object.values.keySet());
-        for (String key : keys)
-        {
-            if (contains(key))
-                throw new RuntimeException("The key " + key + " already exists");
+        for (String key : keys) {
+            if (contains(key)) {
+                System.out.println(key + " " + object.getValue(key).toJSON());
+                System.out.println(getValue(key).toJSON());
+                // throw new RuntimeException("The key " + key + " already exists");
+                System.out.println("The key " + key + " already exists");
+                continue;
+            }
+
             setValue(key, object.getValue(key));
         }
     }
-
 
     public ArrayList<String> getKeys() {
         return new ArrayList<>(values.keySet());
@@ -115,15 +120,15 @@ public class ObjectJSON implements ToJSON {
                 json += "\t";
             json += "\"" + key + "\": ";
             ToJSON value = getValue(key);
-            if (value==null)
-                json+="null";
+            if (value == null)
+                json += "null";
             else
                 json += getValue(key).toJSON().replace("\n", "\n\t");
             if (i < keys.size() - 1)
                 json += ",\n";
         }
-        if(keys.size()>1)
-            json+="\n";
+        if (keys.size() > 1)
+            json += "\n";
         json += "}";
         return json;
     }

@@ -174,8 +174,9 @@ public class BlockToJSON {
             }
         }
 
-        for (Input input : block.getInputs())
+        for (Input input : block.getInputs()) {
             inputsJSON.setArray(input.getName(), ValueFieldToJSON.valueFieldToJSON(input.getValueField()));
+        }
 
         return inputsJSON;
     }
@@ -200,7 +201,7 @@ public class BlockToJSON {
     }
 
     static String getBlockID(Block block) {
-        return "id_block_" + block.getOpcode() + "_" + block.hashCode();
+        return "id_block_" + block.getOpcode() + "_" + block.getUnique();
     }
 
     private static Vector2 getBlockPosition(int stackNumber) {

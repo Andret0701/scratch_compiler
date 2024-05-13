@@ -1,0 +1,25 @@
+int[] createArray(int size) {
+    int[] arr = int[size];
+    for (int i = 0; i < size; i++) {
+        arr[i] = i;
+    }
+    return arr;
+}
+
+
+int[] squareArray(int[] arr) {
+    for (int i = 0; i < #arr; i++) {
+        arr[i] = arr[i] * arr[i];
+    }
+    return arr;
+}
+
+
+
+string out="";
+int[] arr = createArray(10);
+int[] arr2 = squareArray(arr);
+for (int i = 0; i < #arr2; i++) {
+    out+=arr2[i]+" ";
+}
+say(out);

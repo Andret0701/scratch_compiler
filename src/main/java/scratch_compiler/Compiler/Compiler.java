@@ -16,23 +16,16 @@ import scratch_compiler.Compiler.parser.expressions.types.UnaryOperatorDefinitio
 
 public class Compiler {
 
-    public static IntermediateCode compile(String code, ArrayList<SystemCall> systemCalls, boolean optimise) {
+    public static IntermediateCode compile(String code, ArrayList<SystemCall> systemCalls, boolean optimize) {
         ArrayList<Token> tokens = Lexer.lex(code);
 
         TokenReader reader = new TokenReader(tokens);
         DeclarationTable declarationTable = createDeclarationTable(systemCalls);
         CompiledCode compiledCode = GlobalParser.parse(reader, declarationTable);
-        // System.out.println("Parsed code:");
-        // System.out.println(compiledCode);
-        // System.out.println();
         IntermediateCode intermediateCode = ConvertToIntermediate.convert(compiledCode);
-        // System.out.println("Intermediate code:");
-        // System.out.println(intermediateCode);
-        // System.out.println();
-        if (optimise)
-            intermediateCode = Optimizer.optimize(intermediateCode);
 
-        // throw new UnsupportedOperationException("Not implemented yet");
+        if (optimize)
+            intermediateCode = Optimizer.optimize(intermediateCode);
 
         return intermediateCode;
     }

@@ -15,7 +15,6 @@ import scratch_compiler.Compiler.parser.statements.Statement;
 public class ConvertVariableReference {
     public static Scope convert(Scope scope) {
         Scope converted = new Scope();
-        System.out.println("Converting scope: " + scope);
         for (Statement statement : scope.getStatements()) {
             converted.addStatement(convert(statement));
         }
@@ -39,9 +38,6 @@ public class ConvertVariableReference {
     private static void convert(ExpressionContainer container) {
         if (container == null)
             return;
-
-        if (container instanceof Push)
-            System.out.println("Trying to convert Push: " + container);
 
         for (int i = 0; i < container.getExpressionCount(); i++) {
             Expression expression = container.getExpression(i);
