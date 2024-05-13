@@ -1,0 +1,74 @@
+
+
+
+struct Vector2
+{
+    float x;
+    float y;
+}
+
+struct Color
+{
+    float r;
+    float g;
+    float b;
+}
+
+void drawCircle(Vector2 position, float radius, Color color)
+{
+    moveTo(position.x, position.y);
+    penColor(color.r, color.g, color.b);
+    penSize(2*radius);
+    penDown();
+    penUp();
+}
+
+
+void background(Color color)
+{
+    moveTo(0, 0);
+    penColor(color.r, color.g, color.b);
+    penSize(1000);
+    penDown();
+    penUp();
+}
+
+
+float distance(Vector2 a, Vector2 b)
+{
+    float dx=a.x-b.x;
+    float dy=a.y-b.y;
+    return sqrt(dx*dx+dy*dy);
+}
+
+
+Color color = {255, 0, 0};
+while(true)
+{
+    float mouseX=getMouseX();
+    float mouseY=getMouseY();
+    bool mouseDown=getMouseDown();
+
+    string text="Mouse X: "+mouseX+" Mouse Y: "+mouseY;
+    if(mouseDown)
+    {
+        text+=" Mouse Down";
+        color =  {30,255,30};
+    }
+    else
+    {
+        text+=" Mouse Up";
+        color = {255,30,30};
+    }
+
+
+    float dist=distance({mouseX, mouseY}, {0, 0});
+    float r = dist;
+
+
+    background({0,0,0});
+    drawCircle({0, 0}, r, color);
+
+
+    say(text);
+}

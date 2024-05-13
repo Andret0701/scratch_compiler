@@ -51,6 +51,12 @@ public class ScratchCoreAssembler {
                         new SystemCall("getKey", new Type(VariableType.BOOL),
                                         new ArrayList<>(Arrays
                                                         .asList(new Variable("key", new Type(VariableType.STRING))))),
+                        new SystemCall("getMouseX", new Type(VariableType.FLOAT),
+                                        new ArrayList<>()),
+                        new SystemCall("getMouseY", new Type(VariableType.FLOAT),
+                                        new ArrayList<>()),
+                        new SystemCall("getMouseDown", new Type(VariableType.BOOL),
+                                        new ArrayList<>()),
                         new SystemCall("sin", new Type(VariableType.FLOAT),
                                         new ArrayList<>(Arrays
                                                         .asList(new Variable("angle", new Type(VariableType.FLOAT))))),
@@ -79,10 +85,6 @@ public class ScratchCoreAssembler {
         public static ArrayList<SystemCall> getSystemCalls() {
                 return new ArrayList<SystemCall>(systemCalls);
         }
-
-        // public static boolean isVariable(String name) {
-        // return getDeclarationTable().isVariableDeclared(name);
-        // }
 
         public static boolean isSystemCall(String name) {
                 for (SystemCall systemCall : systemCalls) {

@@ -22,7 +22,7 @@ public class App {
         String path = getFileName(args);
 
         optimize = true;
-        path = ".\\tetris.scc";
+        path = ".\\mouse.scc";
 
         ScratchProject project = new ScratchProject();
 

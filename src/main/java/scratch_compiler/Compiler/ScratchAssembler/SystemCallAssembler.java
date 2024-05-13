@@ -18,6 +18,8 @@ import scratch_compiler.ValueFields.AdditionField;
 import scratch_compiler.ValueFields.CeilField;
 import scratch_compiler.ValueFields.CosField;
 import scratch_compiler.ValueFields.FloorField;
+import scratch_compiler.ValueFields.MouseXField;
+import scratch_compiler.ValueFields.MouseYField;
 import scratch_compiler.ValueFields.MultiplicationField;
 import scratch_compiler.ValueFields.NumberField;
 import scratch_compiler.ValueFields.RandomField;
@@ -27,6 +29,7 @@ import scratch_compiler.ValueFields.SqrtField;
 import scratch_compiler.ValueFields.StringField;
 import scratch_compiler.ValueFields.ValueField;
 import scratch_compiler.ValueFields.LogicFields.GetKetField;
+import scratch_compiler.ValueFields.LogicFields.MouseDownField;
 
 public class SystemCallAssembler {
 
@@ -73,6 +76,13 @@ public class SystemCallAssembler {
             return new SqrtField(ExpressionAssembler.assemble(expression.getArguments().get(0)));
         if (name.equals("getKey"))
             return new GetKetField(ExpressionAssembler.assemble(expression.getArguments().get(0)));
+        if (name.equals("getMouseX"))
+            return new MouseXField();
+        if (name.equals("getMouseY"))
+            return new MouseYField();
+        if (name.equals("getMouseDown"))
+            return new MouseDownField();
+
         if (name.equals("random")) {
             ValueField min = ExpressionAssembler.assemble(expression.getArguments().get(0));
             ValueField max = ExpressionAssembler.assemble(expression.getArguments().get(1));
