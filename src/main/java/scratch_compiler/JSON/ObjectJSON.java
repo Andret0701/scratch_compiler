@@ -92,11 +92,11 @@ public class ObjectJSON implements ToJSON {
         ArrayList<String> keys = new ArrayList<>(object.values.keySet());
         for (String key : keys) {
             if (contains(key)) {
-                System.out.println(key + " " + object.getValue(key).toJSON());
-                System.out.println(getValue(key).toJSON());
-                // throw new RuntimeException("The key " + key + " already exists");
-                System.out.println("The key " + key + " already exists");
-                continue;
+                // System.out.println(key + " " + object.getValue(key).toJSON());
+                // System.out.println(getValue(key).toJSON());
+                throw new RuntimeException("The key " + key + " already exists");
+                // System.out.println("The key " + key + " already exists");
+                // continue;
             }
 
             setValue(key, object.getValue(key));

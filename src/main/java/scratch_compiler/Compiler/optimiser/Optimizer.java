@@ -24,9 +24,14 @@ public class Optimizer {
     };
 
     public static IntermediateCode optimize(IntermediateCode code) {
+        return optimize(code, false);
+    }
+
+    public static IntermediateCode optimize(IntermediateCode code, boolean debug) {
         OptimisationEvaluator optimisationEvaluator = new OptimisationEvaluator(code);
 
-        System.out.println("Optimising...");
+        // if (debug)
+        // System.out.println("Optimising...");
         // System.out.println(code);
 
         boolean changed = true;
@@ -36,17 +41,23 @@ public class Optimizer {
                 Optimized optimized = optimization.optimize(code);
                 if (optimized.isOptimized()) {
                     code = (IntermediateCode) optimized.getObject();
-                    System.out.println("Optimised " + optimization.getClass().getSimpleName() + ":");
                     // System.out.println(code);
                     changed = true;
 
-                    optimisationEvaluator.evaluate(code, 3);
+                    // if (debug) {
+                    // System.out.println("Optimised " + optimization.getClass().getSimpleName() +
+                    // ":");
+                    // optimisationEvaluator.evaluate(code, 3);
+                    // }
                 }
             }
         }
 
-        System.out.println("Optimisation complete");
-        optimisationEvaluator.totalEvaluate(3);
+        if (debug) {
+            System.out.println("Optimisation complete");
+            optimisationEvaluator.totalEvaluate(code, 3);
+        }
+
         return code;
     }
 

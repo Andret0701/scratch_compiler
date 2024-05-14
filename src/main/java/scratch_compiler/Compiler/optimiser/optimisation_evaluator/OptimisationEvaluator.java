@@ -47,7 +47,12 @@ public class OptimisationEvaluator {
         functions = optimizedFunctions;
     }
 
-    public void totalEvaluate(int padding) {
+    public void totalEvaluate(IntermediateCode optimized, int padding) {
+        lines = LineCounter.countLines(optimized);
+        operations = OperationCounter.countOperations(optimized);
+        variables = VariableCounter.countVariables(optimized);
+        functions = optimized.getFunctions().size();
+
         printStatus("lines", initialLines, lines, padding);
         printStatus("operations", initialOperations, operations, padding);
         printStatus("variables", initialVariables, variables, padding);

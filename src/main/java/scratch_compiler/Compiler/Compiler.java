@@ -16,16 +16,36 @@ import scratch_compiler.Compiler.parser.expressions.types.UnaryOperatorDefinitio
 
 public class Compiler {
 
-    public static IntermediateCode compile(String code, ArrayList<SystemCall> systemCalls, boolean optimize) {
+    public static IntermediateCode compile(String code, ArrayList<SystemCall> systemCalls, boolean optimize,
+            boolean debug) {
+
         ArrayList<Token> tokens = Lexer.lex(code);
+        if (debug) {
+            System.out.println("Lexing complete");
+            System.out.println("   " + tokens.size() + " tokens found");
+        }
 
         TokenReader reader = new TokenReader(tokens);
         DeclarationTable declarationTable = createDeclarationTable(systemCalls);
         CompiledCode compiledCode = GlobalParser.parse(reader, declarationTable);
+        if (debug) {
+            System.out.println("Parsing complete");
+            System.out.println("   " + compiledCode.getStructs().size() + " structs found");
+            System.out.println("   " + compiledCode.getFunctions().size() + " functions found");
+            System.out
+                    .println("   " + compiledCode.getGlobalScope().getStatements().size() + " global statements found");
+        }
+
         IntermediateCode intermediateCode = ConvertToIntermediate.convert(compiledCode);
+        if (debug) {
+            System.out.println("Conversion to intermediate code complete");
+            System.out.println("   " + intermediateCode.getFunctions().size() + " functions found");
+            System.out.println(
+                    "   " + intermediateCode.getGlobalScope().getStatements().size() + " global statements found");
+        }
 
         if (optimize)
-            intermediateCode = Optimizer.optimize(intermediateCode);
+            intermediateCode = Optimizer.optimize(intermediateCode, debug);
 
         return intermediateCode;
     }

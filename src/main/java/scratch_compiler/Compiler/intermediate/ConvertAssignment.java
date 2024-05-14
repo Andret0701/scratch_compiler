@@ -27,7 +27,6 @@ import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
 
 public class ConvertAssignment {
     public static ArrayList<Statement> convert(Assignment assignment) {
-        System.out.println("Converting assignment: " + assignment);
         return convert((VariableReference) assignment.getVariable(), assignment.getExpression());
     }
 

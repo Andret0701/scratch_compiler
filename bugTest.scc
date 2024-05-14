@@ -1,0 +1,14 @@
+
+
+
+void changeVariable(int a)
+{
+    a = 10;
+}
+
+
+int a = 5;
+string output = "a = " + a;
+changeVariable(a);
+output += " a = " + a;
+say(output);

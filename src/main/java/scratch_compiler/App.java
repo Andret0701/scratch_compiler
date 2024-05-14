@@ -19,23 +19,35 @@ public class App {
     public static void main(String[] args) throws Exception {
         ArrayList<String> flags = getFlags(args);
         boolean optimize = flags.contains("-o");
-        String path = getFileName(args);
-
-        optimize = true;
-        path = ".\\mouse.scc";
+        boolean debug = flags.contains("-d");
+        String path = getFilePath(args);
+        if (path == null) {
+            System.out.println("How to use: scratch_compiler [flags] <file.scc>");
+            return;
+        }
 
         ScratchProject project = new ScratchProject();
 
         Figure figure = new Figure("Pen");
         String code = CompilerUtils.readFile(path);
 
-        IntermediateCode intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), optimize);
-        ScratchProgram program = ScratchAssembler.assemble(intermediateCode, optimize);
+        IntermediateCode intermediateCode;
+        try {
+            intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), optimize, debug);
+        } catch (Exception e) {
+            System.out.println("Compilation error: " + e.getMessage());
+            return;
+        }
+
+        ScratchProgram program;
+        try {
+            program = ScratchAssembler.assemble(intermediateCode, optimize, debug);
+        } catch (Exception e) {
+            System.out.println("Scratch assembler error: " + e.getMessage());
+            return;
+        }
 
         GreenFlagBlock greenFlagBlock = new GreenFlagBlock();
-        // greenFlagBlock.push(new PenClearBlock());
-        // greenFlagBlock.push(new PenUpBlock());
-        // greenFlagBlock.push(new SetPositionBlock(0, 0));
         greenFlagBlock.push(program.getStack());
 
         figure.addBlock(greenFlagBlock);
@@ -70,7 +82,15 @@ public class App {
 
         String scratchName = path.substring(path.lastIndexOf("\\") + 1, path.lastIndexOf("."));
         String scratchPath = path.substring(0, path.lastIndexOf("\\"));
-        ScratchProjectCreater.createProject(scratchName, scratchPath, project);
+
+        try {
+            ScratchProjectCreater.createProject(scratchName, scratchPath, project);
+        } catch (Exception e) {
+            System.out.println("Error creating project: " + e.getMessage());
+            return;
+        }
+
+        System.out.println("Successfully compiled " + scratchName + ".scc to " + scratchName + ".sb3");
 
     }
 
@@ -84,10 +104,20 @@ public class App {
         return flags;
     }
 
-    private static String getFileName(String[] args) {
+    private static String getFilePath(String[] args) {
         for (int i = 0; i < args.length; i++) {
-            if (args[i].charAt(0) != '-')
-                return args[i];
+            if (args[i].charAt(0) != '-') {
+                String path = args[i];
+                if (path.startsWith("\"") && path.endsWith("\"") && path.length() > 1)
+                    path = path.substring(1, path.length() - 1);
+
+                if (path.endsWith(".scc")) {
+                    if (path.contains("\\"))
+                        return path;
+                    else
+                        return System.getProperty("user.dir") + "\\" + path;
+                }
+            }
         }
         return null;
     }

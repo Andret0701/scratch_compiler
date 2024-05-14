@@ -14,9 +14,19 @@ import scratch_compiler.Compiler.scratchIntermediate.ConvertToScratchIntermediat
 
 public class ScratchAssembler {
     public static ScratchProgram assemble(IntermediateCode code, boolean optimize) {
+        return assemble(code, optimize, false);
+    }
+
+    public static ScratchProgram assemble(IntermediateCode code, boolean optimize, boolean debug) {
         code = ConvertToScratchIntermediate.convert(code);
+        if (debug) {
+            System.out.println("Conversion to scratch intermediate code complete");
+            System.out.println("   " + code.getFunctions().size() + " functions found");
+            System.out.println("   " + code.getGlobalScope().getStatements().size() + " global statements found");
+        }
+
         if (optimize)
-            code = Optimizer.optimize(code);
+            code = Optimizer.optimize(code, debug);
 
         BlockStack blockStack = new BlockStack();
         blockStack.push(ScopeAssembler.assemble(code.getGlobalScope()));
