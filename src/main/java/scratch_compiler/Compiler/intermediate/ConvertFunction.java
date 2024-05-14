@@ -60,7 +60,8 @@ public class ConvertFunction {
             converted.addStatement(statement);
         }
 
-        if (!(converted.getStatements().get(converted.getStatements().size() - 1) instanceof SimpleReturn))
+        if (converted.getStatements().size() == 0
+                || !(converted.getStatements().get(converted.getStatements().size() - 1) instanceof SimpleReturn))
             converted
                     .addStatement(new SimpleReturn());
 

@@ -1,14 +1,193 @@
-
-
-
-void changeVariable(int a)
+/*
+void getInput()
 {
-    a = 10;
+    Vector2Int _input = { 0, 0 };
+    if (getKey("a") || getKey("left arrow"))
+        _input.x = -1;
+    else if (getKey("d") || getKey("right arrow"))
+        _input.x = 1;
+    else if (getKey("w") || getKey("up arrow"))
+        _input.y = 1;
+    else if (getKey("s") || getKey("down arrow"))
+        _input.y = -1;
+    return _input;
+}
+*/
+
+struct Color{
+    float r;
+    float g;
+
+    float b;
+
+}
+int playerx;
+int playery;
+
+int randint(int a,int b){
+    return round(random(a,b));
+}
+
+Color backgroundcolor= {20,200,45};//Havent tested that the color works yet. 
+Color CIRCLECOLOR={223,20,140};
+int pensize;
+
+
+int THINGSPLACED=20;
+int HOSTILECIRCLESIZE=50;
+int PLAYERSIZE=27;
+struct xysize
+{
+    int x;
+    int y;
+    int size;
 }
 
 
-int a = 5;
-string output = "a = " + a;
-changeVariable(a);
-output += " a = " + a;
-say(output);
+
+xysize[] circles=xysize[THINGSPLACED];
+
+//size: #array
+
+void placeCircle(xysize circle){
+    penUp();
+    
+    moveTo(circle.x,circle.y);
+    penSize(circle.size);
+    penDown();
+    penUp();
+
+}
+
+
+
+
+void placeSquare(int startx,int starty, int width){
+
+    moveTo(startx,starty);
+    penDown();
+    moveTo(startx,starty+width);
+    moveTo(startx+width,starty+width);
+    moveTo(startx+width,starty);
+    moveTo(startx,starty);
+    moveTo(startx+width/2,starty+width/2);
+
+  
+    penSize(width);
+    penDown();
+    penSize(pensize);
+
+
+    penUp();
+}
+
+void slightlychangecircles(){
+    for(int i=0;i<THINGSPLACED;i++){
+        //I should be able to take away the other circles first.
+        //I havent done this yet. 
+        int xchange= randint(-3,3);
+        int ychange= randint(-3,3);
+        circles[i].x+=xchange;
+        circles[i].y+=ychange;
+
+
+    }
+}
+
+void initcircles(){
+    
+    int i = 0;
+    while (i < THINGSPLACED)
+    {
+        int x = round(random(-200, 160));
+        int y = round(random(-200, 160));
+        int circlesize = HOSTILECIRCLESIZE;
+        circles[i] ={ x,y,circlesize};
+
+        i++;
+    }
+}
+
+void displaycircles(){
+    penSize(HOSTILECIRCLESIZE);
+    penColor(CIRCLECOLOR.r,CIRCLECOLOR.g,CIRCLECOLOR.b);
+    //penColor(backgroundcolor.r, backgroundcolor.g, backgroundcolor.b);
+    /*
+Color backgroundcolor= {20,200,45};//Havent tested that the color works yet. 
+    Color CIRCLECOLOR={223,20,140};
+    */
+
+
+    for (int i=0;i<THINGSPLACED;i++){
+        placeCircle(circles[i]);
+    }
+    //there has to be bugs. 
+}
+
+int distancefromcircles(int x, int y){
+    int dist=500;//arbitrary big value;
+    for(int i=0;i<THINGSPLACED;i++){
+        int xdist=x-circles[i].x;
+        int ydist=y-circles[i].y;
+        int dist2=round(sqrt(xdist*xdist+ydist*ydist));
+        if(dist2<dist){
+            dist=dist2;
+        }
+    }
+    return dist;
+
+}
+
+void changeplayerpos(){
+    //TODO:
+}
+
+void displayplayer(){
+    //pencolor
+    moveTo(playerx,playery);
+
+    penSize(PLAYERSIZE);
+    penDown();
+    penUp();
+    //TODO:
+
+}
+
+
+
+void main(){
+    penClear();
+    //TODO:Set the background color. This is useful for things.
+    // This one doesnt have a color yet.
+    moveTo(0,0);
+    penColor(backgroundcolor.r,backgroundcolor.g,backgroundcolor.b);
+    penSize(1000);
+    penDown();
+    penUp();
+    //Right after I set it to the standard penSize. 
+
+    pensize = 1;
+    penSize(pensize);
+
+
+    initcircles();
+
+
+
+}
+
+main();
+bool done=false;
+while(!done){
+
+    penClear();
+    changeplayerpos();
+    displayplayer();
+    if(distancefromcircles(playerx,playery)<PLAYERSIZE+HOSTILECIRCLESIZE){
+        done=true;
+    }
+    slightlychangecircles();
+    displaycircles();
+    wait(1);
+
+}
