@@ -36,7 +36,6 @@ public class App {
             intermediateCode = Compiler.compile(code, ScratchCoreAssembler.getSystemCalls(), optimize, debug);
         } catch (Exception e) {
             System.out.println("Compilation error: " + e.getMessage());
-            e.printStackTrace();
             return;
         }
 
