@@ -18,6 +18,12 @@ int[] squareArray(int[] arr) {
 
 string out="";
 int[] arr = createArray(10);
+for (int i = 0; i < #arr; i++) {
+    out+=arr[i]+" ";
+}
+
+out+="   ";
+
 int[] arr2 = squareArray(arr);
 for (int i = 0; i < #arr2; i++) {
     out+=arr2[i]+" ";

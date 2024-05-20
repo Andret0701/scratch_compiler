@@ -22,6 +22,7 @@ public class ConvertToScratchIntermediate {
         }
 
         code = new IntermediateCode(globalScope, functions);
+        // System.out.println(code);
         return ConvertOneIndexed.convert(code);
     }
 

@@ -21,6 +21,7 @@ import scratch_compiler.Compiler.parser.expressions.values.StructValue;
 import scratch_compiler.Compiler.parser.expressions.values.VariableValue;
 import scratch_compiler.Compiler.parser.statements.Statement;
 import scratch_compiler.Compiler.parser.statements.VariableDeclaration;
+import scratch_compiler.Compiler.parser.statements.WhileStatement;
 
 public class ConvertDeclaration {
     public static ArrayList<Statement> declareVariable(String name, TypeDefinition type) {
@@ -61,7 +62,7 @@ public class ConvertDeclaration {
         Expression value = declaration.getExpression();
 
         if (type.isArray()) {
-            Expression size = getArraySize(declaration);
+            Expression size = getArraySize(declaration.getExpression());
             ArrayList<Statement> statements = new ArrayList<>();
             statements.add(new SimpleVariableDeclaration("size:" + name, VariableType.INT));
             statements.add(new SimpleVariableAssignment("size:" + name, size));
@@ -72,7 +73,7 @@ public class ConvertDeclaration {
             if (value instanceof ArrayDeclarationValue)
                 statements.addAll(convertArrayDeclaration(name, type.getType(), size));
             if (value instanceof VariableReference)
-                statements.addAll(convertArrayDeclaration(name, type.getType(), size));
+                statements.addAll(convertArrayAssignment(name, type.getType(), (VariableReference) value));
             return statements;
         }
 
@@ -87,6 +88,7 @@ public class ConvertDeclaration {
         ArrayList<Statement> statements = new ArrayList<Statement>();
         if (type.getType() != VariableType.STRUCT) {
             SimpleArrayDeclaration arrayDeclaration = new SimpleArrayDeclaration(name, type.getType(), size);
+            System.out.println("Array declaration: " + arrayDeclaration);
             statements.add(arrayDeclaration);
             return statements;
         }
@@ -96,6 +98,44 @@ public class ConvertDeclaration {
             String fieldName = name + "." + field.getName();
             TypeDefinition fieldType = field.getType();
             statements.addAll(convertArrayDeclaration(fieldName, fieldType, size));
+        }
+
+        return statements;
+    }
+
+    private static ArrayList<Statement> convertArrayAssignment(String name, TypeDefinition type,
+            VariableReference value) {
+
+        ArrayList<Statement> statements = new ArrayList<Statement>();
+        ArrayList<Statement> arrayAssignmentDeclarations = convertArrayAssignmentDeclarations(name, type, value);
+        statements.addAll(arrayAssignmentDeclarations);
+
+        // WhileStatement whileStatement = new WhileStatement(new VariableValue("i",
+        // VariableType.INT),
+        // new VariableValue("0", VariableType.INT), new VariableValue("size:" +
+        // value.getName(), VariableType.INT),
+        // arrayAssignmentDeclarations);
+
+        return statements;
+    }
+
+    private static ArrayList<Statement> convertArrayAssignmentDeclarations(String name, TypeDefinition type,
+            VariableReference value) {
+        ArrayList<Statement> statements = new ArrayList<Statement>();
+        if (type.getType() != VariableType.STRUCT) {
+            SimpleArrayDeclaration arrayDeclaration = new SimpleArrayDeclaration(name,
+                    type.getType(), getArraySize(value));
+            System.out.println("Array declaration: " + arrayDeclaration);
+            statements.add(arrayDeclaration);
+            return statements;
+        }
+
+        ArrayList<TypeField> fields = type.getFields();
+        for (TypeField field : fields) {
+            String fieldName = name + "." + field.getName();
+            TypeDefinition fieldType = field.getType();
+            statements.addAll(convertArrayAssignment(fieldName, fieldType, new VariableReference(
+                    value.getName() + "." + field.getName(), new Type(fieldType), value.getIndex())));
         }
 
         return statements;
@@ -147,8 +187,7 @@ public class ConvertDeclaration {
         return statements;
     }
 
-    private static Expression getArraySize(VariableDeclaration declaration) {
-        Expression value = declaration.getExpression();
+    private static Expression getArraySize(Expression value) {
         if (value instanceof ArrayValue)
             return new IntValue(((ArrayValue) value).getValues().size());
         if (value instanceof ArrayDeclarationValue)
